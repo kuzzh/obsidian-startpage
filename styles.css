@@ -6,3 +6,131 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+
+.start-page-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+	max-width: 800px;
+	margin: 0 auto;
+}
+
+.start-page-container h1 {
+	color: var(--text-normal);
+	font-size: 2em;
+	margin-bottom: 0.5em;
+}
+
+.start-page-container h2 {
+	color: var(--text-muted);
+	font-size: 1.5em;
+	margin: 0.25em 0;
+}
+
+.start-page-container ul {
+	list-style: none;
+	padding: 0;
+	width: 100%;
+}
+
+.start-page-container li {
+	margin: 8px 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: flex-start;
+	gap: 10px;
+
+	border-radius: 12px;
+	border: 1px solid var(--background-secondary);
+	padding: 10px;
+}
+
+.start-page-container a {
+	color: var(--text-accent);
+	text-decoration: none;
+	transition: color 0.2s ease;
+}
+
+.start-page-container a:hover {
+	color: var(--text-accent-hover);
+}
+
+.time-tag {
+	font-size: 0.85em;
+	padding: 2px 8px;
+	border-radius: 12px;
+	background-color: var(--background-secondary);
+	color: var(--text-muted);
+	white-space: nowrap;
+}
+
+.start-page-container .row {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	align-items: center;
+	gap: 10px;
+	width: 100%;
+}
+
+/* Settings styles */
+.pinned-note-list {
+	padding: 0;
+}
+
+.pinned-note-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 4px 0;
+}
+
+.pinned-note-item .remove-button {
+	margin-left: 8px;
+}
+
+.note-tree-modal {
+    padding: 20px;
+}
+.tree-item-content {
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.tree-item-content:hover {
+    background-color: var(--interactive-hover);
+}
+.tree-item-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+}
+.tree-item-name {
+    flex: 1;
+}
+.tree-item-children {
+    display: block;
+}
+.tree-item-children.collapsed {
+    display: none;
+}
+.tree-item-toggle {
+    width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.2s ease;
+}
+.tree-item-toggle.collapsed {
+    transform: rotate(-90deg);
+}
