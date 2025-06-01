@@ -1,5 +1,6 @@
 import { App, ItemView, MarkdownView, TFile, Menu, EventRef } from "obsidian";
 import StartPagePlugin from "./main";
+import { t } from "./i18n";
 
 export const VIEW_TYPE_START_PAGE = "start-page-view";
 
@@ -20,7 +21,7 @@ export class StartPageView extends ItemView {
   }
 
   getDisplayText(): string {
-    return "启动首页";
+    return t("start_page");
   }
 
   getIcon(): string {
@@ -43,7 +44,7 @@ export class StartPageView extends ItemView {
       const menu = new Menu();
       menu.addItem((item) => {
         item
-          .setTitle("刷新")
+          .setTitle(t("refresh"))
           .setIcon("refresh-cw")
           .onClick(() => this.renderContent());
       });
@@ -88,11 +89,11 @@ export class StartPageView extends ItemView {
     container.empty();
     container.addClass("start-page-container");
 
-    container.createEl("h1", { text: "欢迎回来 👋" });
+    container.createEl("h1", { text: t("welcome") });
 
     // Display pinned notes
     if (this.plugin.settings.pinnedNotes.length > 0) {
-      container.createEl("h2", { text: "📌置顶笔记" });
+      container.createEl("h2", { text: t("pinned_notes") });
       const pinnedUl = container.createEl("ul");
       
       for (const path of this.plugin.settings.pinnedNotes) {
@@ -114,7 +115,7 @@ export class StartPageView extends ItemView {
     // Display recent notes
     const recentNotes = this.getRecentNotes(this.plugin.settings.recentNotesLimit);
     if (recentNotes.length > 0) {
-      container.createEl("h2", { text: "🕒最近的笔记" });
+      container.createEl("h2", { text: t("recent_notes") });
       const ul = container.createEl("ul");
 
       for (const file of recentNotes) {
@@ -166,15 +167,15 @@ export class StartPageView extends ItemView {
       const hours = Math.floor(diff / (60 * 60 * 1000));
       if (hours === 0) {
         const minutes = Math.floor(diff / (60 * 1000));
-        return `${minutes}分钟前`;
+        return t("minutes_ago").replace("{minutes}", minutes.toString());
       }
-      return `${hours}小时前`;
+      return t("hours_ago").replace("{hours}", hours.toString());
     }
     
     // Less than 7 days
     if (diff < 7 * 24 * 60 * 60 * 1000) {
       const days = Math.floor(diff / (24 * 60 * 60 * 1000));
-      return `${days}天前`;
+      return t("days_ago").replace("{days}", days.toString());
     }
     
     // Otherwise show full date

@@ -1,12 +1,10 @@
 {
 	"id": "start-page",
-	"name": "启动首页",
+	"name": "Startpage",
 	"version": "0.1.0",
 	"minAppVersion": "0.15.0",
-	"description": "Obsidian 启动时自动打开定制首页，显示常用和最近的笔记。",
+	"description": "Obsidian automatically opens a customized homepage upon startup, displaying frequently used and recent notes.",
 	"author": "kuzzh",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
 	"isDesktopOnly": false,
 	"styles": [
 		"styles.css"

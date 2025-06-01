@@ -1,11 +1,15 @@
 import { Plugin, WorkspaceLeaf } from "obsidian";
 import { StartPageView, VIEW_TYPE_START_PAGE } from "./view";
 import { StartPageSettingTab, StartPageSettings, DEFAULT_SETTINGS } from "./settings";
+import { setLocale } from "./i18n";
 
 export default class StartPagePlugin extends Plugin {
   settings: StartPageSettings;
 
   async onload() {
+    const obsidianLang = this.settings?.language || "en";
+    setLocale(obsidianLang);
+
     await this.loadSettings();
 
     this.registerView(

@@ -1,0 +1,25 @@
+{
+    "language": "语言",
+    "language_desc": "选择语言",
+    "language_zh": "中文",
+    "language_en": "英文",
+    "start_page": "启动首页",
+    "welcome": "欢迎回来👋",
+    "recent_notes": "🕒最近修改的笔记",
+    "pinned_notes": "📌置顶笔记",
+    "refresh": "刷新",
+    "minutes_ago": "{minutes}分钟前",
+    "hours_ago": "{hours}小时前",
+    "days_ago": "{days}天前",
+    "root_folder": "笔记库",
+    "start_page_settings": "启动首页设置",
+    "recent_notes_limit": "最近修改笔记显示数量",
+    "recent_notes_limit_desc": "设置启动首页显示的最近修改笔记数量",
+    "recent_notes_limit_placeholder": "输入数字",
+    "pinned_notes_setting": "置顶笔记",
+    "pinned_notes_select": "选择笔记",
+    "pinned_notes_select_desc": "选择要在启动首页置顶显示的笔记",
+    "pinned_notes_remove": "移除",
+    "current_pinned_notes": "当前置顶笔记"
+  }
+  

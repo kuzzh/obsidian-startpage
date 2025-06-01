@@ -1,13 +1,16 @@
 import { App, PluginSettingTab, Setting, TFile, Modal } from "obsidian";
 import StartPagePlugin from "./main";
 import { VIEW_TYPE_START_PAGE } from "./view";
+import { setLocale, t } from "./i18n";
 
 export interface StartPageSettings {
+    language: string;
     recentNotesLimit: number;
     pinnedNotes: string[];
 }
 
 export const DEFAULT_SETTINGS: StartPageSettings = {
+    language: "en",
     recentNotesLimit: 5,
     pinnedNotes: []
 };
@@ -29,10 +32,10 @@ class NoteTreeModal extends Modal {
 
         // 创建文件夹结构
         const folderStructure: { [key: string]: TFile[] } = {};
-        
+
         this.files.forEach(file => {
             const parts = file.path.split('/');
-            
+
             // Initialize parent folders
             let currentPath = '';
             for (let i = 0; i < parts.length - 1; i++) {
@@ -55,18 +58,18 @@ class NoteTreeModal extends Modal {
         const rootIcon = rootContent.createSpan('tree-item-icon');
         rootIcon.innerHTML = '📚';
         const rootName = rootContent.createSpan('tree-item-name');
-        rootName.textContent = '笔记库';
+        rootName.textContent = t("root_folder");
 
         // 递归创建树形结构
         const createTreeItem = (path: string, level: number, parentEl: HTMLElement) => {
             const item = parentEl.createDiv('tree-item');
             // item.style.marginLeft = `${(level - 1) * 10}px`;
-            
+
             const isFolder = path !== '';
             const displayName = isFolder ? path.split('/').pop() || path : '';
-            
+
             const itemContent = item.createDiv('tree-item-content');
-            
+
             if (isFolder) {
                 const toggle = itemContent.createSpan('tree-item-toggle');
                 toggle.innerHTML = '▼';
@@ -89,18 +92,18 @@ class NoteTreeModal extends Modal {
 
             if (folderStructure[path]) {
                 const childrenContainer = item.createDiv('tree-item-children');
-                
+
                 // 添加文件
                 folderStructure[path].slice().forEach(file => {
                     const fileItem = childrenContainer.createDiv('tree-item');
                     fileItem.style.marginLeft = `${(level - 1) * 10}px`;
-                    
+
                     const fileContent = fileItem.createDiv('tree-item-content');
                     const fileIcon = fileContent.createSpan('tree-item-icon');
                     fileIcon.innerHTML = '📄';
                     const fileName = fileContent.createSpan('tree-item-name');
                     fileName.textContent = file.basename;
-                    
+
                     fileContent.addEventListener('click', () => {
                         this.onSelect(file);
                         this.close();
@@ -161,13 +164,29 @@ export class StartPageSettingTab extends PluginSettingTab {
         const { containerEl } = this;
         containerEl.empty();
 
-        containerEl.createEl('h2', { text: '启动首页设置' });
+        new Setting(containerEl)
+            .setName(t("language"))
+            .setDesc(t("language_desc"))
+            .addDropdown(dropdown => {
+                dropdown.addOption("en", t("language_en"));
+                dropdown.addOption("zh", t("language_zh"));
+                dropdown.setValue(this.plugin.settings.language);
+                dropdown.onChange(async (value) => {
+                    this.plugin.settings.language = value;
+                    setLocale(value);
+                    await this.plugin.saveSettings();
+
+                    // Reload setting page and start page
+                    this.display();
+                    this.refreshStartPage();
+                });
+            });
 
         new Setting(containerEl)
-            .setName('最近修改笔记显示数量')
-            .setDesc('设置启动首页显示的最近修改笔记数量')
+            .setName(t("recent_notes_limit"))
+            .setDesc(t("recent_notes_limit_desc"))
             .addText(text => text
-                .setPlaceholder('输入数字')
+                .setPlaceholder(t("recent_notes_limit_placeholder"))
                 .setValue(this.plugin.settings.recentNotesLimit.toString())
                 .onChange(async (value) => {
                     const num = parseInt(value);
@@ -179,10 +198,10 @@ export class StartPageSettingTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
-            .setName('置顶笔记')
-            .setDesc('选择要在启动首页置顶显示的笔记')
+            .setName(t("pinned_notes_setting"))
+            .setDesc(t("pinned_notes_select_desc"))
             .addButton(button => button
-                .setButtonText('选择笔记')
+                .setButtonText(t("pinned_notes_select"))
                 .onClick(() => {
                     const files = this.app.vault.getMarkdownFiles();
                     new NoteTreeModal(this.app, files, async (file) => {
@@ -197,18 +216,18 @@ export class StartPageSettingTab extends PluginSettingTab {
 
         // 显示当前置顶笔记
         if (this.plugin.settings.pinnedNotes.length > 0) {
-            containerEl.createEl('h3', { text: '当前置顶笔记：' });
+            containerEl.createEl('h3', { text: t("current_pinned_notes") });
             const pinnedList = containerEl.createEl('ul', {
                 cls: 'pinned-note-list'
             });
-            
+
             for (const path of this.plugin.settings.pinnedNotes) {
                 const li = pinnedList.createEl('li', { cls: 'pinned-note-item' });
                 const file = this.app.vault.getAbstractFileByPath(path);
                 if (file) {
                     li.createEl('span', { text: file.path });
                     li.createEl('button', {
-                        text: '移除',
+                        text: t("pinned_notes_remove"),
                         cls: 'mod-warning remove-button'
                     }).onclick = async () => {
                         this.plugin.settings.pinnedNotes = this.plugin.settings.pinnedNotes.filter(p => p !== path);
