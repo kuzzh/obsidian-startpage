@@ -129,7 +129,7 @@ export class StartPageView extends ItemView {
             text: file.basename,
             href: "#",
           });
-          link.onclick = () => {
+          link.onclick = async () => {
             // Check if file is already open in any leaf
             const existingLeaf = this.app.workspace.getLeavesOfType("markdown").find(
               (leaf) => leaf.view instanceof MarkdownView && leaf.view.file?.path === file.path
@@ -137,7 +137,7 @@ export class StartPageView extends ItemView {
 
             if (existingLeaf) {
               // If file is already open, just focus that leaf
-              this.app.workspace.revealLeaf(existingLeaf);
+              await this.app.workspace.revealLeaf(existingLeaf);
             } else {
               // If file is not open, open it in a new leaf
               this.app.workspace.openLinkText(file.path, "", false);
