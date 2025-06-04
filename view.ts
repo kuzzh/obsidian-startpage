@@ -105,7 +105,18 @@ export class StartPageView extends ItemView {
             href: "#",
           });
           link.onclick = () => {
-            this.app.workspace.openLinkText(file.path, "", false);
+            // Check if file is already open in any leaf
+            const existingLeaf = this.app.workspace.getLeavesOfType("markdown").find(
+              (leaf) => leaf.view instanceof MarkdownView && leaf.view.file?.path === file.path
+            );
+
+            if (existingLeaf) {
+              // If file is already open, just focus that leaf
+              this.app.workspace.revealLeaf(existingLeaf);
+            } else {
+              // If file is not open, open it in a new leaf
+              this.app.workspace.openLinkText(file.path, "", false);
+            }
             return false;
           };
         }
@@ -125,7 +136,18 @@ export class StartPageView extends ItemView {
           href: "#",
         });
         link.onclick = () => {
-          this.app.workspace.openLinkText(file.path, "", false);
+          // Check if file is already open in any leaf
+          const existingLeaf = this.app.workspace.getLeavesOfType("markdown").find(
+            (leaf) => leaf.view instanceof MarkdownView && leaf.view.file?.path === file.path
+          );
+
+          if (existingLeaf) {
+            // If file is already open, just focus that leaf
+            this.app.workspace.revealLeaf(existingLeaf);
+          } else {
+            // If file is not open, open it in a new leaf
+            this.app.workspace.openLinkText(file.path, "", false);
+          }
           return false;
         };
 
