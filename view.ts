@@ -7,6 +7,9 @@ export const VIEW_TYPE_START_PAGE = "start-page-view";
 export class StartPageView extends ItemView {
   plugin: StartPagePlugin;
   private fileChangeEventRef: EventRef;
+  private fileCreateEventRef: EventRef;
+  private fileDeleteEventRef: EventRef;
+  private fileRenameEventRef: EventRef;
   private refreshTimer: number | null = null;
   private readonly REFRESH_INTERVAL = 60000; // 1分钟刷新一次
 
@@ -35,8 +38,21 @@ export class StartPageView extends ItemView {
   async onOpen() {
     await this.renderContent();
     
-    // Register file change event
+    // Register file change events
     this.fileChangeEventRef = this.app.vault.on('modify', () => {
+      this.renderContent();
+    });
+
+    // Add event listeners for file creation, deletion, and rename
+    this.fileCreateEventRef = this.app.vault.on('create', () => {
+      this.renderContent();
+    });
+
+    this.fileDeleteEventRef = this.app.vault.on('delete', () => {
+      this.renderContent();
+    });
+
+    this.fileRenameEventRef = this.app.vault.on('rename', () => {
       this.renderContent();
     });
 
@@ -53,9 +69,18 @@ export class StartPageView extends ItemView {
   }
 
   async onClose() {
-    // Clean up event listener and timer when view is closed
+    // Clean up event listeners and timer when view is closed
     if (this.fileChangeEventRef) {
       this.app.vault.offref(this.fileChangeEventRef);
+    }
+    if (this.fileCreateEventRef) {
+      this.app.vault.offref(this.fileCreateEventRef);
+    }
+    if (this.fileDeleteEventRef) {
+      this.app.vault.offref(this.fileDeleteEventRef);
+    }
+    if (this.fileRenameEventRef) {
+      this.app.vault.offref(this.fileRenameEventRef);
     }
     this.clearRefreshTimer();
   }
