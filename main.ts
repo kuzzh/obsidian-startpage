@@ -25,7 +25,10 @@ export default class StartPagePlugin extends Plugin {
     // Add settings tab
     this.addSettingTab(new StartPageSettingTab(this.app, this));
 
-    this.activateStartPage();
+    // 等待 workspace 布局准备好后再激活 Start Page
+    this.app.workspace.onLayoutReady(() => {
+      this.activateStartPage();
+    });
   }
 
   async loadSettings() {
@@ -44,11 +47,26 @@ export default class StartPagePlugin extends Plugin {
       this.app.workspace.revealLeaf(existingLeaves[0]);
     } else {
       // If no Start Page exists, create a new one
-      const leaf = this.app.workspace.getLeaf(false);
-      await leaf.setViewState({
-        type: VIEW_TYPE_START_PAGE,
-        active: true,
-      });
+      try {
+        const leaf = this.app.workspace.getLeaf('tab');
+        if (leaf) {
+          await leaf.setViewState({
+            type: VIEW_TYPE_START_PAGE,
+            active: true,
+          });
+        } else {
+          // Fallback: try to create in the active leaf
+          const activeLeaf = this.app.workspace.activeLeaf;
+          if (activeLeaf) {
+            await activeLeaf.setViewState({
+              type: VIEW_TYPE_START_PAGE,
+              active: true,
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Failed to create Start Page leaf:', error);
+      }
     }
   }
 

@@ -1,94 +1,121 @@
-# Obsidian Sample Plugin
+# Obsidian StartPage 插件
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+[English](README.EN.md) | 中文
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+一个为 Obsidian 设计的启动首页插件，在启动时自动显示自定义的首页，展示常用笔记和最近修改的笔记。
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+## ✨ 功能特性
 
-## First time developing plugins?
+- **自动启动首页**: 插件启动时自动打开自定义首页
+- **置顶笔记**: 可以设置重要的笔记在首页置顶显示
+- **最近笔记**: 显示最近修改的笔记列表，按修改时间排序
+- **智能时间显示**: 自动显示相对时间（几分钟前、几小时前、几天前）
+- **多语言支持**: 支持中文和英文界面
+- **实时刷新**: 文件变更时自动刷新首页内容
+- **右键菜单**: 支持右键刷新功能
+- **美观界面**: 现代化的UI设计，适配Obsidian主题
 
-Quick starting guide for new plugin devs:
+## 🚀 安装
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+### 从 Obsidian 社区插件安装（推荐）
 
-## Releasing new releases
+1. 打开 Obsidian 设置
+2. 进入"社区插件"选项卡
+3. 关闭"安全模式"
+4. 点击"浏览"按钮
+5. 搜索"StartPage"
+6. 点击安装并启用插件
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+### 手动安装
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+1. 下载最新版本的插件文件
+2. 将 `main.js`、`styles.css`、`manifest.json` 复制到你的 Obsidian 库的 `.obsidian/plugins/start-page/` 文件夹中
+3. 重启 Obsidian
+4. 在设置中启用插件
 
-## Adding your plugin to the community plugin list
+## 📖 使用方法
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+### 基本使用
 
-## How to use
+1. 安装并启用插件后，Obsidian 启动时会自动显示启动首页
+2. 首页会显示欢迎信息和最近修改的笔记列表
+3. 点击笔记链接可以直接打开对应的笔记
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+### 设置置顶笔记
 
-## Manually installing the plugin
+1. 打开 Obsidian 设置
+2. 找到"StartPage"设置选项卡
+3. 点击"选择笔记"按钮
+4. 在弹出的文件树中选择要置顶的笔记
+5. 置顶的笔记会显示在首页的"📌置顶笔记"部分
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+### 自定义设置
 
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
+- **语言**: 选择中文或英文界面
+- **最近笔记数量**: 设置首页显示的最近修改笔记数量
+- **管理置顶笔记**: 添加或移除置顶笔记
 
-## Funding URL
+## 🛠️ 开发
 
-You can include funding URLs where people who use your plugin can financially support it.
+### 环境要求
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
+- Node.js 16.0 或更高版本
+- Obsidian 0.15.0 或更高版本
 
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+### 开发设置
+
+1. 克隆仓库到本地
+2. 安装依赖：
+   ```bash
+   npm install
+   ```
+3. 启动开发模式：
+   ```bash
+   npm run dev
+   ```
+4. 将插件文件夹链接到你的 Obsidian 库的 `.obsidian/plugins/` 目录
+
+### 构建
+
+```bash
+npm run build
 ```
 
-If you have multiple URLs, you can also do:
+## 📝 功能说明
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
+### 启动首页内容
 
-## API Documentation
+- **欢迎信息**: 显示个性化的欢迎消息
+- **置顶笔记**: 用户手动设置的常用笔记
+- **最近笔记**: 按修改时间排序的最近笔记列表
+- **时间标签**: 显示笔记的修改时间（相对时间或绝对时间）
+- **文件路径**: 显示笔记所在的文件夹路径
 
-See https://github.com/obsidianmd/obsidian-api
+### 智能刷新
+
+- 文件修改时自动刷新
+- 文件创建/删除/重命名时自动刷新
+- 24小时内的笔记会启动定时刷新（每分钟）
+- 支持手动刷新（右键菜单）
+
+### 多语言支持
+
+- 支持中文和英文界面
+- 可在设置中动态切换语言
+- 时间格式本地化显示
+
+## 🤝 贡献
+
+欢迎提交 Issue 和 Pull Request！
+
+## 📄 许可证
+
+MIT License
+
+## 🙏 致谢
+
+感谢 Obsidian 团队提供的优秀插件API和开发框架。
+
+---
+
+**❤️ Love what you love, and love what you do. ❤️**

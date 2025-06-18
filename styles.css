@@ -40,11 +40,11 @@ If your plugin does not need CSS, delete this file.
 	flex-direction: column;
 	justify-content: center;
 	align-items: flex-start;
-	gap: 10px;
+	gap: 5px;
 
 	border-radius: 12px;
 	border: 1px solid var(--background-secondary);
-	padding: 10px;
+	padding: 5px;
 }
 
 .start-page-container a {
@@ -73,6 +73,18 @@ If your plugin does not need CSS, delete this file.
 	align-items: center;
 	gap: 10px;
 	width: 100%;
+}
+
+.start-page-container .copyright {
+	font-size: 0.8em;
+	color: var(--text-muted);
+	margin-top: 20px;
+}
+
+.start-page-container .love {
+	font-size: 0.8em;
+	color: var(--color-pink);
+	margin-top: 0px;
 }
 
 /* Settings styles */

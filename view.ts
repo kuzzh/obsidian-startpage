@@ -163,7 +163,15 @@ export class StartPageView extends ItemView {
         link.onclick = () => {
           // Check if file is already open in any leaf
           const existingLeaf = this.app.workspace.getLeavesOfType("markdown").find(
-            (leaf) => leaf.view instanceof MarkdownView && leaf.view.file?.path === file.path
+            (leaf) => {
+              const view = leaf.view as any;
+              if (view instanceof MarkdownView) { 
+                return view.file?.path === file.path;
+              } else if (view.state.file === file.path) {
+                return true;
+              }
+              return false;
+            }
           );
 
           if (existingLeaf) {
@@ -195,6 +203,10 @@ export class StartPageView extends ItemView {
       // 检查是否需要启动定时刷新
       this.startRefreshTimerIfNeeded(recentNotes);
     }
+
+    // Display copyright at bottom
+    container.createEl("p", { text: `Copyright © 2025 ${this.plugin.manifest.author}`, cls: "copyright" });
+    container.createEl("p", { text: `❤️ Love what you love, and love what you do. ❤️`, cls: "love" });
   }
 
   getRecentNotes(limit: number): TFile[] {
