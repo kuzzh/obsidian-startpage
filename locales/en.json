@@ -5,8 +5,8 @@
     "language_en": "English",
     "start_page": "Start Page",
     "welcome": "Welcome back 👋",
-    "recent_notes": "🕒Recently modified notes",
-    "pinned_notes": "📌Pinned notes",
+    "recent_notes": "Recently modified",
+    "pinned_notes": "Pinned notes",
     "refresh": "Refresh",
     "minutes_ago": "{minutes} minutes ago",
     "hours_ago": "{hours} hours ago",
@@ -20,5 +20,12 @@
     "pinned_notes_select": "Select notes",
     "pinned_notes_select_desc": "Select notes to display on the start page",
     "pinned_notes_remove": "Remove",
-    "current_pinned_notes": "Current pinned notes"
+    "current_pinned_notes": "Current pinned notes",
+    "show_count": "Show count",
+    "new_note": "New note",
+    "total_notes": "Total notes",
+    "today_edited": "Today edited",
+    "total_size": "Total size",
+    "manage": "Manage"    
+
 }

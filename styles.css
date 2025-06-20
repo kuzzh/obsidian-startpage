@@ -1,90 +1,354 @@
-/*
+html,
+body {
+	height: 100% !important;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
-
-If your plugin does not need CSS, delete this file.
-
-*/
-
+/* 顶级容器撑满页面 */
 .start-page-container {
 	display: flex;
 	flex-direction: column;
-	align-items: center;
-	padding: 20px;
-	max-width: 800px;
+	height: 100%;
+	max-width: 1400px;
 	margin: 0 auto;
+	padding: 20px !important;
+	overflow: hidden;
 }
 
-.start-page-container h1 {
+.start-page-container .main-content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 0 !important;
+}
+
+/* 头部样式 */
+.start-page-container .header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	background: var(--background-secondary);
+	backdrop-filter: blur(10px);
+	border-radius: 16px;
+	padding: 20px 30px;
+	margin-bottom: 30px;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+	border: 1px solid var(--background-modifier-border);
+}
+
+.start-page-container .logo {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.start-page-container .logo-icon {
+	width: 32px;
+	height: 32px;
+	color: var(--color-accent);
+}
+
+.start-page-container .logo-text {
+	font-size: 24px;
+	font-weight: 700;
+	background: linear-gradient(135deg, var(--color-purple), var(--color-accent));
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+.start-page-container .header-actions {
+	display: flex;
+	gap: 12px;
+}
+
+/* 按钮样式 */
+.start-page-container button {
+	cursor: pointer;
+}
+
+.start-page-container .btn-icon {
+	background: none;
+	border: none;
+	padding: 8px;
+	border-radius: 6px;
+	cursor: pointer;
+	color: var(--text-faint);
+	transition: all 0.3s ease;
+}
+
+.start-page-container .btn-icon:hover {
 	color: var(--text-normal);
-	font-size: 2em;
-	margin-bottom: 0.5em;
 }
 
-.start-page-container h2 {
-	color: var(--text-muted);
-	font-size: 1.5em;
-	margin: 0.25em 0;
+.start-page-container .btn-icon svg,
+.start-page-container .new-note-icon {
+	width: 16px;
+	height: 16px;
 }
 
-.start-page-container ul {
-	list-style: none;
-	padding: 0;
-	width: 100%;
+/* 统计卡片 */
+.start-page-container .stats-section {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 20px;
+	margin-bottom: 30px;
 }
 
-.start-page-container li {
-	margin: 8px 0;
+.start-page-container .stat-card {
+	background: var(--background-secondary);
+	backdrop-filter: blur(10px);
+	border-radius: 16px;
+	padding: 24px;
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	border: 1px solid var(--background-modifier-border);
+	transition: all 0.3s ease;
+}
+
+.start-page-container .stat-card:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.start-page-container .stat-icon {
+	width: 48px;
+	height: 48px;
+	background: linear-gradient(135deg, var(--color-purple), var(--color-accent));
+	border-radius: 12px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--color-base-30); 
+}
+
+.start-page-container .stat-icon svg {
+	width: 24px;
+	height: 24px;
+}
+
+.start-page-container .stat-number {
+	font-size: 28px;
+	font-weight: 700;
+	color: var(--text-normal);
+	line-height: 1;
+}
+
+.start-page-container .stat-label {
+	font-size: 14px;
+	color: var(--text-faint);
+	margin-top: 4px;
+}
+
+/* 主要内容网格 */
+.start-page-container .content-grid {
+	flex: 1;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 30px;
+	min-width: 0;
+	min-height: 0;
+}
+
+/* 区块样式 */
+.start-page-container .section {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+	background: var(--background-secondary);
+	backdrop-filter: blur(10px);
+	border-radius: 16px;
+	padding: 24px;
+	border: 1px solid var(--background-modifier-border);
+}
+
+.start-page-container .section-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+}
+
+.section-title {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	font-size: 18px;
+	font-weight: 600;
+	color: var(--text-normal);
+}
+
+.start-page-container .section-icon {
+	width: 20px;
+	height: 20px;
+	color: var(--icon-color);
+}
+
+/* 笔记列表 */
+.start-page-container .notes-list {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	overflow-y: auto;
+	overflow-x: hidden;
+	min-height: 0;
+	gap: 12px;
+}
+
+.start-page-container .note-item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 16px;
+	border-radius: 12px;
+	background: var(--tag-background);
+	border: 1px solid var(--tag-border-color);
+	transition: all 0.3s ease;
+	cursor: pointer;
+	min-width: 0;
+	max-width: 100%;
+}
+
+.start-page-container .note-item:hover {
+	background: var(--tag-background-hover);
+	transform: translateX(4px);
+	border-color: var(--tag-border-color-hover);
+	box-shadow: 0 4px 15px var(--background-modifier-border);
+}
+
+.start-page-container .note-icon {
+	width: 40px;
+	height: 40px;
+	background: var(--tag-border-color);
+	border-radius: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--icon-color);
+	flex-shrink: 0;
+}
+
+.start-page-container .note-icon svg {
+	width: 20px;
+	height: 20px;
+}
+
+.start-page-container .note-content {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+}
+
+.start-page-container .note-title {
+	font-weight: 500;
+	color: var(--text-normal);
+	margin-bottom: 4px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 100%;
+}
+
+.start-page-container .note-meta {
+	font-size: 12px;
+	color: var(--text-faint);
+}
+
+.start-page-container .note-actions {
+	display: flex;
+	gap: 4px;
+}
+
+.start-page-container .recent-notes-limit-label {
+	margin-right: 0.5rem;
+	color: var(--text-faint);
+}
+
+.start-page-container .footer {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
-	align-items: flex-start;
-	gap: 5px;
-
-	border-radius: 12px;
-	border: 1px solid var(--background-secondary);
-	padding: 5px;
-}
-
-.start-page-container a {
-	color: var(--text-accent);
-	text-decoration: none;
-	transition: color 0.2s ease;
-}
-
-.start-page-container a:hover {
-	color: var(--text-accent-hover);
-}
-
-.time-tag {
-	font-size: 0.85em;
-	padding: 2px 8px;
-	border-radius: 12px;
-	background-color: var(--background-secondary);
-	color: var(--text-muted);
-	white-space: nowrap;
-}
-
-.start-page-container .row {
-	display: flex;
-	flex-direction: row;
-	justify-content: flex-start;
 	align-items: center;
-	gap: 10px;
-	width: 100%;
+	margin-top: 30px;
+	font-size: 12px;
+	color: var(--text-faint);
 }
 
-.start-page-container .copyright {
-	font-size: 0.8em;
-	color: var(--text-muted);
-	margin-top: 20px;
+.start-page-container .footer p {
+	margin: 5px;
 }
 
-.start-page-container .love {
-	font-size: 0.8em;
-	color: var(--color-pink);
-	margin-top: 0px;
+/* 响应式设计 */
+@media (max-width: 1200px) {
+	.start-page-container .content-grid {
+		grid-template-columns: 1fr;
+	}
+	.stats-section {
+		display: none !important;
+	}
+	.start-page-container .section{
+		overflow: unset;
+		overflow-x: hidden;
+	}
+	.start-page-container .main-content {
+		min-height: unset !important;
+	}
+}
+
+@media (max-width: 768px) {
+	.start-page-container .container {
+		padding: 10px;
+	}
+
+	.start-page-container .header {
+		flex-direction: column;
+		gap: 16px;
+		text-align: center;
+	}
+
+	.start-page-container .stats-section {
+		grid-template-columns: 1fr;
+	}
+
+	.start-page-container .actions-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.start-page-container .search-input {
+		padding: 14px 50px 14px 50px;
+		font-size: 14px;
+	}
+}
+
+@media (max-width: 480px) {
+	.start-page-container .section {
+		padding: 16px;
+	}
+
+	.start-page-container .note-item {
+		padding: 12px;
+	}
+
+	.start-page-container .action-card {
+		padding: 16px 12px;
+	}
+}
+
+/* 动画效果 */
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 /* Settings styles */
@@ -101,52 +365,16 @@ If your plugin does not need CSS, delete this file.
 
 .pinned-note-item .remove-button {
 	margin-left: 8px;
+	cursor: pointer;
 }
 
-.note-tree-modal {
-    padding: 20px;
-}
-.tree-item-content {
-    padding: 4px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.tree-item-content:hover {
-    background-color: var(--interactive-hover);
-}
-.tree-item-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-}
-.tree-item-name {
-    flex: 1;
-}
-.tree-item-children {
-    display: block;
-}
-.tree-item-children.collapsed {
-    display: none;
-}
-.tree-item-toggle {
-    width: 16px;
-    height: 16px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    user-select: none;
-    transition: transform 0.2s ease;
-}
-.tree-item-toggle.collapsed {
-    transform: rotate(-90deg);
+.pinned-note-item .remove-button:hover {
+	color: var(--color-accent);
+	background: var(--background-modifier-hover);
+	transition: all 0.2s;
 }
 
 /* Hide title navigation bar for start page */
 .workspace-leaf-content[data-type="start-page-view"] .view-header {
-    display: none;
+	display: none;
 }
