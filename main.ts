@@ -1,4 +1,4 @@
-import { Plugin, WorkspaceLeaf, TFile } from "obsidian";
+import { Plugin, WorkspaceLeaf, TFile, MarkdownView } from "obsidian";
 import { StartPageView, VIEW_TYPE_START_PAGE } from "./startpageview";
 import { StartPageSettingTab, StartPageSettings, DEFAULT_SETTINGS } from "./settings";
 import { setLocale } from "./i18n";
@@ -27,16 +27,18 @@ export default class StartPagePlugin extends Plugin {
 		this.app.workspace.onLayoutReady(() => {
 			// this.activateStartPage();
 		});
-		this.app.workspace.on("file-open", (file: TFile | null) => {
-			console.log("file-open", file);
+		this.app.workspace.on("file-open", async (file: TFile | null) => {
 			if (!file) {
 				return;
 			}
 			if (!this.startPageLeaf) {
-				this.activateStartPage();
-				this.app.workspace.openLinkText(file.path, "", false);
-			} 
-		}); 
+				this.startPageLeaf = this.findStartPageLeaf();
+				if (!this.startPageLeaf) {
+					this.activateStartPage();
+					this.app.workspace.openLinkText(file.path, "", false);
+				}
+			}
+		});
 	}
 
 	async loadSettings() {
@@ -47,16 +49,21 @@ export default class StartPagePlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
+	findStartPageLeaf(): WorkspaceLeaf | null {
+		const existingLeaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_START_PAGE);
+		if (existingLeaves.length > 0) {
+			return existingLeaves[0];
+		}
+		return null;
+	}
+
 	async activateStartPage() {
-    if (!this.startPageLeaf) {
-      const existingLeaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_START_PAGE);
-      if (existingLeaves.length > 0) {
-        this.startPageLeaf = existingLeaves[0];
-      }
-    }
+		if (!this.startPageLeaf) {
+			this.startPageLeaf = this.findStartPageLeaf();
+		}
 		if (this.startPageLeaf) {
 			this.app.workspace.revealLeaf(this.startPageLeaf);
-			return; 
+			return;
 		}
 		try {
 			const leaf = this.app.workspace.getLeaf(false);
@@ -66,7 +73,7 @@ export default class StartPagePlugin extends Plugin {
 					type: VIEW_TYPE_START_PAGE,
 					active: true,
 				});
-        this.startPageLeaf = leaf;
+				this.startPageLeaf = leaf;
 			}
 		} catch (error) {
 			console.error("Failed to create Start Page leaf:", error);
@@ -74,7 +81,7 @@ export default class StartPagePlugin extends Plugin {
 	}
 
 	onunload() {
-    this.startPageLeaf = null;
+		this.startPageLeaf = null;
 		this.app.workspace.getLeavesOfType(VIEW_TYPE_START_PAGE).forEach((leaf) => leaf.detach());
 	}
 }
