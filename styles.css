@@ -285,18 +285,56 @@ body {
 
 /* 响应式设计 */
 @media (max-width: 1200px) {
+	.start-page-container {
+		padding: 5px !important;
+	}
+	.start-page-container .header {
+		margin-bottom: 10px;
+	}
+	.start-page-container .logo-text {
+		font-size: 20px;
+	}
+	.start-page-container .recent-notes-limit-label {
+		display: none;
+	}
 	.start-page-container .content-grid {
 		grid-template-columns: 1fr;
 	}
-	.stats-section {
-		display: none !important;
+	.start-page-container .stat-icon {
+		display: none;
+	}
+	.start-page-container .stats-section {
+		margin-bottom: 10px;
+	}
+	.start-page-container .stat-card {
+		padding: 5px;
+	}
+	.start-page-container .stat-content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+	}
+	.start-page-container .stat-number {
+		font-size: 20px;
+	}
+	.start-page-container .stat-label {
+		font-size: 12px;
+		text-align: center;
 	}
 	.start-page-container .section{
 		overflow: unset;
 		overflow-x: hidden;
 	}
+	.start-page-container .section-header{
+		margin-bottom: 12px;
+	}
 	.start-page-container .main-content {
 		min-height: unset !important;
+	}
+	.start-page-container .content-grid {
+		gap: 10px;
 	}
 }
 
@@ -312,22 +350,17 @@ body {
 	}
 
 	.start-page-container .stats-section {
-		grid-template-columns: 1fr;
+		grid-template-columns: repeat(3, 1fr);
 	}
 
 	.start-page-container .actions-grid {
 		grid-template-columns: 1fr;
 	}
-
-	.start-page-container .search-input {
-		padding: 14px 50px 14px 50px;
-		font-size: 14px;
-	}
 }
 
 @media (max-width: 480px) {
 	.start-page-container .section {
-		padding: 16px;
+		padding: 15px;
 	}
 
 	.start-page-container .note-item {

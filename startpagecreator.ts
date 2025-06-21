@@ -95,8 +95,8 @@ export default class StartPageCreator {
 		this.container = container;
 	}
 
-	public createStartPage(pinnedNotePaths: string[] | null, recentNotes: TFile[] | null): void {
-		this.initData(pinnedNotePaths, recentNotes);
+	public createStartPage(pinnedNotes: TFile[] | null, recentNotes: TFile[] | null): void {
+		this.initData(pinnedNotes, recentNotes);
 
 		this.container.empty();
 		this.container.addClass("start-page-container");
@@ -112,8 +112,8 @@ export default class StartPageCreator {
 		console.log("Start page created");
 	}
 
-	private initData(pinnedNotePaths: string[] | null, recentNotes: TFile[] | null): void {
-		this.pinnedNotes = this.getTFiles(pinnedNotePaths);
+	private initData(pinnedNotes: TFile[] | null, recentNotes: TFile[] | null): void {
+		this.pinnedNotes = pinnedNotes;
 		this.recentNotes = recentNotes;
 
 		this.stats.forEach((stat) => {
@@ -356,10 +356,10 @@ export default class StartPageCreator {
 	private createFooter(): HTMLElement {
 		const footer = this.createElement("footer", "footer");
 
-		const copyright = this.createElement("p", "", `Copyright © 2025 ${this.plugin.manifest.author}`);
+		// const copyright = this.createElement("p", "", `Copyright © 2025 ${this.plugin.manifest.author}`);
 		const love = this.createElement("p", "", `❤️ Love what you love, and love what you do. ❤️`);
 
-		footer.appendChild(copyright);
+		// footer.appendChild(copyright);
 		footer.appendChild(love);
 
 		return footer;
@@ -443,24 +443,6 @@ export default class StartPageCreator {
 		container.appendChild(dropdown);
 
 		return container;
-	}
-
-	private getTFiles(notePaths: string[] | null): TFile[] | null {
-		if (!notePaths) {
-			return null;
-		}
-
-		const tFiles = notePaths
-			.map((notePath) => {
-				const file = this.app.vault.getAbstractFileByPath(notePath);
-				if (file instanceof TFile) {
-					return file;
-				}
-				return null;
-			})
-			.filter((file) => file !== null) as TFile[];
-
-		return tFiles;
 	}
 
 	getTodayModifiedNoteCount(): number {

@@ -93,12 +93,12 @@ export class StartPageView extends ItemView {
 		}
 	}
 
-	private startRefreshTimerIfNeeded(recentNotes: TFile[]) {
+	private startRefreshTimerIfNeeded(pinnedNotes: TFile[], recentNotes: TFile[]) {
 		// 清除现有的定时器
 		this.clearRefreshTimer();
 
 		// 检查是否有需要定时刷新的时间标签
-		const needsRefresh = recentNotes.some((file) => {
+		const needsRefresh = pinnedNotes.concat(recentNotes).some((file) => {
 			const diff = Date.now() - file.stat.mtime;
 			return diff < 24 * 60 * 60 * 1000; // 24小时内的文件需要定时刷新
 		});
@@ -116,7 +116,11 @@ export class StartPageView extends ItemView {
 		if (!this.startPageCreator) {
 			this.startPageCreator = new StartPageCreator(this.app, this.plugin, container);
 		}
-		this.startPageCreator.createStartPage(this.plugin.settings.pinnedNotes, this.getRecentNotes(this.plugin.settings.recentNotesLimit));
+		const pinnedNotes = this.getTFiles(this.plugin.settings.pinnedNotes);
+		const recentNotes = this.getRecentNotes(this.plugin.settings.recentNotesLimit);
+		this.startPageCreator.createStartPage(pinnedNotes, recentNotes);
+
+		this.startRefreshTimerIfNeeded(pinnedNotes, recentNotes);
 
 		// container.empty();
 		// container.addClass("start-page-container");
@@ -214,6 +218,24 @@ export class StartPageView extends ItemView {
 		// // Display copyright at bottom
 		// container.createEl("p", { text: `Copyright © 2025 ${this.plugin.manifest.author}`, cls: "copyright" });
 		// container.createEl("p", { text: `❤️ Love what you love, and love what you do. ❤️`, cls: "love" });
+	}
+
+	getTFiles(notePaths: string[] | null): TFile[] {
+		if (!notePaths) {
+			return [];
+		}
+
+		const tFiles = notePaths
+			.map((notePath) => {
+				const file = this.app.vault.getAbstractFileByPath(notePath);
+				if (file instanceof TFile) {
+					return file;
+				}
+				return null;
+			})
+			.filter((file) => file !== null) as TFile[];
+
+		return tFiles;
 	}
 
 	getRecentNotes(limit: number): TFile[] {
