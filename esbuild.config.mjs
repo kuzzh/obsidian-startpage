@@ -1,6 +1,9 @@
 import esbuild from "esbuild";
 import process from "process";
 import builtins from "builtin-modules";
+import { cp, mkdir } from "fs/promises";
+import { existsSync } from "fs";
+import path from "path";
 
 const banner =
 `/*
@@ -11,39 +14,59 @@ if you want to view the source, please visit the github repository of this plugi
 
 const prod = (process.argv[2] === "production");
 
+const outdir = path.resolve("dist");
+
 const context = await esbuild.context({
-	banner: {
-		js: banner,
-	},
-	entryPoints: ["main.ts"],
-	bundle: true,
-	external: [
-		"obsidian",
-		"electron",
-		"@codemirror/autocomplete",
-		"@codemirror/collab",
-		"@codemirror/commands",
-		"@codemirror/language",
-		"@codemirror/lint",
-		"@codemirror/search",
-		"@codemirror/state",
-		"@codemirror/view",
-		"@lezer/common",
-		"@lezer/highlight",
-		"@lezer/lr",
-		...builtins],
-	format: "cjs",
-	target: "es2018",
-	logLevel: "info",
-	sourcemap: prod ? false : "inline",
-	treeShaking: true,
-	outfile: "main.js",
-	minify: prod,
+  banner: {
+    js: banner,
+  },
+  entryPoints: ["main.ts"],
+  bundle: true,
+  external: [
+    "obsidian",
+    "electron",
+    "@codemirror/autocomplete",
+    "@codemirror/collab",
+    "@codemirror/commands",
+    "@codemirror/language",
+    "@codemirror/lint",
+    "@codemirror/search",
+    "@codemirror/state",
+    "@codemirror/view",
+    "@lezer/common",
+    "@lezer/highlight",
+    "@lezer/lr",
+    ...builtins,
+  ],
+  format: "cjs",
+  target: "es2018",
+  logLevel: "info",
+  sourcemap: prod ? false : "inline",
+  treeShaking: true,
+  outfile: path.join(outdir, "main.js"),
+  minify: prod,
 });
 
+async function copyStaticFiles() {
+  const filesToCopy = ["manifest.json", "styles.css"];
+  await mkdir(outdir, { recursive: true });
+
+  for (const file of filesToCopy) {
+    const src = path.resolve(file);
+    const dest = path.join(outdir, file);
+    if (existsSync(src)) {
+      await cp(src, dest);
+      console.log(`✅ Copied ${file} to dist/`);
+    } else {
+      console.warn(`⚠️ ${file} not found`);
+    }
+  }
+}
+
 if (prod) {
-	await context.rebuild();
-	process.exit(0);
+  await context.rebuild();
+  await copyStaticFiles();
+  process.exit(0);
 } else {
-	await context.watch();
+  await context.watch();
 }
