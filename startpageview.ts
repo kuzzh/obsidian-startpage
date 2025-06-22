@@ -233,7 +233,7 @@ export class StartPageView extends ItemView {
 				}
 				return null;
 			})
-			.filter((file) => file !== null) as TFile[];
+			.filter((file): file is TFile => file !== null);
 
 		return tFiles;
 	}
