@@ -5,7 +5,6 @@
 	"minAppVersion": "0.15.0",
 	"description": "Automatically opens a customized homepage upon startup, displaying pinned and recent notes.",
 	"author": "kuzzh",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"authorUrl": "https://github.com/kuzzh",
 	"isDesktopOnly": false
 }
