@@ -1,176 +1,176 @@
-# Obsidian StartPage 插件
+# Obsidian StartPage Plugin
 
-[English](README.EN.md) | 中文
+English | [中文](README.CN.md)
 
-一个为 Obsidian 设计的现代化启动首页插件，提供美观的仪表板界面，展示笔记库统计信息、置顶笔记和最近修改的笔记。
+A modern startup homepage plugin for Obsidian that provides a beautiful dashboard interface, displaying vault statistics, pinned notes, and recently modified notes.
 
-## ✨ 功能特性
+## ✨ Features
 
-### 🏠 智能首页
-- **自动启动首页**: 插件启动时自动打开自定义首页
-- **现代化设计**: 采用卡片式布局，支持响应式设计，完美适配各种屏幕尺寸
-- **仪表板统计**: 实时显示笔记库统计信息（总笔记数、今日编辑数、总占用空间）
-- **快速操作**: 内置新建笔记按钮，一键创建新笔记
+### 🏠 Smart Homepage
+- **Automatic Startup Homepage**: Automatically opens a customized homepage when the plugin starts
+- **Modern Design**: Card-based layout with responsive design, perfectly adapted to various screen sizes
+- **Dashboard Statistics**: Real-time display of vault statistics (total notes, today's edits, total storage space)
+- **Quick Actions**: Built-in new note button for one-click note creation
 
-### 📌 笔记管理
-- **置顶笔记**: 可以设置重要的笔记在首页置顶显示，支持快速访问
-- **最近笔记**: 显示最近修改的笔记列表，按修改时间排序
-- **智能搜索**: 支持模糊搜索选择置顶笔记
-- **动态数量**: 可自定义最近笔记显示数量（5-50个）
+### 📌 Note Management
+- **Pinned Notes**: Set important notes to be displayed at the top of the homepage for quick access
+- **Recent Notes**: Display a list of recently modified notes, sorted by modification time
+- **Smart Search**: Support fuzzy search for selecting pinned notes
+- **Dynamic Count**: Customizable number of recent notes to display (5-50 notes)
 
-### 🎨 用户体验
-- **智能时间显示**: 自动显示相对时间（几分钟前、几小时前、几天前）
-- **多语言支持**: 支持中文和英文界面，可动态切换
-- **实时刷新**: 文件变更时自动刷新首页内容
-- **定时更新**: 24小时内的笔记会启动定时刷新（每分钟）
-- **右键菜单**: 支持右键刷新功能
-- **主题适配**: 完美适配 Obsidian 的明暗主题
+### 🎨 User Experience
+- **Smart Time Display**: Automatically shows relative time (minutes ago, hours ago, days ago)
+- **Multi-language Support**: Supports both Chinese and English interfaces with dynamic switching
+- **Real-time Refresh**: Automatically refreshes homepage content when files change
+- **Timed Updates**: Notes modified within 24 hours will trigger periodic refresh (every minute)
+- **Right-click Menu**: Supports right-click refresh functionality
+- **Theme Adaptation**: Perfect adaptation to Obsidian's light and dark themes
 
-## 🚀 安装
+## 🚀 Installation
 
-### 从 Obsidian 社区插件安装（暂未实现）
+### Install from Obsidian Community Plugins (Not yet implemented)
 
-1. 打开 Obsidian 设置
-2. 进入"社区插件"选项卡
-3. 关闭"安全模式"
-4. 点击"浏览"按钮
-5. 搜索"StartPage"
-6. 点击安装并启用插件
+1. Open Obsidian Settings
+2. Go to the "Community plugins" tab
+3. Turn off "Safe mode"
+4. Click the "Browse" button
+5. Search for "StartPage"
+6. Click install and enable the plugin
 
-### 手动安装
+### Manual Installation
 
-1. 从 [Releases](https://github.com/kuzzh/obsidian-startpage/releases) 下载最新版本的插件文件
-2. 将 `main.js`、`styles.css`、`manifest.json`、`locales` 复制到你的 Obsidian 库的 `.obsidian/plugins/obsidian-startpage/` 文件夹中
-3. 重启 Obsidian
-4. 在设置中启用插件
+1. Download the latest version from [Releases](https://github.com/kuzzh/obsidian-startpage/releases)
+2. Copy `main.js`, `styles.css`, `manifest.json`, and `locales` to your Obsidian vault's `.obsidian/plugins/obsidian-startpage/` folder
+3. Restart Obsidian
+4. Enable the plugin in settings
 
-## 📖 使用方法
+## 📖 Usage
 
-### 基本使用
+### Basic Usage
 
-1. **启动首页**: 安装并启用插件后，可以通过以下方式打开启动首页：
-   - 点击左侧工具栏的"🏠"图标
-   - 首次打开文件时会自动显示启动首页
-2. **查看统计**: 首页顶部显示笔记库的统计信息（总笔记数、今日编辑数、总占用空间）
-3. **快速新建**: 点击右上角的"新建笔记"按钮快速创建新笔记
-4. **访问笔记**: 点击置顶笔记或最近笔记可以直接打开对应的笔记
+1. **Open Start Page**: After installing and enabling the plugin, you can open the start page by:
+   - Clicking the "🏠" icon in the left toolbar
+   - The start page will automatically display when opening files for the first time
+2. **View Statistics**: The top of the homepage displays vault statistics (total notes, today's edits, total storage space)
+3. **Quick Create**: Click the "New Note" button in the top right corner to quickly create a new note
+4. **Access Notes**: Click on pinned notes or recent notes to directly open the corresponding notes
 
-### 设置置顶笔记
+### Setting Pinned Notes
 
-1. 打开 Obsidian 设置
-2. 找到"StartPage"设置选项卡
-3. 点击"选择笔记"按钮
-4. 在弹出的搜索框中输入笔记名称进行模糊搜索
-5. 选择要置顶的笔记，它会显示在首页的"📌置顶笔记"部分
-6. 点击置顶笔记区域的"管理"按钮可以快速跳转到设置页面
+1. Open Obsidian Settings
+2. Find the "StartPage" settings tab
+3. Click the "Select notes" button
+4. Enter note names in the popup search box for fuzzy search
+5. Select the notes to pin, they will be displayed in the "📌 Pinned notes" section on the homepage
+6. Click the "Manage" button in the pinned notes area to quickly jump to the settings page
 
-### 自定义设置
+### Custom Settings
 
-- **语言设置**: 选择中文或英文界面，支持动态切换
-- **最近笔记数量**: 在首页直接调整显示数量（5-50个），或在设置中修改
-- **置顶笔记管理**: 在设置页面添加或移除置顶笔记
-- **实时预览**: 所有设置修改后会立即在首页生效
+- **Language Settings**: Choose between Chinese and English interface with dynamic switching
+- **Recent Notes Count**: Adjust the display count directly on the homepage (5-50 notes) or modify in settings
+- **Pinned Notes Management**: Add or remove pinned notes in the settings page
+- **Real-time Preview**: All setting changes take effect immediately on the homepage
 
-## 🛠️ 开发
+## 🛠️ Development
 
-### 环境要求
+### Requirements
 
-- Node.js 16.0 或更高版本
-- Obsidian 0.15.0 或更高版本
+- Node.js 16.0 or higher
+- Obsidian 0.15.0 or higher
 
-### 开发设置
+### Development Setup
 
-1. 克隆仓库到本地
-2. 安装依赖：
+1. Clone the repository locally
+2. Install dependencies:
    ```bash
    npm install
    ```
-3. 启动开发模式：
+3. Start development mode:
    ```bash
    npm run dev
    ```
-4. 将插件文件夹链接到你的 Obsidian 库的 `.obsidian/plugins/` 目录
+4. Link the plugin folder to your Obsidian vault's `.obsidian/plugins/` directory
 
-### 构建
+### Build
 
 ```bash
 npm run build
 ```
 
-## 📝 功能详解
+## 📝 Feature Details
 
-### 🎯 仪表板统计
+### 🎯 Dashboard Statistics
 
-- **总笔记数**: 显示笔记库中所有 Markdown 文件的数量
-- **今日编辑**: 统计今天修改过的笔记数量
-- **总占用空间**: 显示所有笔记文件的总大小（自动格式化为 B/KB/MB/GB）
-- **实时更新**: 统计数据会随着文件变化自动更新
+- **Total Notes**: Displays the count of all Markdown files in the vault
+- **Today's Edits**: Statistics of notes modified today
+- **Total Storage**: Shows the total size of all note files (automatically formatted as B/KB/MB/GB)
+- **Real-time Updates**: Statistics data updates automatically with file changes
 
-### 📋 笔记展示
+### 📋 Note Display
 
-- **置顶笔记区域**:
-  - 显示用户手动设置的重要笔记
-  - 支持无限添加置顶笔记
-  - 一键管理功能，快速跳转到设置页面
-- **最近笔记区域**:
-  - 按修改时间排序显示最近编辑的笔记
-  - 支持动态调整显示数量（5-50个）
-  - 智能时间显示（相对时间和绝对时间）
+- **Pinned Notes Section**:
+  - Displays user-manually set important notes
+  - Supports unlimited pinned notes
+  - One-click management function to quickly jump to settings page
+- **Recent Notes Section**:
+  - Displays recently edited notes sorted by modification time
+  - Supports dynamic adjustment of display count (5-50 notes)
+  - Smart time display (relative and absolute time)
 
-### 🔄 智能刷新机制
+### 🔄 Smart Refresh Mechanism
 
-- **文件监听**: 自动监听文件的修改、创建、删除、重命名事件
-- **定时刷新**: 24小时内修改的笔记会启动定时刷新（每分钟）
-- **手动刷新**: 支持右键菜单手动刷新功能
-- **性能优化**: 智能判断是否需要刷新，避免不必要的性能消耗
+- **File Monitoring**: Automatically monitors file modification, creation, deletion, and rename events
+- **Timed Refresh**: Notes modified within 24 hours will trigger periodic refresh (every minute)
+- **Manual Refresh**: Supports right-click menu manual refresh functionality
+- **Performance Optimization**: Intelligently determines whether refresh is needed to avoid unnecessary performance consumption
 
-### 🌍 多语言支持
+### 🌍 Multi-language Support
 
-- **双语界面**: 完整支持中文和英文界面
-- **动态切换**: 可在设置中实时切换语言，无需重启
-- **本地化显示**: 时间格式、数字格式等完全本地化
-- **扩展性**: 架构支持轻松添加更多语言
+- **Bilingual Interface**: Complete support for Chinese and English interfaces
+- **Dynamic Switching**: Can switch languages in settings in real-time without restart
+- **Localized Display**: Time format, number format, etc. are fully localized
+- **Extensibility**: Architecture supports easy addition of more languages
 
-## 🎨 界面特色
+## 🎨 Interface Features
 
-### 现代化设计
-- **卡片式布局**: 采用现代化的卡片设计，信息层次清晰
-- **渐变效果**: 精美的渐变色彩和阴影效果
-- **响应式设计**: 完美适配桌面端和移动端
-- **主题兼容**: 自动适配 Obsidian 的明暗主题
+### Modern Design
+- **Card-based Layout**: Modern card design with clear information hierarchy
+- **Gradient Effects**: Beautiful gradient colors and shadow effects
+- **Responsive Design**: Perfect adaptation to desktop and mobile devices
+- **Theme Compatibility**: Automatically adapts to Obsidian's light and dark themes
 
-### 交互体验
-- **悬停效果**: 丰富的鼠标悬停动画效果
-- **点击反馈**: 清晰的点击反馈和状态变化
-- **键盘支持**: 完整的键盘导航支持
-- **无障碍访问**: 遵循无障碍设计原则
+### Interactive Experience
+- **Hover Effects**: Rich mouse hover animation effects
+- **Click Feedback**: Clear click feedback and state changes
+- **Keyboard Support**: Complete keyboard navigation support
+- **Accessibility**: Follows accessibility design principles
 
-## 🔧 技术特性
+## 🔧 Technical Features
 
-- **TypeScript 开发**: 使用 TypeScript 确保代码质量和类型安全
-- **模块化架构**: 清晰的模块分离，便于维护和扩展
-- **性能优化**: 智能缓存和懒加载，确保流畅体验
-- **内存管理**: 自动清理定时器和事件监听器，避免内存泄漏
+- **TypeScript Development**: Uses TypeScript to ensure code quality and type safety
+- **Modular Architecture**: Clear module separation for easy maintenance and extension
+- **Performance Optimization**: Smart caching and lazy loading for smooth experience
+- **Memory Management**: Automatic cleanup of timers and event listeners to avoid memory leaks
 
-## 🤝 贡献
+## 🤝 Contributing
 
-欢迎提交 Issue 和 Pull Request！
+Welcome to submit Issues and Pull Requests!
 
-### 开发指南
-1. Fork 本仓库
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 打开 Pull Request
+### Development Guide
+1. Fork this repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## 📄 许可证
+## 📄 License
 
-MIT License - 详见 [LICENSE](LICENSE) 文件
+MIT License - see [LICENSE](LICENSE) file for details
 
-## 🙏 致谢
+## 🙏 Acknowledgments
 
-- 感谢 Obsidian 团队提供的优秀插件API和开发框架
-- 感谢所有贡献者和用户的反馈与支持
+- Thanks to the Obsidian team for providing excellent plugin APIs and development framework
+- Thanks to all contributors and users for their feedback and support
 
 ---
 
