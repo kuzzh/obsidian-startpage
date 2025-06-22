@@ -32,4 +32,4 @@ jobs:
           gh release create "$tag" \
             --title="$tag" \
             --draft \
-            main.js manifest.json styles.css locales
+            main.js manifest.json styles.css locales/en.json locales/zh.json
