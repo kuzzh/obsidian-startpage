@@ -110,7 +110,7 @@ export class StartPageView extends ItemView {
 		}
 	}
 
-	async renderContent() {
+	public async renderContent() {
 		const container = this.containerEl.children[1];
 
 		if (!this.startPageCreator) {

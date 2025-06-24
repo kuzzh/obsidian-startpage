@@ -2,7 +2,7 @@ import type { SVGTag } from "./types";
 import { App, TFile, MarkdownView } from "obsidian";
 import StartPagePlugin from "./main";
 import { t } from "./i18n";
-import { VIEW_TYPE_START_PAGE } from "./startpageview";
+import { VIEW_TYPE_START_PAGE, StartPageView } from "./startpageview";
 
 const STAT_TOTAL_NOTES = "totalNotes";
 const STAT_TODAY_EDITED = "todayEdited";
@@ -108,8 +108,6 @@ export default class StartPageCreator {
 		this.container.appendChild(header);
 		this.container.appendChild(mainContent);
 		this.container.appendChild(footer);
-
-		console.log("Start page created");
 	}
 
 	private initData(pinnedNotes: TFile[] | null, recentNotes: TFile[] | null): void {
@@ -406,8 +404,9 @@ export default class StartPageCreator {
 	private refreshStartPage(): void {
 		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_START_PAGE);
 		leaves.forEach((leaf) => {
-			if (leaf.view) {
-				(leaf.view as any).renderContent();
+			if (leaf.view instanceof StartPageView) {
+				leaf.view.renderContent();
+				return;
 			}
 		});
 	}

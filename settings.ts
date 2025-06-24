@@ -1,6 +1,6 @@
 import { App, PluginSettingTab, Setting, TFile, Modal } from "obsidian";
 import StartPagePlugin from "./main";
-import { VIEW_TYPE_START_PAGE } from "./startpageview";
+import { VIEW_TYPE_START_PAGE, StartPageView } from "./startpageview";
 import { setLocale, t } from "./i18n";
 import NoteSuggestModal from "./notesuggestmodal";
 
@@ -27,8 +27,8 @@ export class StartPageSettingTab extends PluginSettingTab {
 	private refreshStartPage() {
 		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_START_PAGE);
 		leaves.forEach((leaf) => {
-			if (leaf.view) {
-				(leaf.view as any).renderContent();
+			if (leaf.view instanceof StartPageView) {
+				leaf.view.renderContent();
 			}
 		});
 	}

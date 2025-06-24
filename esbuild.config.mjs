@@ -43,12 +43,12 @@ const context = await esbuild.context({
   logLevel: "info",
   sourcemap: prod ? false : "inline",
   treeShaking: true,
-  outfile: path.join(outdir, "main.js"),
+  outfile: "main.js",
   minify: prod,
 });
 
 async function copyStaticFiles() {
-  const filesToCopy = ["manifest.json", "styles.css"];
+  const filesToCopy = ["main.js", "manifest.json", "styles.css"];
   await mkdir(outdir, { recursive: true });
 
   for (const file of filesToCopy) {
