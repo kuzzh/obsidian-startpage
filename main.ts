@@ -1,11 +1,10 @@
-import { Plugin, WorkspaceLeaf, TFile, MarkdownView } from "obsidian";
+import { Plugin, WorkspaceLeaf } from "obsidian";
 import { StartPageView, VIEW_TYPE_START_PAGE } from "./startpageview";
 import { StartPageSettingTab, StartPageSettings, DEFAULT_SETTINGS } from "./settings";
 import { setLocale } from "./i18n";
 
 export default class StartPagePlugin extends Plugin {
 	settings: StartPageSettings;
-	private startPageLeaf: WorkspaceLeaf | null = null;
 
 	async onload() {
 		const obsidianLang = this.settings?.language || "en";
@@ -23,22 +22,19 @@ export default class StartPagePlugin extends Plugin {
 		// Add settings tab
 		this.addSettingTab(new StartPageSettingTab(this.app, this));
 
-		// 等待 workspace 布局准备好后再激活 Start Page
-		this.app.workspace.onLayoutReady(() => {
-			// this.activateStartPage();
-		});
-		this.app.workspace.on("file-open", async (file: TFile | null) => {
-			if (!file) {
-				return;
-			}
-			if (!this.startPageLeaf) {
-				this.startPageLeaf = this.findStartPageLeaf();
-				if (!this.startPageLeaf) {
-					this.activateStartPage();
-					this.app.workspace.openLinkText(file.path, "", false);
+		this.registerEvent(
+			this.app.workspace.on("active-leaf-change", (leaf: WorkspaceLeaf | null) => {
+				if (this.settings.replaceNewTab) {
+					if (leaf && !leaf.view.getViewType().startsWith(VIEW_TYPE_START_PAGE)) {
+						const state = leaf.getViewState();
+						// If new empty tab, replace it with StartPage
+						if (state.type === 'empty' &&  !state.state?.file) {
+							this.replaceWithStartPage(leaf);
+						}
+					}
 				}
-			}
-		});
+			})
+		);
 	}
 
 	async loadSettings() {
@@ -58,30 +54,31 @@ export default class StartPagePlugin extends Plugin {
 	}
 
 	async activateStartPage() {
-		if (!this.startPageLeaf) {
-			this.startPageLeaf = this.findStartPageLeaf();
-		}
-		if (this.startPageLeaf) {
-			this.app.workspace.revealLeaf(this.startPageLeaf);
-			return;
-		}
 		try {
 			const leaf = this.app.workspace.getLeaf(false);
 			if (leaf) {
-				leaf.setPinned(true);
 				await leaf.setViewState({
 					type: VIEW_TYPE_START_PAGE,
 					active: true,
 				});
-				this.startPageLeaf = leaf;
 			}
 		} catch (error) {
 			console.error("Failed to create Start Page leaf:", error);
 		}
 	}
 
+	async replaceWithStartPage(leaf: WorkspaceLeaf) {
+		try {
+			await leaf.setViewState({
+				type: VIEW_TYPE_START_PAGE,
+				active: true,
+			});
+		} catch (error) {
+			console.error("Failed to replace with Start Page:", error);
+		}
+	}
+
 	onunload() {
-		this.startPageLeaf = null;
 		this.app.workspace.getLeavesOfType(VIEW_TYPE_START_PAGE).forEach((leaf) => leaf.detach());
 	}
 }

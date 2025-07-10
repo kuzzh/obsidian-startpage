@@ -26,5 +26,7 @@
     "total_notes": "总笔记数",
     "today_edited": "今日编辑",
     "total_size": "总占用空间",
-    "manage": "管理"    
+    "manage": "管理",
+    "replace_new_tab": "替换新标签页",
+    "replace_new_tab_desc": "打开新标签页时，使用启动首页替换默认的新标签页"    
   }

@@ -8,12 +8,14 @@ export interface StartPageSettings {
 	language: string;
 	recentNotesLimit: number;
 	pinnedNotes: string[];
+	replaceNewTab: boolean;
 }
 
 export const DEFAULT_SETTINGS: StartPageSettings = {
 	language: "en",
-	recentNotesLimit: 5,
+	recentNotesLimit: 10,
 	pinnedNotes: [],
+	replaceNewTab: true,
 };
 
 export class StartPageSettingTab extends PluginSettingTab {
@@ -86,21 +88,20 @@ export class StartPageSettingTab extends PluginSettingTab {
 					}).open();
 				});
 			});
-		// .addButton(button => button
-		//     .setButtonText(t("pinned_notes_select"))
-		//     .onClick(() => {
-		//         const files = this.app.vault.getMarkdownFiles();
-		//         new NoteTreeModal(this.app, files, async (file) => {
-		//             if (!this.plugin.settings.pinnedNotes.includes(file.path)) {
-		//                 this.plugin.settings.pinnedNotes.push(file.path);
-		//                 await this.plugin.saveSettings();
-		//                 this.refreshStartPage();
-		//                 this.display();
-		//             }
-		//         }).open();
-		//     }));
+		
+		// Add settings option to replace new tab
+		new Setting(containerEl)
+			.setName(t("replace_new_tab"))
+			.setDesc(t("replace_new_tab_desc"))
+			.addToggle((toggle) => {
+				toggle.setValue(this.plugin.settings.replaceNewTab);
+				toggle.onChange(async (value) => {
+					this.plugin.settings.replaceNewTab = value;
+					await this.plugin.saveSettings();
+				});
+			});
 
-		// 显示当前置顶笔记
+		// Display current pinned notes
 		if (this.plugin.settings.pinnedNotes.length > 0) {
 			containerEl.createEl("h3", { text: t("current_pinned_notes") });
 			const pinnedList = containerEl.createEl("ul", {

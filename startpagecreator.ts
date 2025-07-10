@@ -1,5 +1,5 @@
 import type { SVGTag } from "./types";
-import { App, TFile, MarkdownView } from "obsidian";
+import { App, TFile } from "obsidian";
 import StartPagePlugin from "./main";
 import { t } from "./i18n";
 import { VIEW_TYPE_START_PAGE, StartPageView } from "./startpageview";
@@ -7,6 +7,15 @@ import { VIEW_TYPE_START_PAGE, StartPageView } from "./startpageview";
 const STAT_TOTAL_NOTES = "totalNotes";
 const STAT_TODAY_EDITED = "todayEdited";
 const STAT_TOTAL_SIZE = "totalSize";
+
+declare module 'obsidian' {
+	interface App {
+		setting: {
+			open(): void;
+			openTabById(id: string): void;
+		};
+	}
+}
 
 export default class StartPageCreator {
 	private app: App;
@@ -211,14 +220,8 @@ export default class StartPageCreator {
 
 		noteItem.addEventListener("click", async () => {
 			const existingLeaf = this.app.workspace.getLeavesOfType("markdown").find((leaf) => {
-				if (leaf.view instanceof MarkdownView) {
-					return leaf.view.file?.path === note.path;
-				}
-				// Obsidian API has no type for this property
-				else if ((leaf.view as any).state.file === note.path) {
-					return true;
-				}
-				return false;
+				const state = leaf.view.getState();
+				return state['file'] === note.path;
 			});
 
 			if (existingLeaf) {
@@ -271,9 +274,9 @@ export default class StartPageCreator {
 		if (isPinned) {
 			const actionBtn = this.createElement("button", "btn btn-text", t("manage"));
 			actionBtn.addEventListener("click", () => {
-				// Obsidian API has no type for this property
-				const setting = (this.app as any).setting;
-				setting?.open?.();
+				console.log("app", this.app)
+				const setting = this.app.setting;
+				setting.open();
 
 				setTimeout(() => {
 					setting.openTabById(this.plugin.manifest.id);

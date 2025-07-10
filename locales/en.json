@@ -26,6 +26,8 @@
     "total_notes": "Total notes",
     "today_edited": "Today edited",
     "total_size": "Total size",
-    "manage": "Manage"    
+    "manage": "Manage",
+    "replace_new_tab": "Replace new tab",
+    "replace_new_tab_desc": "When opening a new tab, replace it with Start Page"    
 
 }

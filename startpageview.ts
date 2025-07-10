@@ -1,4 +1,4 @@
-import { App, ItemView, MarkdownView, TFile, Menu, EventRef } from "obsidian";
+import { App, ItemView, TFile, Menu, EventRef } from "obsidian";
 import StartPagePlugin from "./main";
 import { t } from "./i18n";
 import StartPageCreator from "./startpagecreator";
@@ -12,13 +12,17 @@ export class StartPageView extends ItemView {
 	private fileDeleteEventRef: EventRef;
 	private fileRenameEventRef: EventRef;
 	private refreshTimer: number | null = null;
-	private readonly REFRESH_INTERVAL = 60000; // 1分钟刷新一次
+	private readonly REFRESH_INTERVAL = 60000; // Refresh every 1 minute
 	private startPageCreator: StartPageCreator;
 
 	constructor(leaf: any, app: App, plugin: StartPagePlugin) {
 		super(leaf);
 		this.app = app;
 		this.plugin = plugin;
+		
+		this.navigation = true;
+		this.icon = "home";
+		this.contentEl.addClass("start-page-view");
 	}
 
 	getViewType(): string {
@@ -34,7 +38,7 @@ export class StartPageView extends ItemView {
 	}
 
 	canClose(): boolean {
-		return false;
+		return true;
 	}
 
 	async onOpen() {
@@ -94,13 +98,13 @@ export class StartPageView extends ItemView {
 	}
 
 	private startRefreshTimerIfNeeded(pinnedNotes: TFile[], recentNotes: TFile[]) {
-		// 清除现有的定时器
+		// Clear existing timer
 		this.clearRefreshTimer();
 
-		// 检查是否有需要定时刷新的时间标签
+		// Check if there are any files that need to be refreshed every 24 hours
 		const needsRefresh = pinnedNotes.concat(recentNotes).some((file) => {
 			const diff = Date.now() - file.stat.mtime;
-			return diff < 24 * 60 * 60 * 1000; // 24小时内的文件需要定时刷新
+			return diff < 24 * 60 * 60 * 1000; // Files modified within 24 hours need periodic refresh
 		});
 
 		if (needsRefresh) {
@@ -121,103 +125,6 @@ export class StartPageView extends ItemView {
 		this.startPageCreator.createStartPage(pinnedNotes, recentNotes);
 
 		this.startRefreshTimerIfNeeded(pinnedNotes, recentNotes);
-
-		// container.empty();
-		// container.addClass("start-page-container");
-
-		// container.createEl("h1", { text: t("welcome") });
-
-		// // Display pinned notes
-		// if (this.plugin.settings.pinnedNotes.length > 0) {
-		//   container.createEl("h2", { text: t("pinned_notes") });
-		//   const pinnedUl = container.createEl("ul");
-
-		//   for (const path of this.plugin.settings.pinnedNotes) {
-		//     const file = this.app.vault.getAbstractFileByPath(path);
-		//     if (file instanceof TFile) {
-		//       const li = pinnedUl.createEl("li");
-		//       const link = li.createEl("a", {
-		//         text: file.basename,
-		//         href: "#",
-		//       });
-		//       link.onclick = async () => {
-		//         // Check if file is already open in any leaf
-		//         const existingLeaf = this.app.workspace.getLeavesOfType("markdown").find(
-		//           (leaf) => leaf.view instanceof MarkdownView && leaf.view.file?.path === file.path
-		//         );
-
-		//         if (existingLeaf) {
-		//           // If file is already open, just focus that leaf
-		//           await this.app.workspace.revealLeaf(existingLeaf);
-		//         } else {
-		//           // If file is not open, open it in a new leaf
-		//           this.app.workspace.openLinkText(file.path, "", false);
-		//         }
-		//         return false;
-		//       };
-		//     }
-		//   }
-		// }
-
-		// // Display recent notes
-		// const recentNotes = this.getRecentNotes(this.plugin.settings.recentNotesLimit);
-		// if (recentNotes.length > 0) {
-		//   container.createEl("h2", { text: t("recent_notes") });
-		//   const ul = container.createEl("ul");
-
-		//   for (const file of recentNotes) {
-		//     const li = ul.createEl("li");
-		//     const link = li.createEl("a", {
-		//       text: file.basename,
-		//       href: "#",
-		//     });
-		//     link.onclick = () => {
-		//       // Check if file is already open in any leaf
-		//       const existingLeaf = this.app.workspace.getLeavesOfType("markdown").find(
-		//         (leaf) => {
-		//           const view = leaf.view as any;
-		//           if (view instanceof MarkdownView) {
-		//             return view.file?.path === file.path;
-		//           } else if (view.state.file === file.path) {
-		//             return true;
-		//           }
-		//           return false;
-		//         }
-		//       );
-
-		//       if (existingLeaf) {
-		//         // If file is already open, just focus that leaf
-		//         this.app.workspace.revealLeaf(existingLeaf);
-		//       } else {
-		//         // If file is not open, open it in a new leaf
-		//         this.app.workspace.openLinkText(file.path, "", false);
-		//       }
-		//       return false;
-		//     };
-
-		//     const row = li.createEl("div", {
-		//       cls: "row"
-		//     });
-
-		//     const parentPath = row.createEl("span", {
-		//       text: file.parent?.path,
-		//       cls: "time-tag"
-		//     });
-
-		//     // Add time tag
-		//     const timeTag = row.createEl("span", {
-		//       text: this.formatDate(file.stat.mtime),
-		//       cls: "time-tag"
-		//     });
-		//   }
-
-		//   // 检查是否需要启动定时刷新
-		//   this.startRefreshTimerIfNeeded(recentNotes);
-		// }
-
-		// // Display copyright at bottom
-		// container.createEl("p", { text: `Copyright © 2025 ${this.plugin.manifest.author}`, cls: "copyright" });
-		// container.createEl("p", { text: `❤️ Love what you love, and love what you do. ❤️`, cls: "love" });
 	}
 
 	getTFiles(notePaths: string[] | null): TFile[] {
