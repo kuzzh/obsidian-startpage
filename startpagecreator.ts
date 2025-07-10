@@ -17,7 +17,9 @@ export default class StartPageCreator {
 			id: STAT_TOTAL_NOTES,
 			data: {
 				number: 0,
-				label: function() {return t("total_notes")},
+				label: function () {
+					return t("total_notes");
+				},
 				icon: [
 					{ tagName: "path", attributes: { d: "M14 2H6A2 2 0 0 0 4 4V20A2 2 0 0 0 6 22H18A2 2 0 0 0 20 20V8L14 2Z" } },
 					{ tagName: "path", attributes: { d: "M14 2V8H20" } },
@@ -28,7 +30,9 @@ export default class StartPageCreator {
 			id: STAT_TODAY_EDITED,
 			data: {
 				number: 0,
-				label: function() { return t("today_edited")},
+				label: function () {
+					return t("today_edited");
+				},
 				icon: [
 					{ tagName: "path", attributes: { d: "M12 8V12L15 15" } },
 					{ tagName: "circle", attributes: { cx: 12, cy: 12, r: 10, stroke: "currentColor", "stroke-width": 2 } },
@@ -39,7 +43,9 @@ export default class StartPageCreator {
 			id: STAT_TOTAL_SIZE,
 			data: {
 				number: "0",
-				label: function() {return t("total_size")},
+				label: function () {
+					return t("total_size");
+				},
 				icon: [
 					{
 						tagName: "rect",
@@ -207,7 +213,9 @@ export default class StartPageCreator {
 			const existingLeaf = this.app.workspace.getLeavesOfType("markdown").find((leaf) => {
 				if (leaf.view instanceof MarkdownView) {
 					return leaf.view.file?.path === note.path;
-				} else if ((leaf.view as any).state.file === note.path) {
+				}
+				// Obsidian API has no type for this property
+				else if ((leaf.view as any).state.file === note.path) {
 					return true;
 				}
 				return false;
@@ -263,6 +271,7 @@ export default class StartPageCreator {
 		if (isPinned) {
 			const actionBtn = this.createElement("button", "btn btn-text", t("manage"));
 			actionBtn.addEventListener("click", () => {
+				// Obsidian API has no type for this property
 				const setting = (this.app as any).setting;
 				setting?.open?.();
 
@@ -433,7 +442,7 @@ export default class StartPageCreator {
 		});
 
 		const label = document.createElement("label");
-		label.className = 'recent-notes-limit-label';
+		label.className = "recent-notes-limit-label";
 		label.textContent = t("show_count");
 		label.htmlFor = dropdown.id;
 
