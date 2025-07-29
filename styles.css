@@ -396,6 +396,27 @@ body {
 	padding: 4px 0;
 }
 
+.pinned-note-item span {
+	flex: 1;
+}
+
+.pinned-note-item .control-button {
+	margin-left: 8px;
+	padding: 2px 6px;
+	border: none;
+	background: none;
+	cursor: pointer;
+	border-radius: 3px;
+	color: var(--text-faint);
+	transition: all 0.2s;
+	font-size: 12px;
+}
+
+.pinned-note-item .control-button:hover {
+	color: var(--text-normal);
+	background: var(--background-modifier-hover);
+}
+
 .pinned-note-item .remove-button {
 	margin-left: 8px;
 	cursor: pointer;

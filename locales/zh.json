@@ -30,5 +30,7 @@
     "replace_new_tab": "替换新标签页",
     "replace_new_tab_desc": "打开新标签页时，使用启动首页替换默认的新标签页",
     "remove_from_pinned_notes": "从置顶笔记移除",
-    "add_to_pinned_notes": "添加到置顶笔记"
+    "add_to_pinned_notes": "添加到置顶笔记",
+    "move_up": "上移",
+    "move_down": "下移"
   }

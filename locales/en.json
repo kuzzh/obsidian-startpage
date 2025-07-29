@@ -30,5 +30,7 @@
     "replace_new_tab": "Replace new tab",
     "replace_new_tab_desc": "When opening a new tab, replace it with Start Page",
     "remove_from_pinned_notes": "Remove from pinned notes",
-    "add_to_pinned_notes": "Add to pinned notes"
+    "add_to_pinned_notes": "Add to pinned notes",
+    "move_up": "Move up",
+    "move_down": "Move down"
 }

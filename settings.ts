@@ -35,6 +35,17 @@ export class StartPageSettingTab extends PluginSettingTab {
 		});
 	}
 
+	private async moveNote(fromIndex: number, toIndex: number) {
+		const notes = [...this.plugin.settings.pinnedNotes];
+		const [movedNote] = notes.splice(fromIndex, 1);
+		notes.splice(toIndex, 0, movedNote);
+		
+		this.plugin.settings.pinnedNotes = notes;
+		await this.plugin.saveSettings();
+		this.refreshStartPage();
+		this.display();
+	}
+
 	display(): void {
 		const { containerEl } = this;
 		containerEl.empty();
@@ -108,11 +119,33 @@ export class StartPageSettingTab extends PluginSettingTab {
 				cls: "pinned-note-list",
 			});
 
-			for (const path of this.plugin.settings.pinnedNotes) {
+			this.plugin.settings.pinnedNotes.forEach((path, index) => {
 				const li = pinnedList.createEl("li", { cls: "pinned-note-item" });
 				const file = this.app.vault.getAbstractFileByPath(path);
 				if (file) {
 					li.createEl("span", { text: file.path });
+					
+					// Move up button
+					if (index > 0) {
+						li.createEl("button", {
+							text: t("move_up"),
+							cls: "control-button"
+						}).onclick = async () => {
+							await this.moveNote(index, index - 1);
+						};
+					}
+					
+					// Move down button
+					if (index < this.plugin.settings.pinnedNotes.length - 1) {
+						li.createEl("button", {
+							text: t("move_down"),
+							cls: "control-button"
+						}).onclick = async () => {
+							await this.moveNote(index, index + 1);
+						};
+					}
+
+					// Remove button
 					li.createEl("button", {
 						text: t("pinned_notes_remove"),
 						cls: "mod-warning remove-button",
@@ -123,7 +156,7 @@ export class StartPageSettingTab extends PluginSettingTab {
 						this.display();
 					};
 				}
-			}
+			});
 		}
 	}
 }
