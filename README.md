@@ -2,21 +2,23 @@
 
 English | [中文](README.CN.md)
 
-A modern startup homepage plugin for Obsidian that provides a beautiful dashboard interface, displaying vault statistics, pinned notes, and recently modified notes.
+A modern startup homepage plugin for Obsidian that provides a beautiful dashboard interface, displaying vault statistics, pinned notes, and recently modified notes. Automatically displays a personalized homepage when starting Obsidian or opening new tabs, giving you quick access to important content.
 
 ## ✨ Features
 
 ### 🏠 Smart Homepage
-- **Automatic Startup Homepage**: Automatically opens a customized homepage when the plugin starts
+- **Automatic Startup Homepage**: Automatically opens a customized homepage when the plugin starts, with support for replacing new tabs
 - **Modern Design**: Card-based layout with responsive design, perfectly adapted to various screen sizes
 - **Dashboard Statistics**: Real-time display of vault statistics (total notes, today's edits, total storage space)
 - **Quick Actions**: Built-in new note button for one-click note creation
+- **Toolbar Integration**: Adds a homepage icon to the left toolbar for quick access anytime
 
 ### 📌 Note Management
 - **Pinned Notes**: Set important notes to be displayed at the top of the homepage for quick access
 - **Recent Notes**: Display a list of recently modified notes, sorted by modification time
 - **Smart Search**: Support fuzzy search for selecting pinned notes
 - **Dynamic Count**: Customizable number of recent notes to display (5-50 notes)
+- **Context Menu**: Support adding/removing pinned notes via right-click context menu in file explorer
 
 ### 🎨 User Experience
 - **Smart Time Display**: Automatically shows relative time (minutes ago, hours ago, days ago)
@@ -40,9 +42,10 @@ A modern startup homepage plugin for Obsidian that provides a beautiful dashboar
 ### Manual Installation
 
 1. Download the latest version from [Releases](https://github.com/kuzzh/obsidian-startpage/releases)
-2. Copy `main.js`, `styles.css`, `manifest.json`, and `locales` to your Obsidian vault's `.obsidian/plugins/obsidian-startpage/` folder
-3. Restart Obsidian
-4. Enable the plugin in settings
+2. Create a `.obsidian/plugins/obsidian-startpage/` folder in your Obsidian vault
+3. Copy the downloaded `main.js`, `styles.css`, and `manifest.json` files to this folder
+4. Restart Obsidian
+5. Enable the "Startpage" plugin in Settings → Community plugins
 
 ## 📖 Usage
 
@@ -50,10 +53,11 @@ A modern startup homepage plugin for Obsidian that provides a beautiful dashboar
 
 1. **Open Start Page**: After installing and enabling the plugin, you can open the start page by:
    - Clicking the "🏠" icon in the left toolbar
-   - The start page will automatically display when opening files for the first time
+   - If "Replace new tab" is enabled, it will automatically display when opening new tabs
 2. **View Statistics**: The top of the homepage displays vault statistics (total notes, today's edits, total storage space)
 3. **Quick Create**: Click the "New Note" button in the top right corner to quickly create a new note
 4. **Access Notes**: Click on pinned notes or recent notes to directly open the corresponding notes
+5. **Context Menu**: Right-click on files in the file explorer to quickly add or remove pinned notes
 
 ### Setting Pinned Notes
 
@@ -69,6 +73,7 @@ A modern startup homepage plugin for Obsidian that provides a beautiful dashboar
 - **Language Settings**: Choose between Chinese and English interface with dynamic switching
 - **Recent Notes Count**: Adjust the display count directly on the homepage (5-50 notes) or modify in settings
 - **Pinned Notes Management**: Add or remove pinned notes in the settings page
+- **Replace New Tab**: Option to automatically display the start page when opening new tabs
 - **Real-time Preview**: All setting changes take effect immediately on the homepage
 
 ## 🛠️ Development

@@ -5,7 +5,7 @@
     "language_en": "English",
     "start_page": "Start Page",
     "welcome": "Welcome back 👋",
-    "recent_notes": "Recently modified",
+    "recent_notes": "Recently notes",
     "pinned_notes": "Pinned notes",
     "refresh": "Refresh",
     "minutes_ago": "{minutes} minutes ago",
@@ -28,6 +28,7 @@
     "total_size": "Total size",
     "manage": "Manage",
     "replace_new_tab": "Replace new tab",
-    "replace_new_tab_desc": "When opening a new tab, replace it with Start Page"    
-
+    "replace_new_tab_desc": "When opening a new tab, replace it with Start Page",
+    "remove_from_pinned_notes": "Remove from pinned notes",
+    "add_to_pinned_notes": "Add to pinned notes"
 }

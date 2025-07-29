@@ -146,7 +146,34 @@ export class StartPageView extends ItemView {
 	}
 
 	getRecentNotes(limit: number): TFile[] {
-		const files = this.app.vault.getMarkdownFiles();
-		return files.sort((a, b) => b.stat.mtime - a.stat.mtime).slice(0, limit);
+		// 获取最近打开的文件路径
+		const recentlyOpenedPaths = this.app.workspace.getLastOpenFiles();
+		
+		// 获取所有markdown文件
+		const allFiles = this.app.vault.getMarkdownFiles();
+		
+		// 为每个文件计算最近时间（修改时间或访问时间的最大值）
+		const filesWithTime = allFiles.map(file => {
+			let lastAccessTime = 0;
+			
+			// 根据最近打开文件列表中的位置计算访问时间
+			const openIndex = recentlyOpenedPaths.indexOf(file.path);
+			if (openIndex !== -1) {
+				// 将索引转换为时间戳，越靠前的文件时间越新
+				// 使用当前时间减去索引分钟数来模拟访问时间
+				lastAccessTime = Date.now() - (openIndex * 60 * 1000);
+			}
+			
+			// 取修改时间和访问时间的最大值
+			const lastTime = Math.max(file.stat.mtime, lastAccessTime);
+			
+			return { file, lastTime };
+		});
+		
+		// 按最近时间排序并返回指定数量的文件
+		return filesWithTime
+			.sort((a, b) => b.lastTime - a.lastTime)
+			.slice(0, limit)
+			.map(item => item.file);
 	}
 }

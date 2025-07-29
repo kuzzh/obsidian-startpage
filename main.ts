@@ -1,7 +1,7 @@
-import { Plugin, WorkspaceLeaf } from "obsidian";
+import { Plugin, WorkspaceLeaf, TFile, Menu } from "obsidian";
 import { StartPageView, VIEW_TYPE_START_PAGE } from "./startpageview";
 import { StartPageSettingTab, StartPageSettings, DEFAULT_SETTINGS } from "./settings";
-import { setLocale } from "./i18n";
+import { setLocale, t } from "./i18n";
 
 export default class StartPagePlugin extends Plugin {
 	settings: StartPageSettings;
@@ -32,6 +32,15 @@ export default class StartPagePlugin extends Plugin {
 							this.replaceWithStartPage(leaf);
 						}
 					}
+				}
+			})
+		);
+
+		// Register file menu event for right-click context menu
+		this.registerEvent(
+			this.app.workspace.on("file-menu", (menu: Menu, file: TFile) => {
+				if (file instanceof TFile) {
+					this.addPinnedNoteMenuItem(menu, file);
 				}
 			})
 		);
@@ -76,6 +85,34 @@ export default class StartPagePlugin extends Plugin {
 		} catch (error) {
 			console.error("Failed to replace with Start Page:", error);
 		}
+	}
+
+	addPinnedNoteMenuItem(menu: Menu, file: TFile) {
+		const isPinned = this.settings.pinnedNotes.includes(file.path);
+		
+		menu.addItem((item) => {
+			item
+				.setTitle(isPinned ? t("remove_from_pinned_notes") : t("add_to_pinned_notes"))
+				.setIcon(isPinned ? "pin-off" : "pin")
+				.onClick(async () => {
+					if (isPinned) {
+						// Remove from pinned notes
+						this.settings.pinnedNotes = this.settings.pinnedNotes.filter(path => path !== file.path);
+					} else {
+						// Add to pinned notes
+						this.settings.pinnedNotes.push(file.path);
+					}
+					await this.saveSettings();
+					
+					// Refresh start page if it's open
+					const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_START_PAGE);
+					leaves.forEach((leaf) => {
+						if (leaf.view instanceof StartPageView) {
+							leaf.view.renderContent();
+						}
+					});
+				});
+		});
 	}
 
 	onunload() {

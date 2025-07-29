@@ -1,5 +1,5 @@
 import type { SVGTag } from "./types";
-import { App, TFile } from "obsidian";
+import { App, TFile, Menu } from "obsidian";
 import StartPagePlugin from "./main";
 import { t } from "./i18n";
 import { VIEW_TYPE_START_PAGE, StartPageView } from "./startpageview";
@@ -230,6 +230,31 @@ export default class StartPageCreator {
 				this.app.workspace.openLinkText(note.path, "", false);
 			}
 		});
+
+		// 为置顶笔记添加右键菜单
+		if (isPinned) {
+			noteItem.addEventListener("contextmenu", (event) => {
+				event.preventDefault();
+				event.stopPropagation();
+				
+				const menu = new Menu();
+				menu.addItem((item) => {
+					item
+						.setTitle(t("remove_from_pinned_notes"))
+						.setIcon("pin-off")
+						.onClick(async () => {
+							// 从置顶笔记中移除
+							this.plugin.settings.pinnedNotes = this.plugin.settings.pinnedNotes.filter(path => path !== note.path);
+							await this.plugin.saveSettings();
+							
+							// 刷新启动页面
+							this.refreshStartPage();
+						});
+				});
+				
+				menu.showAtMouseEvent(event);
+			});
+		}
 
 		const noteIcon = this.createElement("div", "note-icon");
 		const iconSvg = this.createSVG([
