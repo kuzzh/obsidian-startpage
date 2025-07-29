@@ -1,5 +1,5 @@
 import type { SVGTag } from "./types";
-import { App, TFile, Menu } from "obsidian";
+import { App, TFile, Menu, Platform } from "obsidian";
 import StartPagePlugin from "./main";
 import { t } from "./i18n";
 import { VIEW_TYPE_START_PAGE, StartPageView } from "./startpageview";
@@ -265,7 +265,17 @@ export default class StartPageCreator {
 
 		const noteContent = this.createElement("div", "note-content");
 		const noteTitle = this.createElement("div", "note-title", note.basename);
-		const noteMeta = this.createElement("div", "note-meta", this.formatDate(note.stat.mtime));
+		
+		// 在PC端显示路径信息
+		let metaText = this.formatDate(note.stat.mtime);
+		if (Platform.isDesktop) {
+			const folderPath = note.parent ? note.parent.path : '';
+			if (folderPath) {
+				metaText += ` • ${folderPath}`;
+			}
+		}
+		const noteMeta = this.createElement("div", "note-meta", metaText);
+		
 		noteTitle.setAttribute("title", note.basename);
 		noteContent.appendChild(noteTitle);
 		noteContent.appendChild(noteMeta);
