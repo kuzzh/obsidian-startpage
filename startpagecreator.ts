@@ -1,5 +1,5 @@
 import type { SVGTag } from "./types";
-import { App, TFile, Menu, Platform } from "obsidian";
+import { App, TFolder, TFile, Menu, Platform } from "obsidian";
 import StartPagePlugin from "./main";
 import { t } from "./i18n";
 import { VIEW_TYPE_START_PAGE, StartPageView } from "./startpageview";
@@ -8,7 +8,7 @@ const STAT_TOTAL_NOTES = "totalNotes";
 const STAT_TODAY_EDITED = "todayEdited";
 const STAT_TOTAL_SIZE = "totalSize";
 
-declare module 'obsidian' {
+declare module "obsidian" {
 	interface App {
 		setting: {
 			open(): void;
@@ -170,11 +170,23 @@ export default class StartPageCreator {
 			],
 			"new-note-icon"
 		);
-		newNoteBtn.addEventListener("click", () => {
-			const newNoteBtn = document.querySelector('div[aria-label="New note"]') as HTMLElement;
-			if (newNoteBtn) {
-				newNoteBtn.click();
+		newNoteBtn.addEventListener("click", async () => {
+			const parent: TFolder = this.app.fileManager.getNewFileParent("");
+			if (!parent) {
+				console.error("Unable to get the currently selected directory");
+				return;
 			}
+
+			let newFilePath = parent.path === "/" ? "Untitled.md" : parent.path + "/Untitled.md";
+			let index = 1;
+			let existFile = this.app.vault.getAbstractFileByPath(newFilePath);
+			while (existFile) {
+				newFilePath = parent.path === "/" ? `Untitled ${index++}.md` : parent.path + `/Untitled ${index++}.md`;
+				existFile = this.app.vault.getAbstractFileByPath(newFilePath);
+			}
+
+			const file = await this.app.vault.create(newFilePath, "");
+			this.app.workspace.openLinkText(file.path, "", false);
 		});
 		newNoteBtn.appendChild(newNoteIcon);
 		newNoteBtn.appendChild(document.createTextNode(t("new_note")));
@@ -222,7 +234,7 @@ export default class StartPageCreator {
 		noteItem.addEventListener("click", async () => {
 			const existingLeaf = this.app.workspace.getLeavesOfType("markdown").find((leaf) => {
 				const state = leaf.view.getState();
-				return state['file'] === note.path;
+				return state["file"] === note.path;
 			});
 
 			if (existingLeaf) {
@@ -237,22 +249,21 @@ export default class StartPageCreator {
 			noteItem.addEventListener("contextmenu", (event) => {
 				event.preventDefault();
 				event.stopPropagation();
-				
+
 				const menu = new Menu();
 				menu.addItem((item) => {
-					item
-						.setTitle(t("remove_from_pinned_notes"))
+					item.setTitle(t("remove_from_pinned_notes"))
 						.setIcon("pin-off")
 						.onClick(async () => {
 							// 从置顶笔记中移除
-							this.plugin.settings.pinnedNotes = this.plugin.settings.pinnedNotes.filter(path => path !== note.path);
+							this.plugin.settings.pinnedNotes = this.plugin.settings.pinnedNotes.filter((path) => path !== note.path);
 							await this.plugin.saveSettings();
-							
+
 							// 刷新启动页面
 							this.refreshStartPage();
 						});
 				});
-				
+
 				menu.showAtMouseEvent(event);
 			});
 		}
@@ -266,17 +277,17 @@ export default class StartPageCreator {
 
 		const noteContent = this.createElement("div", "note-content");
 		const noteTitle = this.createElement("div", "note-title", note.basename);
-		
+
 		// 在PC端显示路径信息
 		let metaText = this.formatDate(note.stat.mtime);
 		if (Platform.isDesktop) {
-			const folderPath = note.parent ? note.parent.path : '';
+			const folderPath = note.parent ? note.parent.path : "";
 			if (folderPath) {
 				metaText += ` • ${folderPath}`;
 			}
 		}
 		const noteMeta = this.createElement("div", "note-meta", metaText);
-		
+
 		noteTitle.setAttribute("title", note.basename);
 		noteContent.appendChild(noteTitle);
 		noteContent.appendChild(noteMeta);
@@ -310,7 +321,7 @@ export default class StartPageCreator {
 		if (isPinned) {
 			const actionBtn = this.createElement("button", "btn btn-text", t("manage"));
 			actionBtn.addEventListener("click", () => {
-				console.log("app", this.app)
+				console.log("app", this.app);
 				const setting = this.app.setting;
 				setting.open();
 

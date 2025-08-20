@@ -435,6 +435,9 @@
 	.pinned-note-item {
 		flex-direction: column;
 	}
+	.pinned-note-item span {
+		width: 100%;
+	}
 	.pinned-note-item .control-buttons {
 		width: 100%;
 	}
