@@ -3,7 +3,7 @@
     "language_desc": "Select language",
     "language_zh": "Chinese",
     "language_en": "English",
-    "start_page": "Start Page",
+    "start_page": "Start page",
     "welcome": "Welcome back 👋",
     "recent_notes": "Recently notes",
     "pinned_notes": "Pinned notes",
@@ -32,5 +32,9 @@
     "remove_from_pinned_notes": "Remove from pinned notes",
     "add_to_pinned_notes": "Add to pinned notes",
     "move_up": "Move up",
-    "move_down": "Move down"
+    "move_down": "Move down",
+    "open_start_page": "Open start page",
+    "open_start_page_desc": "Open the start page in current tab",
+    "open_start_page_new_tab": "Open start page in new tab",
+    "open_start_page_new_tab_desc": "Open the start page in a new tab"
 }

@@ -1,4 +1,4 @@
-# Obsidian StartPage Plugin
+# StartPage Plugin
 
 English | [中文](README.CN.md)
 
@@ -30,7 +30,7 @@ A modern startup homepage plugin for Obsidian that provides a beautiful dashboar
 
 ## 🚀 Installation
 
-### Install from Obsidian Community Plugins (Not yet implemented)
+### Install from Obsidian Community Plugins
 
 1. Open Obsidian Settings
 2. Go to the "Community plugins" tab
@@ -46,6 +46,40 @@ A modern startup homepage plugin for Obsidian that provides a beautiful dashboar
 3. Copy the downloaded `main.js`, `styles.css`, and `manifest.json` files to this folder
 4. Restart Obsidian
 5. Enable the "Startpage" plugin in Settings → Community plugins
+
+## 📷 Screenshots
+
+### Desktop Interface
+
+#### Light Theme
+![StartPage Desktop Light](Screenshots/startpage-desktop-light.png)
+*StartPage interface in light theme on desktop*
+
+![Settings Desktop Light](Screenshots/setting-desktop-light.png)
+*Plugin settings interface in light theme*
+
+#### Dark Theme
+![StartPage Desktop Dark](Screenshots/startpage-desktop-dark.png)
+*StartPage interface in dark theme on desktop*
+
+![Settings Desktop Dark](Screenshots/setting-desktop-dark.png)
+*Plugin settings interface in dark theme*
+
+### Mobile Interface
+
+#### Light Theme
+![StartPage Mobile Light](Screenshots/startpage-mobile-light.jpg)
+*StartPage interface in light theme on mobile*
+
+![Settings Mobile Light](Screenshots/setting-mobile-light.jpg)
+*Plugin settings interface in light theme on mobile*
+
+#### Dark Theme
+![StartPage Mobile Dark](Screenshots/startpage-mobile-dark.png)
+*StartPage interface in dark theme on mobile*
+
+![Settings Mobile Dark](Screenshots/setting-mobile-dark.png)
+*Plugin settings interface in dark theme on mobile*
 
 ## 📖 Usage
 

@@ -1,4 +1,4 @@
-# Obsidian StartPage 插件
+# StartPage 插件
 
 [English](README.md) | 中文
 
@@ -30,7 +30,7 @@
 
 ## 🚀 安装
 
-### 从 Obsidian 社区插件安装（暂未实现）
+### 从 Obsidian 社区插件安装
 
 1. 打开 Obsidian 设置
 2. 进入"社区插件"选项卡
@@ -46,6 +46,40 @@
 3. 将下载的 `main.js`、`styles.css`、`manifest.json` 文件复制到该文件夹中
 4. 重启 Obsidian
 5. 在设置 → 社区插件中启用 "Startpage" 插件
+
+## 📷 界面截图
+
+### 桌面端界面
+
+#### 浅色主题
+![StartPage Desktop Light](Screenshots/startpage-desktop-light.png)
+*桌面端浅色主题下的 StartPage 界面*
+
+![Settings Desktop Light](Screenshots/setting-desktop-light.png)
+*浅色主题下的插件设置界面*
+
+#### 深色主题
+![StartPage Desktop Dark](Screenshots/startpage-desktop-dark.png)
+*桌面端深色主题下的 StartPage 界面*
+
+![Settings Desktop Dark](Screenshots/setting-desktop-dark.png)
+*深色主题下的插件设置界面*
+
+### 移动端界面
+
+#### 浅色主题
+![StartPage Mobile Light](Screenshots/startpage-mobile-light.jpg)
+*移动端浅色主题下的 StartPage 界面*
+
+![Settings Mobile Light](Screenshots/setting-mobile-light.jpg)
+*移动端浅色主题下的插件设置界面*
+
+#### 深色主题
+![StartPage Mobile Dark](Screenshots/startpage-mobile-dark.png)
+*移动端深色主题下的 StartPage 界面*
+
+![Settings Mobile Dark](Screenshots/setting-mobile-dark.png)
+*移动端深色主题下的插件设置界面*
 
 ## 📖 使用方法
 

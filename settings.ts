@@ -1,18 +1,16 @@
-import { App, PluginSettingTab, Setting, TFile, Modal } from "obsidian";
+import { App, PluginSettingTab, Setting } from "obsidian";
 import StartPagePlugin from "./main";
 import { VIEW_TYPE_START_PAGE, StartPageView } from "./startpageview";
-import { setLocale, t } from "./i18n";
+import { t } from "./i18n";
 import NoteSuggestModal from "./notesuggestmodal";
 
 export interface StartPageSettings {
-	language: string;
 	recentNotesLimit: number;
 	pinnedNotes: string[];
 	replaceNewTab: boolean;
 }
 
 export const DEFAULT_SETTINGS: StartPageSettings = {
-	language: "en",
 	recentNotesLimit: 10,
 	pinnedNotes: [],
 	replaceNewTab: true,
@@ -49,24 +47,6 @@ export class StartPageSettingTab extends PluginSettingTab {
 	display(): void {
 		const { containerEl } = this;
 		containerEl.empty();
-
-		new Setting(containerEl)
-			.setName(t("language"))
-			.setDesc(t("language_desc"))
-			.addDropdown((dropdown) => {
-				dropdown.addOption("en", t("language_en"));
-				dropdown.addOption("zh", t("language_zh"));
-				dropdown.setValue(this.plugin.settings.language);
-				dropdown.onChange(async (value) => {
-					this.plugin.settings.language = value;
-					setLocale(value);
-					await this.plugin.saveSettings();
-
-					// Reload setting page and start page
-					this.display();
-					this.refreshStartPage();
-				});
-			});
 
 		new Setting(containerEl)
 			.setName(t("recent_notes_limit"))
@@ -114,7 +94,10 @@ export class StartPageSettingTab extends PluginSettingTab {
 
 		// Display current pinned notes
 		if (this.plugin.settings.pinnedNotes.length > 0) {
-			containerEl.createEl("h3", { text: t("current_pinned_notes") });
+			new Setting(containerEl)
+				.setName(t("current_pinned_notes"))
+				.setHeading();
+
 			const pinnedList = containerEl.createEl("ul", {
 				cls: "pinned-note-list",
 			});
@@ -124,10 +107,11 @@ export class StartPageSettingTab extends PluginSettingTab {
 				const file = this.app.vault.getAbstractFileByPath(path);
 				if (file) {
 					li.createEl("span", { text: file.path });
-					
+
+					const buttonDiv = li.createEl("div", { cls: "control-buttons" });
 					// Move up button
 					if (index > 0) {
-						li.createEl("button", {
+						buttonDiv.createEl("button", {
 							text: t("move_up"),
 							cls: "control-button"
 						}).onclick = async () => {
@@ -137,7 +121,7 @@ export class StartPageSettingTab extends PluginSettingTab {
 					
 					// Move down button
 					if (index < this.plugin.settings.pinnedNotes.length - 1) {
-						li.createEl("button", {
+						buttonDiv.createEl("button", {
 							text: t("move_down"),
 							cls: "control-button"
 						}).onclick = async () => {
@@ -146,7 +130,7 @@ export class StartPageSettingTab extends PluginSettingTab {
 					}
 
 					// Remove button
-					li.createEl("button", {
+					buttonDiv.createEl("button", {
 						text: t("pinned_notes_remove"),
 						cls: "mod-warning remove-button",
 					}).onclick = async () => {

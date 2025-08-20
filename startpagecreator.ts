@@ -154,7 +154,8 @@ export default class StartPageCreator {
 			],
 			"logo-icon"
 		);
-		const logoText = this.createElement("span", "logo-text", "Obsidian Start Page");
+		const logoText = this.createElement("span", "logo-text", "Start Page for Obsidian");
+
 		logo.appendChild(logoIcon);
 		logo.appendChild(logoText);
 

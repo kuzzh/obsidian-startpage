@@ -1,26 +1,45 @@
-import { Plugin, WorkspaceLeaf, TFile, Menu } from "obsidian";
+import { Plugin, WorkspaceLeaf, TFile, Menu, getLanguage } from "obsidian";
 import { StartPageView, VIEW_TYPE_START_PAGE } from "./startpageview";
 import { StartPageSettingTab, StartPageSettings, DEFAULT_SETTINGS } from "./settings";
 import { setLocale, t } from "./i18n";
+import "./types";
 
 export default class StartPagePlugin extends Plugin {
 	settings: StartPageSettings;
 
 	async onload() {
-		const obsidianLang = this.settings?.language || "en";
-		setLocale(obsidianLang);
-
 		await this.loadSettings();
+		
+		// Use Obsidian's built-in language setting
+		const obsidianLang = getLanguage() || "en";
+		setLocale(obsidianLang);
 
 		this.registerView(VIEW_TYPE_START_PAGE, (leaf) => new StartPageView(leaf, this.app, this));
 
 		// Add ribbon button
-		this.addRibbonIcon("home", "Open Start Page", () => {
+		this.addRibbonIcon("home", "Open start page", () => {
 			this.activateStartPage();
 		});
 
 		// Add settings tab
 		this.addSettingTab(new StartPageSettingTab(this.app, this));
+
+		// Add commands
+		this.addCommand({
+			id: "open-start-page",
+			name: t("open_start_page"),
+			callback: () => {
+				this.activateStartPage();
+			}
+		});
+
+		this.addCommand({
+			id: "open-start-page-new-tab",
+			name: t("open_start_page_new_tab"),
+			callback: () => {
+				this.activateStartPageNewTab();
+			}
+		});
 
 		this.registerEvent(
 			this.app.workspace.on("active-leaf-change", (leaf: WorkspaceLeaf | null) => {
@@ -73,6 +92,20 @@ export default class StartPagePlugin extends Plugin {
 			}
 		} catch (error) {
 			console.error("Failed to create Start Page leaf:", error);
+		}
+	}
+
+	async activateStartPageNewTab() {
+		try {
+			const leaf = this.app.workspace.getLeaf(true);
+			if (leaf) {
+				await leaf.setViewState({
+					type: VIEW_TYPE_START_PAGE,
+					active: true,
+				});
+			}
+		} catch (error) {
+			console.error("Failed to create Start Page leaf in new tab:", error);
 		}
 	}
 
