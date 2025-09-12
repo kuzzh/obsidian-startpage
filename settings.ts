@@ -5,12 +5,14 @@ import { t } from "./i18n";
 import NoteSuggestModal from "./notesuggestmodal";
 
 export interface StartPageSettings {
+	includeAllFilesInRecent: boolean;
 	recentNotesLimit: number;
 	pinnedNotes: string[];
 	replaceNewTab: boolean;
 }
 
 export const DEFAULT_SETTINGS: StartPageSettings = {
+	includeAllFilesInRecent: false,
 	recentNotesLimit: 10,
 	pinnedNotes: [],
 	replaceNewTab: true,
@@ -37,7 +39,7 @@ export class StartPageSettingTab extends PluginSettingTab {
 		const notes = [...this.plugin.settings.pinnedNotes];
 		const [movedNote] = notes.splice(fromIndex, 1);
 		notes.splice(toIndex, 0, movedNote);
-		
+
 		this.plugin.settings.pinnedNotes = notes;
 		await this.plugin.saveSettings();
 		this.refreshStartPage();
@@ -47,6 +49,17 @@ export class StartPageSettingTab extends PluginSettingTab {
 	display(): void {
 		const { containerEl } = this;
 		containerEl.empty();
+
+		new Setting(containerEl)
+			.setName(t("include_all_files_in_recent"))
+			.setDesc(t("include_all_files_in_recent_desc"))
+			.addToggle((toggle) => {
+				toggle.setValue(this.plugin.settings.includeAllFilesInRecent);
+				toggle.onChange(async (value) => {
+					this.plugin.settings.includeAllFilesInRecent = value;
+					await this.plugin.saveSettings();
+				});
+			});
 
 		new Setting(containerEl)
 			.setName(t("recent_notes_limit"))
@@ -79,7 +92,7 @@ export class StartPageSettingTab extends PluginSettingTab {
 					}).open();
 				});
 			});
-		
+
 		// Add settings option to replace new tab
 		new Setting(containerEl)
 			.setName(t("replace_new_tab"))
@@ -118,7 +131,7 @@ export class StartPageSettingTab extends PluginSettingTab {
 							await this.moveNote(index, index - 1);
 						};
 					}
-					
+
 					// Move down button
 					if (index < this.plugin.settings.pinnedNotes.length - 1) {
 						buttonDiv.createEl("button", {
