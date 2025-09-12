@@ -36,5 +36,7 @@
     "open_start_page": "Open start page",
     "open_start_page_desc": "Open the start page in current tab",
     "open_start_page_new_tab": "Open start page in new tab",
-    "open_start_page_new_tab_desc": "Open the start page in a new tab"
+    "open_start_page_new_tab_desc": "Open the start page in a new tab",
+    "total_size_all_files": "Calculate size from all files",
+    "total_size_all_files_desc": "Calculate the total size from all files in the vault rather than just the markdown files."
 }
