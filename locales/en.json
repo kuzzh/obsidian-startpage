@@ -36,5 +36,7 @@
     "open_start_page": "Open start page",
     "open_start_page_desc": "Open the start page in current tab",
     "open_start_page_new_tab": "Open start page in new tab",
-    "open_start_page_new_tab_desc": "Open the start page in a new tab"
+    "open_start_page_new_tab_desc": "Open the start page in a new tab",
+    "include_all_files_in_recent": "Include all files in recent notes",
+    "include_all_files_in_recent_desc": "Include all types of files in the recent notes section, rather than only markdown files"
 }

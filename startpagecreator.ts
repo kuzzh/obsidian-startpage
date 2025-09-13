@@ -8,6 +8,30 @@ const STAT_TOTAL_NOTES = "totalNotes";
 const STAT_TODAY_EDITED = "todayEdited";
 const STAT_TOTAL_SIZE = "totalSize";
 
+const iconSVGs = {
+	"md": [
+		{ tagName: "path", attributes: { d: "M14 2H6A2 2 0 0 0 4 4V20A2 2 0 0 0 6 22H18A2 2 0 0 0 20 20V8L14 2Z" } },
+		{ tagName: "path", attributes: { d: "M14 2V8H20" } },
+	],
+	"base": [
+		{ tagName: "rect", attributes: { x: "4", y: "3", width: "16", height: "20", rx: "2", stroke: "currentColor", "stroke-width": "2", fill: "none" } },
+		{ tagName: "path", attributes: { d: "M6 10H18", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } },
+		{ tagName: "path", attributes: { d: "M6 16H18", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } },
+		{ tagName: "path", attributes: { d: "M10 4V24", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } }
+	],
+	"canvas": [
+		{ tagName: "rect", attributes: { x: "4", y: "3", width: "16", height: "20", rx: "2", stroke: "currentColor", "stroke-width": "2", fill: "none" } },
+		// Three bold nodes, spread out inside the rect
+		{ tagName: "circle", attributes: { cx: "8", cy: "9", r: "2", fill: "currentColor" } },
+		{ tagName: "circle", attributes: { cx: "16", cy: "9", r: "2", fill: "currentColor" } },
+		{ tagName: "circle", attributes: { cx: "12", cy: "17", r: "2", fill: "currentColor" } },
+		// Connecting lines
+		{ tagName: "path", attributes: { d: "M10 9L14 9", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } },
+		{ tagName: "path", attributes: { d: "M9.4 10.6L12 15", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } },
+		{ tagName: "path", attributes: { d: "M14.6 10.6L12 15", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } }
+	],
+}
+
 declare module "obsidian" {
 	interface App {
 		setting: {
@@ -269,10 +293,8 @@ export default class StartPageCreator {
 		}
 
 		const noteIcon = this.createElement("div", "note-icon");
-		const iconSvg = this.createSVG([
-			{ tagName: "path", attributes: { d: "M14 2H6A2 2 0 0 0 4 4V20A2 2 0 0 0 6 22H18A2 2 0 0 0 20 20V8L14 2Z" } },
-			{ tagName: "path", attributes: { d: "M14 2V8H20" } },
-		]);
+		const fileType = note.extension;
+		const iconSvg = this.createSVG(iconSVGs[fileType] || iconSVGs["md"]);
 		noteIcon.appendChild(iconSvg);
 
 		const noteContent = this.createElement("div", "note-content");
