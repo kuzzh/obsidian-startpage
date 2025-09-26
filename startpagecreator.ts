@@ -1,5 +1,5 @@
 import type { SVGTag } from "./types";
-import { App, TFolder, TFile, Menu, Platform } from "obsidian";
+import { App, TFolder, TFile, Menu, Notice, Platform } from "obsidian";
 import StartPagePlugin from "./main";
 import { t } from "./i18n";
 import { VIEW_TYPE_START_PAGE, StartPageView } from "./startpageview";
@@ -116,11 +116,13 @@ export default class StartPageCreator {
 		this.container.empty();
 		this.container.addClass("start-page-container");
 
-		const header = this.createHeader();
 		const mainContent = this.createMainContent();
 		const footer = this.createFooter();
 
-		this.container.appendChild(header);
+		if (Platform.isDesktop) {
+			const header = this.createHeader();
+			this.container.appendChild(header);
+		}
 		this.container.appendChild(mainContent);
 		this.container.appendChild(footer);
 	}
@@ -268,44 +270,118 @@ export default class StartPageCreator {
 			});
 		}
 
-		const noteIcon = this.createElement("div", "note-icon");
-		const iconSvg = this.createSVG([
-			{ tagName: "path", attributes: { d: "M14 2H6A2 2 0 0 0 4 4V20A2 2 0 0 0 6 22H18A2 2 0 0 0 20 20V8L14 2Z" } },
-			{ tagName: "path", attributes: { d: "M14 2V8H20" } },
-		]);
-		noteIcon.appendChild(iconSvg);
+		// 为最近笔记添加右键菜单
+		if (!isPinned) {
+			noteItem.addEventListener("contextmenu", (event) => {
+				event.preventDefault();
+				event.stopPropagation();
+
+				const menu = new Menu();
+				menu.addItem((item) => {
+					item.setTitle(t("add_to_pinned_notes"))
+						.setIcon("pin")
+						.onClick(async () => {
+							// 若笔记已置顶，则不重复添加
+							if (this.plugin.settings.pinnedNotes.includes(note.path)) {
+								new Notice(t("note_already_pinned"));
+								return;
+							}
+							// 将笔记添加到置顶笔记
+							this.plugin.settings.pinnedNotes.push(note.path);
+							await this.plugin.saveSettings();
+
+							// 刷新启动页面
+							this.refreshStartPage();
+						});
+				});
+
+				menu.showAtMouseEvent(event);
+			});
+		}
 
 		const noteContent = this.createElement("div", "note-content");
 		const noteTitle = this.createElement("div", "note-title", note.basename);
 
-		// 在PC端显示路径信息
 		let metaText = this.formatDate(note.stat.mtime);
-		if (Platform.isDesktop) {
-			const folderPath = note.parent ? note.parent.path : "";
-			if (folderPath) {
-				metaText += ` • ${folderPath}`;
-			}
-		}
 		const noteMeta = this.createElement("div", "note-meta", metaText);
+
+		let folderPath = note.parent ? note.parent.name : "";
+		folderPath = folderPath || "/";
+		// 创建文件夹图标SVG元素
+		const folderIcon = this.createSVG(
+			[{ tagName: "path", attributes: { d: "M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" } }],
+			"folder-icon"
+		);
+		folderIcon.setAttribute("width", "16");
+		folderIcon.setAttribute("height", "16");
+
+		// 创建路径文本
+		const pathText = document.createTextNode(` ${folderPath}`);
+
+		// 添加空格、图标和路径到meta元素
+		const folderPathElem = this.createElement("div", "note-path");
+		folderPathElem.appendChild(folderIcon);
+		folderPathElem.appendChild(pathText);
+		noteMeta.appendChild(folderPathElem);
 
 		noteTitle.setAttribute("title", note.basename);
 		noteContent.appendChild(noteTitle);
+
+		// 添加内容预览
+		this.addContentPreview(noteContent, note, isPinned);
+
 		noteContent.appendChild(noteMeta);
-
-		const noteActions = this.createElement("div", "note-actions");
-		const editBtn = this.createElement("button", "btn-icon");
-		const editIcon = this.createSVG([
-			{ tagName: "path", attributes: { d: "M11 4H4A2 2 0 0 0 2 6V20A2 2 0 0 0 4 22H18A2 2 0 0 0 20 20V13" } },
-			{ tagName: "path", attributes: { d: "M18.5 2.5L22 6L12 16H6V10L18.5 2.5Z" } },
-		]);
-		editBtn.appendChild(editIcon);
-		noteActions.appendChild(editBtn);
-
-		noteItem.appendChild(noteIcon);
 		noteItem.appendChild(noteContent);
-		noteItem.appendChild(noteActions);
 
 		return noteItem;
+	}
+
+	// 添加内容预览
+	private async addContentPreview(noteContent: HTMLElement, note: TFile, isPinned: boolean): Promise<void> {
+		try {
+			const content = await this.app.vault.cachedRead(note);
+			const previewText = this.extractPreviewText(content, isPinned);
+
+			if (previewText.trim()) {
+				const previewElement = this.createElement("div", "note-preview", previewText);
+				// 在noteMeta之前插入预览内容
+				const noteMeta = noteContent.querySelector(".note-meta");
+				if (noteMeta) {
+					noteContent.insertBefore(previewElement, noteMeta);
+				} else {
+					noteContent.appendChild(previewElement);
+				}
+			}
+		} catch (error) {
+			// 如果读取文件失败，不显示预览
+			console.warn(`Failed to read content for ${note.path}:`, error);
+		}
+	}
+
+	// 提取预览文本
+	private extractPreviewText(content: string, isPinned: boolean): string {
+		// 移除 markdown 语法和空行
+		const cleanContent = content
+			.replace(/^#+\s+/gm, "") // 移除标题标记
+			.replace(/\*\*(.*?)\*\*/g, "$1") // 移除粗体标记
+			.replace(/\*(.*?)\*/g, "$1") // 移除斜体标记
+			.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // 移除链接，保留文本
+			.replace(/!\[([^\]]*)\]\([^)]+\)/g, "") // 移除图片
+			.replace(/```[\s\S]*?```/g, "") // 移除代码块
+			.replace(/`([^`]+)`/g, "$1") // 移除行内代码标记
+			.replace(/^\s*[-*+]\s+/gm, "") // 移除列表标记
+			.replace(/^\s*\d+\.\s+/gm, "") // 移除有序列表标记
+			.replace(/^\s*>\s+/gm, "") // 移除引用标记
+			.replace(/\n\s*\n/g, "\n") // 合并多个空行为单个换行
+			.trim();
+
+		if (!cleanContent) {
+			return "";
+		}
+
+		const lines = cleanContent.split("\n").filter((line) => line.trim());
+
+		return lines.join("\n");
 	}
 
 	// 创建笔记区块
@@ -314,23 +390,14 @@ export default class StartPageCreator {
 		const sectionHeader = this.createElement("div", "section-header");
 
 		const sectionTitle = this.createElement("h2", "section-title");
-		const titleIcon = this.createSVG(icon, "section-icon");
-		sectionTitle.appendChild(titleIcon);
+		if (icon.length) {
+			const titleIcon = this.createSVG(icon, "section-icon");
+			sectionTitle.appendChild(titleIcon);
+		}
 		sectionTitle.appendChild(document.createTextNode(title));
 
 		if (isPinned) {
-			const actionBtn = this.createElement("button", "btn btn-text", t("manage"));
-			actionBtn.addEventListener("click", () => {
-				console.log("app", this.app);
-				const setting = this.app.setting;
-				setting.open();
-
-				setTimeout(() => {
-					setting.openTabById(this.plugin.manifest.id);
-				}, 100);
-			});
 			sectionHeader.appendChild(sectionTitle);
-			sectionHeader.appendChild(actionBtn);
 		} else {
 			const dropdownDiv = this.createRecentNotesLimitDropdown();
 			sectionHeader.appendChild(sectionTitle);
@@ -343,6 +410,12 @@ export default class StartPageCreator {
 				const noteItem = this.createNoteItem(note, isPinned);
 				if (noteItem) {
 					notesList.appendChild(noteItem);
+
+					// 若不是最后一个笔记，添加分隔线
+					if (note !== notes[notes.length - 1]) {
+						const sectionDivider = this.createElement("div", "section-divider");
+						notesList.appendChild(sectionDivider);
+					}
 				}
 			});
 		}
@@ -358,36 +431,11 @@ export default class StartPageCreator {
 		const contentGrid = this.createElement("div", "content-grid");
 
 		// 置顶笔记
-		const pinnedSection = this.createNotesSection(t("pinned_notes"), this.pinnedNotes, true, [
-			{
-				tagName: "path",
-				attributes: {
-					d: "M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z",
-					fill: "currentColor",
-				},
-			},
-		]);
+		const pinnedSection = this.createNotesSection(t("pinned_notes"), this.pinnedNotes, true, []);
 		pinnedSection.classList.add("pinned-notes");
 
 		// 最近编辑
-		const recentSection = this.createNotesSection(t("recent_notes"), this.recentNotes, false, [
-			{
-				tagName: "path",
-				attributes: {
-					d: "M12 8V12L15 15",
-				},
-			},
-			{
-				tagName: "circle",
-				attributes: {
-					cx: 12,
-					cy: 12,
-					r: 10,
-					stroke: "currentColor",
-					"stroke-width": 2,
-				},
-			},
-		]);
+		const recentSection = this.createNotesSection(t("recent_notes"), this.recentNotes, false, []);
 		recentSection.classList.add("recent-notes");
 
 		contentGrid.appendChild(pinnedSection);
@@ -400,10 +448,11 @@ export default class StartPageCreator {
 	private createMainContent(): HTMLElement {
 		const mainContent = this.createElement("main", "main-content");
 
-		const statsSection = this.createStatsSection();
+		if (Platform.isDesktop) {
+			const statsSection = this.createStatsSection();
+			mainContent.appendChild(statsSection);
+		}
 		const contentGrid = this.createContentGrid();
-
-		mainContent.appendChild(statsSection);
 		mainContent.appendChild(contentGrid);
 
 		return mainContent;
@@ -412,11 +461,7 @@ export default class StartPageCreator {
 	// 创建页脚版权信息
 	private createFooter(): HTMLElement {
 		const footer = this.createElement("footer", "footer");
-
-		// const copyright = this.createElement("p", "", `Copyright © 2025 ${this.plugin.manifest.author}`);
 		const love = this.createElement("p", "", `❤️ Love what you love, and love what you do. ❤️`);
-
-		// footer.appendChild(copyright);
 		footer.appendChild(love);
 
 		return footer;
@@ -535,18 +580,22 @@ export default class StartPageCreator {
 
 		// Less than 24 hours
 		if (diff < 24 * 60 * 60 * 1000) {
-			const hours = Math.floor(diff / (60 * 60 * 1000));
-			if (hours === 0) {
-				const minutes = Math.floor(diff / (60 * 1000));
-				return t("minutes_ago").replace("{minutes}", minutes.toString());
-			}
-			return t("hours_ago").replace("{hours}", hours.toString());
+			return date.toLocaleTimeString("zh-CN", {
+				hour: "2-digit",
+				minute: "2-digit",
+				second: "2-digit",
+			});
 		}
 
 		// Less than 7 days
 		if (diff < 7 * 24 * 60 * 60 * 1000) {
 			const days = Math.floor(diff / (24 * 60 * 60 * 1000));
 			return t("days_ago").replace("{days}", days.toString());
+		}
+
+		// Same year
+		if (date.getFullYear() === now.getFullYear()) {
+			return `${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getDate().toString().padStart(2, "0")}`;
 		}
 
 		// Otherwise show full date

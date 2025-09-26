@@ -2,6 +2,9 @@
 
 [English](README.md) | 中文
 
+> ⚠️ 重要提示
+> 我发现了一个用途跟 `StartPage` 一样，但功能更强大的插件：[Notebook Navigator](https://github.com/johansan/notebook-navigator)，鉴于它已经做的如此优秀了，因此我决定停止 `StartPage` 的开发，后续将不再更新，特此说明。
+
 一个为 Obsidian 设计的现代化启动首页插件，提供美观的仪表板界面，展示笔记库统计信息、置顶笔记和最近修改的笔记。当启动 Obsidian 或打开新标签页时，自动显示个性化的首页，让您快速访问重要内容。
 
 ## ✨ 功能特性

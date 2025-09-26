@@ -9,7 +9,7 @@ export default class StartPagePlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
-		
+
 		// Use Obsidian's built-in language setting
 		const obsidianLang = getLanguage() || "en";
 		setLocale(obsidianLang);
@@ -30,7 +30,7 @@ export default class StartPagePlugin extends Plugin {
 			name: t("open_start_page"),
 			callback: () => {
 				this.activateStartPage();
-			}
+			},
 		});
 
 		this.addCommand({
@@ -38,7 +38,7 @@ export default class StartPagePlugin extends Plugin {
 			name: t("open_start_page_new_tab"),
 			callback: () => {
 				this.activateStartPageNewTab();
-			}
+			},
 		});
 
 		this.registerEvent(
@@ -47,7 +47,7 @@ export default class StartPagePlugin extends Plugin {
 					if (leaf && !leaf.view.getViewType().startsWith(VIEW_TYPE_START_PAGE)) {
 						const state = leaf.getViewState();
 						// If new empty tab, replace it with StartPage
-						if (state.type === 'empty' &&  !state.state?.file) {
+						if (state.type === "empty" && !state.state?.file) {
 							this.replaceWithStartPage(leaf);
 						}
 					}
@@ -63,6 +63,12 @@ export default class StartPagePlugin extends Plugin {
 				}
 			})
 		);
+
+		this.app.workspace.onLayoutReady(() => {
+			if (this.settings.closeOtherTabsWhenAppStart) {
+				this.closeOtherTabs();
+			}
+		});
 	}
 
 	async loadSettings() {
@@ -71,6 +77,17 @@ export default class StartPagePlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+	}
+
+	closeOtherTabs(): void {
+		// 获取所有叶子节点，然后过滤出非StartPage的
+		const allWorkspaceLeaves = this.app.workspace.getLeavesOfType("markdown");
+		const nonStartPageLeaves = allWorkspaceLeaves.filter((leaf) => leaf.view.getViewType() !== VIEW_TYPE_START_PAGE);
+
+		// 关闭所有非StartPage的标签页
+		nonStartPageLeaves.forEach((leaf) => {
+			leaf.detach();
+		});
 	}
 
 	findStartPageLeaf(): WorkspaceLeaf | null {
@@ -122,21 +139,20 @@ export default class StartPagePlugin extends Plugin {
 
 	addPinnedNoteMenuItem(menu: Menu, file: TFile) {
 		const isPinned = this.settings.pinnedNotes.includes(file.path);
-		
+
 		menu.addItem((item) => {
-			item
-				.setTitle(isPinned ? t("remove_from_pinned_notes") : t("add_to_pinned_notes"))
+			item.setTitle(isPinned ? t("remove_from_pinned_notes") : t("add_to_pinned_notes"))
 				.setIcon(isPinned ? "pin-off" : "pin")
 				.onClick(async () => {
 					if (isPinned) {
 						// Remove from pinned notes
-						this.settings.pinnedNotes = this.settings.pinnedNotes.filter(path => path !== file.path);
+						this.settings.pinnedNotes = this.settings.pinnedNotes.filter((path) => path !== file.path);
 					} else {
 						// Add to pinned notes
 						this.settings.pinnedNotes.push(file.path);
 					}
 					await this.saveSettings();
-					
+
 					// Refresh start page if it's open
 					const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_START_PAGE);
 					leaves.forEach((leaf) => {

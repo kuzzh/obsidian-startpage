@@ -8,12 +8,14 @@ export interface StartPageSettings {
 	recentNotesLimit: number;
 	pinnedNotes: string[];
 	replaceNewTab: boolean;
+	closeOtherTabsWhenAppStart: boolean;
 }
 
 export const DEFAULT_SETTINGS: StartPageSettings = {
-	recentNotesLimit: 10,
+	recentNotesLimit: 20,
 	pinnedNotes: [],
 	replaceNewTab: true,
+	closeOtherTabsWhenAppStart: true,
 };
 
 export class StartPageSettingTab extends PluginSettingTab {
@@ -88,6 +90,18 @@ export class StartPageSettingTab extends PluginSettingTab {
 				toggle.setValue(this.plugin.settings.replaceNewTab);
 				toggle.onChange(async (value) => {
 					this.plugin.settings.replaceNewTab = value;
+					await this.plugin.saveSettings();
+				});
+			});
+
+		// Add settings option to close other tabs when start page is opened
+		new Setting(containerEl)
+			.setName(t("close_other_tabs_when_app_start"))
+			.setDesc(t("close_other_tabs_when_app_start_desc"))
+			.addToggle((toggle) => {
+				toggle.setValue(this.plugin.settings.closeOtherTabsWhenAppStart);
+				toggle.onChange(async (value) => {
+					this.plugin.settings.closeOtherTabsWhenAppStart = value;
 					await this.plugin.saveSettings();
 				});
 			});

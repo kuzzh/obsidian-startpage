@@ -2,6 +2,9 @@
 
 English | [中文](README.CN.md)
 
+> ⚠️ Important Notice
+> I have discovered a plugin called [Notebook Navigator](https://github.com/johansan/notebook-navigator) that serves the same purpose as `StartPage` but with more powerful features. Given how excellent it is, I have decided to discontinue the development of `StartPage`. There will be no further updates. This notice serves to inform all users.
+
 A modern startup homepage plugin for Obsidian that provides a beautiful dashboard interface, displaying vault statistics, pinned notes, and recently modified notes. Automatically displays a personalized homepage when starting Obsidian or opening new tabs, giving you quick access to important content.
 
 ## ✨ Features
