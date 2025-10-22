@@ -64,11 +64,11 @@ export default class StartPagePlugin extends Plugin {
 			})
 		);
 
-		this.app.workspace.onLayoutReady(() => {
-			if (this.settings.closeOtherTabsWhenAppStart) {
-				this.closeOtherTabs();
-			}
-		});
+		// this.app.workspace.onLayoutReady(() => {
+		// 	if (this.settings.closeOtherTabsWhenAppStart) {
+		// 		this.closeOtherTabs();
+		// 	}
+		// });
 	}
 
 	async loadSettings() {
