@@ -19,7 +19,7 @@ export class StartPageView extends ItemView {
 		super(leaf);
 		this.app = app;
 		this.plugin = plugin;
-		
+
 		this.navigation = true;
 		this.icon = "home";
 		this.contentEl.addClass("start-page-view");
@@ -147,30 +147,38 @@ export class StartPageView extends ItemView {
 
 	getRecentNotes(limit: number): TFile[] {
 		// 获取最近打开的文件路径
+		// Get the path of the most recently opened file
 		const recentlyOpenedPaths = this.app.workspace.getLastOpenFiles();
-		
+
 		// 获取所有markdown文件
-		const allFiles = this.app.vault.getMarkdownFiles();
-		
+		// Get all files
+		const allFiles = this.plugin.settings.includeAllFilesInRecent ? this.app.vault.getFiles() : this.app.vault.getMarkdownFiles();
+
 		// 为每个文件计算最近时间（修改时间或访问时间的最大值）
+		// Calculate the most recent time for each file (the maximum of modification time or access time)
 		const filesWithTime = allFiles.map(file => {
 			let lastAccessTime = 0;
-			
+
 			// 根据最近打开文件列表中的位置计算访问时间
+			// Calculate access time based on position in the list of recently opened files
 			const openIndex = recentlyOpenedPaths.indexOf(file.path);
 			if (openIndex !== -1) {
 				// 将索引转换为时间戳，越靠前的文件时间越新
 				// 使用当前时间减去索引分钟数来模拟访问时间
+				// Convert the index to a timestamp, the earlier the file, the newer the time
+				// Use the current time minus the index minutes to simulate the access time
 				lastAccessTime = Date.now() - (openIndex * 60 * 1000);
 			}
-			
+
 			// 取修改时间和访问时间的最大值
+			// Take the maximum value of modification time and access time
 			const lastTime = Math.max(file.stat.mtime, lastAccessTime);
-			
+
 			return { file, lastTime };
 		});
-		
+
 		// 按最近时间排序并返回指定数量的文件
+		// Sort by most recent time and return a specified number of files
 		return filesWithTime
 			.sort((a, b) => b.lastTime - a.lastTime)
 			.slice(0, limit)

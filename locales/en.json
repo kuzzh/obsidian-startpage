@@ -37,6 +37,6 @@
     "open_start_page_desc": "Open the start page in current tab",
     "open_start_page_new_tab": "Open start page in new tab",
     "open_start_page_new_tab_desc": "Open the start page in a new tab",
-    "total_size_all_files": "Calculate size from all files",
-    "total_size_all_files_desc": "Calculate the total size from all files in the vault rather than just the markdown files."
+    "include_all_files_in_recent": "Include all files in recent notes",
+    "include_all_files_in_recent_desc": "Include all types of files in the recent notes section, rather than only markdown files"
 }
