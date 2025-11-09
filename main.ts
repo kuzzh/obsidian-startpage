@@ -66,7 +66,47 @@ export default class StartPagePlugin extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		// Backup current settings
+		await this.backupSettings();
+
+		const savedData = await this.loadData();
+
+		// Check if saved configuration exists
+		if (savedData && typeof savedData === "object") {
+			// Preserve user settings, merge possible missing fields
+			this.settings = {
+				...DEFAULT_SETTINGS,
+				...savedData,
+				// Ensure required fields exist and have correct types
+				pinnedNotes: Array.isArray(savedData.pinnedNotes) ? savedData.pinnedNotes : [],
+				recentNotesLimit: typeof savedData.recentNotesLimit === "number" ? savedData.recentNotesLimit : 10,
+				includeAllFilesInRecent: typeof savedData.includeAllFilesInRecent === "boolean" ? savedData.includeAllFilesInRecent : true,
+				replaceNewTab: typeof savedData.replaceNewTab === "boolean" ? savedData.replaceNewTab : true,
+			};
+		} else {
+			// First installation or data corruption, use default settings
+			this.settings = { ...DEFAULT_SETTINGS };
+		}
+	}
+
+	/**
+	 * Create backup file for current configuration
+	 */
+	async backupSettings() {
+		const backupDir = this.manifest.dir + "/backup";
+		const backupFile = `${backupDir}/data-${new Date().toISOString().slice(0, 10)}.json`;
+		
+		const fileExists = await this.app.vault.adapter.exists(backupFile);
+		if (!fileExists) {
+			await this.app.vault.adapter.mkdir(backupDir);
+			
+			const dataFile = this.manifest.dir + "/data.json";
+			const dataContent = await this.app.vault.adapter.read(dataFile);
+
+			await this.app.vault.adapter.write(backupFile, dataContent);
+		} else {
+			console.log("Backup already exists, skipping");
+		}
 	}
 
 	async saveSettings() {
