@@ -96,14 +96,18 @@ export default class StartPagePlugin extends Plugin {
 		const backupDir = this.manifest.dir + "/backup";
 		const backupFile = `${backupDir}/data-${new Date().toISOString().slice(0, 10)}.json`;
 		
-		const fileExists = await this.app.vault.adapter.exists(backupFile);
-		if (!fileExists) {
+		const backupFileExists = await this.app.vault.adapter.exists(backupFile);
+		if (!backupFileExists) {
 			await this.app.vault.adapter.mkdir(backupDir);
 			
 			const dataFile = this.manifest.dir + "/data.json";
-			const dataContent = await this.app.vault.adapter.read(dataFile);
+			if (await this.app.vault.adapter.exists(dataFile)) {
+				const dataContent = await this.app.vault.adapter.read(dataFile);
 
-			await this.app.vault.adapter.write(backupFile, dataContent);
+				await this.app.vault.adapter.write(backupFile, dataContent);
+			} else {
+				console.log("data.json file does not exist, skipping backup");
+			}
 		} else {
 			console.log("Backup already exists, skipping");
 		}
