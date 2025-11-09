@@ -294,7 +294,7 @@ export default class StartPageCreator {
 
 		const noteIcon = this.createElement("div", "note-icon");
 		const fileType = note.extension;
-		const iconSvg = this.createSVG(iconSVGs[fileType] || iconSVGs["md"]);
+		const iconSvg = this.createSVG((iconSVGs as Record<string, SVGTag[]>)[fileType] || iconSVGs["md"]);
 		noteIcon.appendChild(iconSvg);
 
 		const noteContent = this.createElement("div", "note-content");
@@ -540,7 +540,7 @@ export default class StartPageCreator {
 	}
 
 	getTotalSize(): number {
-		const allFiles: TFile[] = this.plugin.settings.totalSizeAllFiles
+		const allFiles: TFile[] = this.plugin.settings.includeAllFilesInRecent
 			? this.app.vault.getFiles()
 			: this.app.vault.getMarkdownFiles();
 

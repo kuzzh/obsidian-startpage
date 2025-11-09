@@ -12,7 +12,7 @@ export interface StartPageSettings {
 }
 
 export const DEFAULT_SETTINGS: StartPageSettings = {
-	includeAllFilesInRecent: false,
+	includeAllFilesInRecent: true,
 	recentNotesLimit: 10,
 	pinnedNotes: [],
 	replaceNewTab: true,
@@ -58,6 +58,7 @@ export class StartPageSettingTab extends PluginSettingTab {
 				toggle.onChange(async (value) => {
 					this.plugin.settings.includeAllFilesInRecent = value;
 					await this.plugin.saveSettings();
+					this.refreshStartPage();
 				});
 			});
 
