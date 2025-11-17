@@ -1,5 +1,5 @@
-import en from "./locales/en.json";
-import zh from "./locales/zh.json";
+import en from "../locales/en.json";
+import zh from "../locales/zh.json";
 
 type LocaleStrings = typeof en;
 

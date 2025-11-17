@@ -1,8 +1,8 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
-import StartPagePlugin from "./main";
-import { VIEW_TYPE_START_PAGE, StartPageView } from "./startpageview";
-import { t } from "./i18n";
-import NoteSuggestModal from "./notesuggestmodal";
+import StartPagePlugin from "@/main";
+import { VIEW_TYPE_START_PAGE, StartPageView } from "@/views/startpageview";
+import { t } from "@/i18n";
+import NoteSuggestModal from "@/views/notesuggestmodal";
 
 export interface StartPageSettings {
 	includeAllFilesInRecent: boolean;

@@ -1,8 +1,8 @@
-import type { SVGTag } from "./types";
+import type { SVGTag } from "@/types";
 import { App, TFolder, TFile, Menu, Platform } from "obsidian";
-import StartPagePlugin from "./main";
-import { t } from "./i18n";
-import { VIEW_TYPE_START_PAGE, StartPageView } from "./startpageview";
+import StartPagePlugin from "@/main";
+import { t } from "@/i18n";
+import { VIEW_TYPE_START_PAGE, StartPageView } from "@/views/startpageview";
 
 const STAT_TOTAL_NOTES = "totalNotes";
 const STAT_TODAY_EDITED = "todayEdited";

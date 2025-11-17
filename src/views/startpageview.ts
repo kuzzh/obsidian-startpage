@@ -1,7 +1,7 @@
 import { App, ItemView, TFile, Menu, EventRef } from "obsidian";
-import StartPagePlugin from "./main";
-import { t } from "./i18n";
-import StartPageCreator from "./startpagecreator";
+import StartPagePlugin from "@/main";
+import { t } from "@/i18n";
+import StartPageCreator from "@/core/startpagecreator";
 
 export const VIEW_TYPE_START_PAGE = "start-page-view";
 

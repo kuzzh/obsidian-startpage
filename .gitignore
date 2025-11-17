@@ -23,3 +23,6 @@ data.json
 
 dist/
 backup/
+memo.txt
+env.json
+styles.css

@@ -2,7 +2,7 @@
 	"name": "obsidian-startpage",
 	"version": "0.2.1",
 	"description": "Automatically opens a customized homepage upon startup, displaying pinned and recent notes.",
-	"main": "main.js",
+	"main": "dist/main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",

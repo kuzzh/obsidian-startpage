@@ -1,8 +1,8 @@
 import { Plugin, WorkspaceLeaf, TFile, Menu, getLanguage } from "obsidian";
-import { StartPageView, VIEW_TYPE_START_PAGE } from "./startpageview";
-import { StartPageSettingTab, StartPageSettings, DEFAULT_SETTINGS } from "./settings";
-import { setLocale, t } from "./i18n";
-import "./types";
+import { StartPageView, VIEW_TYPE_START_PAGE } from "@/views/startpageview";
+import { StartPageSettingTab, StartPageSettings, DEFAULT_SETTINGS } from "@/views/settings";
+import { setLocale, t } from "@/i18n";
+import "@/types";
 
 export default class StartPagePlugin extends Plugin {
 	settings: StartPageSettings;
