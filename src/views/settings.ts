@@ -77,6 +77,18 @@ export class StartPageSettingTab extends PluginSettingTab {
 				});
 			});
 
+		// Add settings option to replace new tab
+		new Setting(containerEl)
+			.setName(t("replace_new_tab"))
+			.setDesc(t("replace_new_tab_desc"))
+			.addToggle((toggle) => {
+				toggle.setValue(this.plugin.settings.replaceNewTab);
+				toggle.onChange(async (value) => {
+					this.plugin.settings.replaceNewTab = value;
+					await this.plugin.saveSettings();
+				});
+			});
+
 		new Setting(containerEl)
 			.setName(t("pinned_notes_setting"))
 			.setDesc(t("pinned_notes_select_desc"))
@@ -91,18 +103,6 @@ export class StartPageSettingTab extends PluginSettingTab {
 							this.display();
 						}
 					}).open();
-				});
-			});
-
-		// Add settings option to replace new tab
-		new Setting(containerEl)
-			.setName(t("replace_new_tab"))
-			.setDesc(t("replace_new_tab_desc"))
-			.addToggle((toggle) => {
-				toggle.setValue(this.plugin.settings.replaceNewTab);
-				toggle.onChange(async (value) => {
-					this.plugin.settings.replaceNewTab = value;
-					await this.plugin.saveSettings();
 				});
 			});
 
