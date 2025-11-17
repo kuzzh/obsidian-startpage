@@ -82,6 +82,7 @@ export default class StartPagePlugin extends Plugin {
 				recentNotesLimit: typeof savedData.recentNotesLimit === "number" ? savedData.recentNotesLimit : 10,
 				includeAllFilesInRecent: typeof savedData.includeAllFilesInRecent === "boolean" ? savedData.includeAllFilesInRecent : true,
 				replaceNewTab: typeof savedData.replaceNewTab === "boolean" ? savedData.replaceNewTab : true,
+				showTitleNavigationBar: ["default", "show", "hide"].includes(savedData.showTitleNavigationBar) ? savedData.showTitleNavigationBar : "default",
 			};
 		} else {
 			// First installation or data corruption, use default settings

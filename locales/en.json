@@ -38,5 +38,10 @@
     "open_start_page_new_tab": "Open start page in new tab",
     "open_start_page_new_tab_desc": "Open the start page in a new tab",
     "include_all_files_in_recent": "Include all files in recent notes",
-    "include_all_files_in_recent_desc": "Include all types of files in the recent notes section, rather than only markdown files"
+    "include_all_files_in_recent_desc": "Include all types of files in the recent notes section, rather than only markdown files",
+    "show_title_navigation_bar": "Show title navigation bar",
+    "show_title_navigation_bar_desc": "Show the title navigation bar on the start page",
+    "show_title_navigation_bar_default": "Default",
+    "show_title_navigation_bar_show": "Show",
+    "show_title_navigation_bar_hide": "Hide"
 }

@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
+import { App, PluginSettingTab, Setting, Platform } from "obsidian";
 import StartPagePlugin from "@/main";
 import { VIEW_TYPE_START_PAGE, StartPageView } from "@/views/startpageview";
 import { t } from "@/i18n";
@@ -9,6 +9,7 @@ export interface StartPageSettings {
 	recentNotesLimit: number;
 	pinnedNotes: string[];
 	replaceNewTab: boolean;
+	showTitleNavigationBar: "default" | "show" | "hide";
 }
 
 export const DEFAULT_SETTINGS: StartPageSettings = {
@@ -16,6 +17,7 @@ export const DEFAULT_SETTINGS: StartPageSettings = {
 	recentNotesLimit: 10,
 	pinnedNotes: [],
 	replaceNewTab: true,
+	showTitleNavigationBar: "default",
 };
 
 export class StartPageSettingTab extends PluginSettingTab {
@@ -46,6 +48,22 @@ export class StartPageSettingTab extends PluginSettingTab {
 		this.display();
 	}
 
+	private updateTitleNavigationBar() {
+		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_START_PAGE);
+		leaves.forEach((leaf) => {
+			if (leaf.view instanceof StartPageView) {
+				const view = leaf.view as StartPageView;
+				if (this.plugin.settings.showTitleNavigationBar === "show") {
+					view.showTitleNavigationBar(true);
+				} else if (this.plugin.settings.showTitleNavigationBar === "hide") {
+					view.showTitleNavigationBar(false);
+				} else { // default
+					view.showTitleNavigationBar(!Platform.isDesktop);
+				}
+			}
+		});
+	}
+
 	display(): void {
 		const { containerEl } = this;
 		containerEl.empty();
@@ -74,6 +92,21 @@ export class StartPageSettingTab extends PluginSettingTab {
 					this.plugin.settings.recentNotesLimit = parseInt(value);
 					await this.plugin.saveSettings();
 					this.refreshStartPage();
+				});
+			});
+
+		new Setting(containerEl)
+			.setName(t("show_title_navigation_bar"))
+			.setDesc(t("show_title_navigation_bar_desc"))
+			.addDropdown((dropdown) => {
+				dropdown.addOption("default", t("show_title_navigation_bar_default"));
+				dropdown.addOption("show", t("show_title_navigation_bar_show"));
+				dropdown.addOption("hide", t("show_title_navigation_bar_hide"));
+				dropdown.setValue(this.plugin.settings.showTitleNavigationBar);
+				dropdown.onChange(async (value: "default" | "show" | "hide") => {
+					this.plugin.settings.showTitleNavigationBar = value;
+					await this.plugin.saveSettings();
+					this.updateTitleNavigationBar();
 				});
 			});
 

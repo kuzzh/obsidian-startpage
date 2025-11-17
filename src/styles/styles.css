@@ -428,7 +428,7 @@
 
 /* Hide title navigation bar for start page */
 .workspace-leaf-content[data-type="start-page-view"] .view-header {
-	display: none;
+	/* display: none; */
 }
 
 @media (max-width: 768px) {
