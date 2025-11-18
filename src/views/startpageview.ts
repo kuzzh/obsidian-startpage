@@ -121,8 +121,30 @@ export class StartPageView extends ItemView {
 
 		if (needsRefresh) {
 			this.refreshTimer = window.setInterval(() => {
-				this.renderContent();
+				this.updateModifiedTimes();
 			}, this.REFRESH_INTERVAL);
+		}
+	}
+
+	/**
+	 * 只更新需要修改时间的笔记，避免全部重新渲染
+	 */
+	private async updateModifiedTimes() {
+		if (!this.startPageCreator) {
+			return;
+		}
+
+		const pinnedNotes = this.getTFiles(this.plugin.settings.pinnedNotes);
+		const recentNotes = this.getRecentNotes(this.plugin.settings.recentNotesLimit);
+		
+		// 只更新24小时内修改过的笔记
+		const notesToUpdate = pinnedNotes.concat(recentNotes).filter((file) => {
+			const diff = Date.now() - file.stat.mtime;
+			return diff < 24 * 60 * 60 * 1000;
+		});
+
+		if (notesToUpdate.length > 0) {
+			await this.startPageCreator.updateNoteModifiedTimes(notesToUpdate);
 		}
 	}
 

@@ -167,6 +167,20 @@ export default class StartPageCreator {
 		});
 	}
 
+	/**
+	 * 更新指定笔记的修改时间显示
+	 * @param notes 需要更新的笔记列表
+	 */
+	public async updateNoteModifiedTimes(notes: TFile[]) {
+		for (const note of notes) {
+			const noteElement = this.container.querySelector(`[data-note-path="${note.path}"] .note-date`);
+			if (noteElement) {
+				const formattedDate = this.formatDate(note.stat.mtime);
+				noteElement.textContent = formattedDate;
+			}
+		}
+	}
+
 	// 创建头部
 	private createHeader(): HTMLElement {
 		const header = this.createElement("header", "header");
@@ -257,6 +271,7 @@ export default class StartPageCreator {
 		}
 
 		const noteItem = this.createElement("div", `note-item${isPinned ? " pinned" : ""}`);
+		noteItem.setAttribute("data-note-path", note.path);
 
 		noteItem.addEventListener("click", async () => {
 			const existingLeaf = this.app.workspace.getLeavesOfType("markdown").find((leaf) => {
@@ -348,7 +363,6 @@ export default class StartPageCreator {
 		if (isPinned) {
 			const actionBtn = this.createElement("button", "btn btn-text", t("manage"));
 			actionBtn.addEventListener("click", () => {
-				console.log("app", this.app);
 				const setting = this.app.setting;
 				setting.open();
 
