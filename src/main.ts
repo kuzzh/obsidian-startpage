@@ -10,6 +10,9 @@ export default class StartPagePlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
+
+		this.settings.scrollPosition = 0;
+		this.saveSettings();
 		
 		// Use Obsidian's built-in language setting
 		const obsidianLang = getLanguage() || "en";
@@ -89,6 +92,7 @@ export default class StartPagePlugin extends Plugin {
 				todayRandomEnFooterText: typeof savedData.todayRandomEnFooterText === "string" ? savedData.todayRandomEnFooterText : "",
 				todayRandomZhFooterText: typeof savedData.todayRandomZhFooterText === "string" ? savedData.todayRandomZhFooterText : "",
 				customFooterText: typeof savedData.customFooterText === "string" ? savedData.customFooterText : "",
+				scrollPosition: typeof savedData.scrollPosition === "number" ? savedData.scrollPosition : 0,
 			};
 		} else {
 			// First installation or data corruption, use default settings

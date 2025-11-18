@@ -2,6 +2,7 @@ import { App, ItemView, TFile, Menu, EventRef, Platform } from "obsidian";
 import StartPagePlugin from "@/main";
 import { t } from "@/i18n";
 import StartPageCreator from "@/core/startpagecreator";
+import Debounce from "@/utils/debounce";
 
 export const VIEW_TYPE_START_PAGE = "start-page-view";
 
@@ -14,6 +15,7 @@ export class StartPageView extends ItemView {
 	private refreshTimer: number | null = null;
 	private readonly REFRESH_INTERVAL = 60000; // Refresh every 1 minute
 	private startPageCreator: StartPageCreator;
+	private debounce: Debounce = new Debounce();
 
 	constructor(leaf: any, app: App, plugin: StartPagePlugin) {
 		super(leaf);
@@ -56,6 +58,8 @@ export class StartPageView extends ItemView {
 	async onOpen() {
 		await this.renderContent();
 
+		this.restoreScrollPosition();
+
 		// Register file change events
 		this.fileChangeEventRef = this.app.vault.on("modify", () => {
 			this.renderContent();
@@ -86,6 +90,8 @@ export class StartPageView extends ItemView {
 	}
 
 	async onClose() {
+		this.debounce.cancelAll();
+
 		// Clean up event listeners and timer when view is closed
 		if (this.fileChangeEventRef) {
 			this.app.vault.offref(this.fileChangeEventRef);
@@ -149,7 +155,13 @@ export class StartPageView extends ItemView {
 	}
 
 	public async renderContent() {
-		const container = this.containerEl.children[1];
+		const container = this.containerEl.children[1] as HTMLElement;
+
+		this.registerDomEvent(container, "scroll", () => {
+			this.debounce.debounce("save-scroll-position", () => {
+				this.saveScrollPosition();
+			}, 300);
+		});
 
 		if (!this.startPageCreator) {
 			this.startPageCreator = new StartPageCreator(this.app, this.plugin, container);
@@ -159,6 +171,24 @@ export class StartPageView extends ItemView {
 		await this.startPageCreator.createStartPage(pinnedNotes, recentNotes);
 
 		this.startRefreshTimerIfNeeded(pinnedNotes, recentNotes);
+	}
+
+	private saveScrollPosition() {
+		const container = document.querySelector(".start-page-container") as HTMLElement;
+		if (container) {
+			this.plugin.settings.scrollPosition = container.scrollTop;
+			this.plugin.saveSettings();
+		}
+	}
+
+	private restoreScrollPosition() {
+		const container = document.querySelector(".start-page-container") as HTMLElement;
+		if (container && this.plugin.settings.scrollPosition > 0) {
+			// Use a small delay to ensure the content is fully rendered
+			setTimeout(() => {
+				container.scrollTop = this.plugin.settings.scrollPosition;
+			}, 0);
+		}
 	}
 
 	getTFiles(notePaths: string[] | null): TFile[] {
