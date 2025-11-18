@@ -134,7 +134,7 @@ export class StartPageView extends ItemView {
 		}
 		const pinnedNotes = this.getTFiles(this.plugin.settings.pinnedNotes);
 		const recentNotes = this.getRecentNotes(this.plugin.settings.recentNotesLimit);
-		this.startPageCreator.createStartPage(pinnedNotes, recentNotes);
+		await this.startPageCreator.createStartPage(pinnedNotes, recentNotes);
 
 		this.startRefreshTimerIfNeeded(pinnedNotes, recentNotes);
 	}
@@ -163,6 +163,11 @@ export class StartPageView extends ItemView {
 
 		// Get all files
 		const allFiles = this.plugin.settings.includeAllFilesInRecent ? this.app.vault.getFiles() : this.app.vault.getMarkdownFiles();
+
+		// Early exit if no files
+		if (allFiles.length === 0) {
+			return [];
+		}
 
 		// Calculate the most recent time for each file (the maximum of modification time or access time)
 		const filesWithTime = allFiles.map(file => {

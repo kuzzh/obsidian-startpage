@@ -3,6 +3,7 @@ import { App, TFolder, TFile, Menu, Platform } from "obsidian";
 import StartPagePlugin from "@/main";
 import { t } from "@/i18n";
 import { VIEW_TYPE_START_PAGE, StartPageView } from "@/views/startpageview";
+import FooterTextUtil from "@/utils/footertextutil";
 
 const STAT_TOTAL_NOTES = "totalNotes";
 const STAT_TODAY_EDITED = "todayEdited";
@@ -134,7 +135,7 @@ export default class StartPageCreator {
 		this.container = container;
 	}
 
-	public createStartPage(pinnedNotes: TFile[] | null, recentNotes: TFile[] | null): void {
+	public async createStartPage(pinnedNotes: TFile[] | null, recentNotes: TFile[] | null): Promise<void> {
 		this.initData(pinnedNotes, recentNotes);
 
 		this.container.empty();
@@ -142,7 +143,7 @@ export default class StartPageCreator {
 
 		const header = this.createHeader();
 		const mainContent = this.createMainContent();
-		const footer = this.createFooter();
+		const footer = await this.createFooter();
 
 		this.container.appendChild(header);
 		this.container.appendChild(mainContent);
@@ -432,16 +433,43 @@ export default class StartPageCreator {
 	}
 
 	// 创建页脚版权信息
-	private createFooter(): HTMLElement {
+	private async createFooter(): Promise<HTMLElement> {
 		const footer = this.createElement("footer", "footer");
 
-		// const copyright = this.createElement("p", "", `Copyright © 2025 ${this.plugin.manifest.author}`);
-		const love = this.createElement("p", "", `❤️ Love what you love, and love what you do. ❤️`);
-
-		// footer.appendChild(copyright);
+		const love = this.createElement("p", "", t("default_footer_text"));
 		footer.appendChild(love);
 
+		this.updateFooterTextAsync(love);
+
 		return footer;
+	}
+
+	// 异步更新页脚文本，避免阻塞UI
+	private async updateFooterTextAsync(footerElement: HTMLElement): Promise<void> {
+		try {
+			const footerText = await FooterTextUtil.getFooterText(this.plugin);
+			footerElement.textContent = footerText;
+
+			if (this.plugin.settings.showCustomFooterText && this.plugin.settings.useRandomFooterText) {
+				if (!footerElement.querySelector("#refresh-footer-text")) {
+					const refreshSvg = this.createSVG([
+						{ tagName: "path", attributes: { d: "M3 2v6h6" } },
+						{ tagName: "path", attributes: { d: "M3 13a9 9 0 1 0 3-7.7L3 8" } },
+					], "refresh-icon");
+					refreshSvg.setAttribute("id", "refresh-footer-text");
+					refreshSvg.addEventListener("click", () => {
+						this.plugin.settings.todayRandomEnFooterText = "";
+						this.plugin.settings.todayRandomZhFooterText = "";
+						this.plugin.saveSettings();
+						footerElement.textContent = t("loading_footer_text");
+						this.updateFooterTextAsync(footerElement);
+					});
+					footerElement.appendChild(refreshSvg);
+				}
+			}
+		} catch (error) {
+			console.error("Failed to load footer text:", error);
+		}
 	}
 
 	// 工具函数

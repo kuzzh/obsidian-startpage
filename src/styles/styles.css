@@ -271,6 +271,9 @@
 }
 
 .start-page-container .footer p {
+	display: flex;
+	align-items: center;
+	gap: 4px;
 	margin: 5px;
 }
 
@@ -429,6 +432,18 @@
 /* Hide title navigation bar for start page */
 .workspace-leaf-content[data-type="start-page-view"] .view-header {
 	/* display: none; */
+}
+
+.refresh-icon {
+	width: 16px;
+	height: 16px;
+	cursor: pointer;
+}
+
+.refresh-icon:hover {
+	color: var(--text-normal);
+	background: var(--background-modifier-hover);
+	transition: all 0.2s;
 }
 
 @media (max-width: 768px) {

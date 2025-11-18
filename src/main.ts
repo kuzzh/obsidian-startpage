@@ -1,6 +1,7 @@
 import { Plugin, WorkspaceLeaf, TFile, Menu, getLanguage } from "obsidian";
 import { StartPageView, VIEW_TYPE_START_PAGE } from "@/views/startpageview";
-import { StartPageSettingTab, StartPageSettings, DEFAULT_SETTINGS } from "@/views/settings";
+import { StartPageSettingTab } from "@/views/startpagesettingtab";
+import { StartPageSettings, DEFAULT_SETTINGS } from "@/types";
 import { setLocale, t } from "@/i18n";
 import "@/types";
 
@@ -83,6 +84,11 @@ export default class StartPagePlugin extends Plugin {
 				includeAllFilesInRecent: typeof savedData.includeAllFilesInRecent === "boolean" ? savedData.includeAllFilesInRecent : true,
 				replaceNewTab: typeof savedData.replaceNewTab === "boolean" ? savedData.replaceNewTab : true,
 				showTitleNavigationBar: ["default", "show", "hide"].includes(savedData.showTitleNavigationBar) ? savedData.showTitleNavigationBar : "default",
+				showCustomFooterText: typeof savedData.showCustomFooterText === "boolean" ? savedData.showCustomFooterText : false,
+				useRandomFooterText: typeof savedData.useRandomFooterText === "boolean" ? savedData.useRandomFooterText : false,
+				todayRandomEnFooterText: typeof savedData.todayRandomEnFooterText === "string" ? savedData.todayRandomEnFooterText : "",
+				todayRandomZhFooterText: typeof savedData.todayRandomZhFooterText === "string" ? savedData.todayRandomZhFooterText : "",
+				customFooterText: typeof savedData.customFooterText === "string" ? savedData.customFooterText : "",
 			};
 		} else {
 			// First installation or data corruption, use default settings
@@ -109,8 +115,6 @@ export default class StartPagePlugin extends Plugin {
 			} else {
 				console.log("data.json file does not exist, skipping backup");
 			}
-		} else {
-			console.log("Backup already exists, skipping");
 		}
 	}
 
