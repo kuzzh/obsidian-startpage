@@ -4,6 +4,8 @@ import StartPagePlugin from "@/main";
 import { t } from "@/i18n";
 import { VIEW_TYPE_START_PAGE, StartPageView } from "@/views/startpageview";
 import FooterTextUtil from "@/utils/footertextutil";
+import SvgUtil from "@/utils/svgutil";
+import { MyUtil } from "@/utils/myutil";
 
 const STAT_TOTAL_NOTES = "totalNotes";
 const STAT_TODAY_EDITED = "todayEdited";
@@ -301,15 +303,17 @@ export default class StartPageCreator {
 		const noteContent = this.createElement("div", "note-content");
 		const noteTitle = this.createElement("div", "note-title", note.basename);
 
-		// 在PC端显示路径信息
-		let metaText = this.formatDate(note.stat.mtime);
-		if (Platform.isDesktop) {
-			const folderPath = note.parent ? note.parent.path : "";
-			if (folderPath) {
-				metaText += ` • ${folderPath}`;
-			}
+		const noteMeta = this.createElement("div", "note-meta", "");
+
+		const noteDate = this.formatDate(note.stat.mtime);
+		let folderPath = note.parent ? note.parent.path : "/";
+		if (!folderPath.startsWith("/")) {
+			folderPath = "/" + folderPath;
 		}
-		const noteMeta = this.createElement("div", "note-meta", metaText);
+		noteMeta.appendChild(this.createElement("div", "note-date", noteDate));
+		const folderIcon = SvgUtil.createFolderIcon();
+		noteMeta.appendChild(folderIcon);
+		noteMeta.appendChild(document.createTextNode(MyUtil.truncateMiddle(folderPath)));
 
 		noteTitle.setAttribute("title", note.basename);
 		noteContent.appendChild(noteTitle);

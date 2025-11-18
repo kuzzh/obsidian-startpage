@@ -246,8 +246,14 @@
 }
 
 .start-page-container .note-meta {
+	display: flex;
+	align-items: center;
+	gap: 4px;
 	font-size: 12px;
 	color: var(--text-faint);
+}
+.start-page-container .note-date {
+	margin-right: 8px;
 }
 
 .start-page-container .note-actions {
@@ -380,42 +386,96 @@
 
 /* Settings styles */
 .pinned-note-list {
-	padding: 0;
+    padding: 0;
 }
 
 .pinned-note-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.pinned-note-item:last-child {
+    border-bottom: none;
+}
+
+.pinned-note-item .note-line1 {
 	display: flex;
-	justify-content: space-between;
 	align-items: center;
-	padding: 4px 0;
 }
 
-.pinned-note-item span {
-	flex: 1;
+.pinned-note-item .note-title {
+	font-weight: 500;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
-.pinned-note-item .control-buttons {
-	display: flex;
-	justify-content: flex-end;
+.pinned-note-item .note-line2 {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 8px;
+}
 
-	gap: 4px;
+.pinned-note-item .note-path {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-faint);
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pinned-note-item .note-path-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pinned-note-item .folder-icon {
+    color: inherit;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.pinned-note-item .folder-icon svg {
+    width: 14px;
+    height: 14px;
+}
+
+.pinned-note-item .note-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
 }
 
 .pinned-note-item .control-button {
-	margin-left: 8px;
-	padding: 2px 6px;
-	border: none;
-	background: none;
-	cursor: pointer;
-	border-radius: 3px;
-	color: var(--text-faint);
-	transition: all 0.2s;
-	font-size: 12px;
+    margin-left: 0;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 4px;
+    color: var(--text-faint);
+    transition: all 0.2s;
 }
 
 .pinned-note-item .control-button:hover {
-	color: var(--text-normal);
-	background: var(--background-modifier-hover);
+    color: var(--text-normal);
+    background: var(--background-modifier-hover);
+}
+
+.pinned-note-item .control-button svg {
+    width: 16px;
+    height: 16px;
 }
 
 .pinned-note-item .remove-button {
@@ -424,7 +484,7 @@
 }
 
 .pinned-note-item .remove-button:hover {
-	color: var(--color-accent);
+	color: var(--text-error);
 	background: var(--background-modifier-hover);
 	transition: all 0.2s;
 }
@@ -447,14 +507,8 @@
 }
 
 @media (max-width: 768px) {
-	.pinned-note-item {
-		flex-direction: column;
-	}
-	.pinned-note-item span {
-		width: 100%;
-	}
-	.pinned-note-item .control-buttons {
-		width: 100%;
+	.pinned-note-item .note-actions {
+		justify-content: flex-start;
 	}
 	.pinned-note-item .control-button,
 	.pinned-note-item .remove-button {

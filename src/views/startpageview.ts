@@ -163,7 +163,6 @@ export class StartPageView extends ItemView {
 
 		// Get all files
 		const allFiles = this.plugin.settings.includeAllFilesInRecent ? this.app.vault.getFiles() : this.app.vault.getMarkdownFiles();
-
 		// Early exit if no files
 		if (allFiles.length === 0) {
 			return [];

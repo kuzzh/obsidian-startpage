@@ -3,6 +3,8 @@ import StartPagePlugin from "@/main";
 import { VIEW_TYPE_START_PAGE, StartPageView } from "@/views/startpageview";
 import { t } from "@/i18n";
 import NoteSuggestModal from "@/views/notesuggestmodal";
+import SvgUtil from "@/utils/svgutil";
+import { MyUtil } from "@/utils/myutil";
 
 export class StartPageSettingTab extends PluginSettingTab {
 	plugin: StartPagePlugin;
@@ -193,75 +195,135 @@ export class StartPageSettingTab extends PluginSettingTab {
 			});
     }
 
+    /**
+     * 创建固定笔记设置区域
+     */
     private createPinnedNotesSettings(containerEl: HTMLElement) {
+        this.createPinnedNotesHeading(containerEl);
+        this.createNoteSelectionButton(containerEl);
+        this.displayCurrentPinnedNotes(containerEl);
+    }
+
+    /**
+     * 创建固定笔记设置标题
+     */
+    private createPinnedNotesHeading(containerEl: HTMLElement) {
         new Setting(containerEl)
             .setName(t("pinned_notes_settings_heading"))
             .setHeading();
+    }
+
+    /**
+     * 创建选择笔记按钮
+     */
+    private createNoteSelectionButton(containerEl: HTMLElement) {
         new Setting(containerEl)
-			.setName(t("pinned_notes_select"))
-			.setDesc(t("pinned_notes_select_desc"))
-			.addButton((button) => {
-				button.setButtonText(t("pinned_notes_select_button")).onClick(() => {
-					new NoteSuggestModal(this.app, async (file) => {
-						if (!this.plugin.settings.pinnedNotes.includes(file.path)) {
-							this.plugin.settings.pinnedNotes.push(file.path);
-							await this.plugin.saveSettings();
-							this.refreshStartPage();
-							this.display();
-						}
-					}).open();
-				});
-			});
+            .setName(t("pinned_notes_select"))
+            .setDesc(t("pinned_notes_select_desc"))
+            .addButton((button) => {
+                button.setButtonText(t("pinned_notes_select_button")).onClick(() => {
+                    new NoteSuggestModal(this.app, async (file) => {
+                        if (!this.plugin.settings.pinnedNotes.includes(file.path)) {
+                            this.plugin.settings.pinnedNotes.push(file.path);
+                            await this.plugin.saveSettings();
+                            this.refreshStartPage();
+                            this.display();
+                        }
+                    }).open();
+                });
+            });
+    }
 
-		// Display current pinned notes
-		if (this.plugin.settings.pinnedNotes.length > 0) {
-			new Setting(containerEl)
-				.setName(t("current_pinned_notes"))
-				.setHeading();
+    /**
+     * 显示当前固定笔记列表
+     */
+    private displayCurrentPinnedNotes(containerEl: HTMLElement) {
+        if (this.plugin.settings.pinnedNotes.length === 0) {
+            return;
+        }
 
-			const pinnedList = containerEl.createEl("ul", {
-				cls: "pinned-note-list",
-			});
+        new Setting(containerEl)
+            .setName(t("current_pinned_notes"))
+            .setHeading();
 
-			this.plugin.settings.pinnedNotes.forEach((path, index) => {
-				const li = pinnedList.createEl("li", { cls: "pinned-note-item" });
-				const file = this.app.vault.getAbstractFileByPath(path);
-				if (file) {
-					li.createEl("span", { text: file.path });
+        const pinnedList = containerEl.createEl("ul", {
+            cls: "pinned-note-list",
+        });
 
-					const buttonDiv = li.createEl("div", { cls: "control-buttons" });
-					// Move up button
-					if (index > 0) {
-						buttonDiv.createEl("button", {
-							text: t("move_up"),
-							cls: "control-button"
-						}).onclick = async () => {
-							await this.moveNote(index, index - 1);
-						};
-					}
+        this.plugin.settings.pinnedNotes.forEach((path, index) => {
+            this.createPinnedNoteListItem(pinnedList, path, index);
+        });
+    }
 
-					// Move down button
-					if (index < this.plugin.settings.pinnedNotes.length - 1) {
-						buttonDiv.createEl("button", {
-							text: t("move_down"),
-							cls: "control-button"
-						}).onclick = async () => {
-							await this.moveNote(index, index + 1);
-						};
-					}
+    private createPinnedNoteListItem(pinnedList: HTMLElement, path: string, index: number) {
+        const li = pinnedList.createEl("li", { cls: "pinned-note-item" });
+        const file = this.app.vault.getAbstractFileByPath(path);
 
-					// Remove button
-					buttonDiv.createEl("button", {
-						text: t("pinned_notes_remove"),
-						cls: "mod-warning remove-button",
-					}).onclick = async () => {
-						this.plugin.settings.pinnedNotes = this.plugin.settings.pinnedNotes.filter((p) => p !== path);
-						await this.plugin.saveSettings();
-						this.refreshStartPage();
-						this.display();
-					};
-				}
-			});
-		}
+        if (!file) {
+            return;
+        }
+
+        const filename = path.split("/").pop() ?? path;
+
+        const line1 = li.createEl("div", { cls: "note-line1" });
+        line1.createEl("span", { cls: "note-title", text: filename });
+
+        const line2 = li.createEl("div", { cls: "note-line2" });
+        const pathContainer = line2.createEl("div", { cls: "note-path" });
+        const iconWrap = pathContainer.createSpan({ cls: "folder-icon" });
+        const folderSvg = SvgUtil.createFolderIcon();
+        iconWrap.appendChild(folderSvg);
+        const dirPath = MyUtil.getDirPath(path);
+        const pathText = pathContainer.createEl("span", { cls: "note-path-text", text: MyUtil.truncateMiddle(dirPath) });
+        pathText.setAttr("title", dirPath);
+
+        const actionsEl = line2.createEl("div", { cls: "note-actions" });
+        this.createNoteControlButtons(actionsEl, path, index);
+    }
+
+    private createNoteControlButtons(container: HTMLElement, path: string, index: number) {
+        this.createMoveUpButton(container, index);
+        this.createMoveDownButton(container, index);
+        this.createRemoveButton(container, path);
+    }
+
+    private createMoveUpButton(container: HTMLElement, index: number) {
+        if (index > 0) {
+            const btn = container.createEl("button", { cls: "control-button icon-button" });
+            btn.setAttr("aria-label", t("move_up"));
+            btn.setAttr("title", t("move_up"));
+            const svg = SvgUtil.createArrowUpIcon();
+            btn.appendChild(svg);
+            btn.onclick = async () => {
+                await this.moveNote(index, index - 1);
+            };
+        }
+    }
+
+    private createMoveDownButton(container: HTMLElement, index: number) {
+        if (index < this.plugin.settings.pinnedNotes.length - 1) {
+            const btn = container.createEl("button", { cls: "control-button icon-button" });
+            btn.setAttr("aria-label", t("move_down"));
+            btn.setAttr("title", t("move_down"));
+            const svg = SvgUtil.createArrowDownIcon();
+            btn.appendChild(svg);
+            btn.onclick = async () => {
+                await this.moveNote(index, index + 1);
+            };
+        }
+    }
+
+    private createRemoveButton(container: HTMLElement, path: string) {
+        const btn = container.createEl("button", { cls: "mod-warning remove-button control-button icon-button" });
+        btn.setAttr("aria-label", t("pinned_notes_remove"));
+        btn.setAttr("title", t("pinned_notes_remove"));
+        const svg = SvgUtil.createRemoveIcon();
+        btn.appendChild(svg);
+        btn.onclick = async () => {
+            this.plugin.settings.pinnedNotes = this.plugin.settings.pinnedNotes.filter((p) => p !== path);
+            await this.plugin.saveSettings();
+            this.refreshStartPage();
+            this.display();
+        };
     }
 }
