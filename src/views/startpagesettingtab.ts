@@ -195,27 +195,18 @@ export class StartPageSettingTab extends PluginSettingTab {
 			});
     }
 
-    /**
-     * 创建固定笔记设置区域
-     */
     private createPinnedNotesSettings(containerEl: HTMLElement) {
         this.createPinnedNotesHeading(containerEl);
         this.createNoteSelectionButton(containerEl);
         this.displayCurrentPinnedNotes(containerEl);
     }
 
-    /**
-     * 创建固定笔记设置标题
-     */
     private createPinnedNotesHeading(containerEl: HTMLElement) {
         new Setting(containerEl)
             .setName(t("pinned_notes_settings_heading"))
             .setHeading();
     }
 
-    /**
-     * 创建选择笔记按钮
-     */
     private createNoteSelectionButton(containerEl: HTMLElement) {
         new Setting(containerEl)
             .setName(t("pinned_notes_select"))
@@ -234,9 +225,6 @@ export class StartPageSettingTab extends PluginSettingTab {
             });
     }
 
-    /**
-     * 显示当前固定笔记列表
-     */
     private displayCurrentPinnedNotes(containerEl: HTMLElement) {
         if (this.plugin.settings.pinnedNotes.length === 0) {
             return;

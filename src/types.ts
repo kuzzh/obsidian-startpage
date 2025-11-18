@@ -7,6 +7,10 @@ export interface SVGTagAttribute {
 	[key: string]: string | number | undefined;
 }
 
+export const ID_STAT_TOTAL_NOTES = "totalNotes";
+export const ID_STAT_TODAY_EDITED = "todayEdited";
+export const ID_STAT_TOTAL_SIZE = "totalSize";
+
 export interface StartPageSettings {
 	includeAllFilesInRecent: boolean;
 	recentNotesLimit: number;

@@ -116,7 +116,6 @@ export class StartPageView extends ItemView {
 	}
 
 	private startRefreshTimerIfNeeded(pinnedNotes: TFile[], recentNotes: TFile[]) {
-		// Clear existing timer
 		this.clearRefreshTimer();
 
 		// Check if there are any files that need to be refreshed every 24 hours
@@ -132,9 +131,6 @@ export class StartPageView extends ItemView {
 		}
 	}
 
-	/**
-	 * 只更新需要修改时间的笔记，避免全部重新渲染
-	 */
 	private async updateModifiedTimes() {
 		if (!this.startPageCreator) {
 			return;
@@ -143,7 +139,6 @@ export class StartPageView extends ItemView {
 		const pinnedNotes = this.getTFiles(this.plugin.settings.pinnedNotes);
 		const recentNotes = this.getRecentNotes(this.plugin.settings.recentNotesLimit);
 		
-		// 只更新24小时内修改过的笔记
 		const notesToUpdate = pinnedNotes.concat(recentNotes).filter((file) => {
 			const diff = Date.now() - file.stat.mtime;
 			return diff < 24 * 60 * 60 * 1000;
@@ -210,12 +205,10 @@ export class StartPageView extends ItemView {
 	}
 
 	getRecentNotes(limit: number): TFile[] {
-		// Get the path of the most recently opened file
 		const recentlyOpenedPaths = this.app.workspace.getLastOpenFiles();
 
-		// Get all files
 		const allFiles = this.plugin.settings.includeAllFilesInRecent ? this.app.vault.getFiles() : this.app.vault.getMarkdownFiles();
-		// Early exit if no files
+		
 		if (allFiles.length === 0) {
 			return [];
 		}

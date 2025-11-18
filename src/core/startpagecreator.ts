@@ -1,39 +1,11 @@
-import type { SVGTag } from "@/types";
-import { App, TFolder, TFile, Menu, Platform } from "obsidian";
+import  {ID_STAT_TOTAL_NOTES, ID_STAT_TODAY_EDITED, ID_STAT_TOTAL_SIZE} from "@/types";
+import { App, TFolder, TFile, Menu } from "obsidian";
 import StartPagePlugin from "@/main";
 import { t } from "@/i18n";
 import { VIEW_TYPE_START_PAGE, StartPageView } from "@/views/startpageview";
 import FooterTextUtil from "@/utils/footertextutil";
 import SvgUtil from "@/utils/svgutil";
 import { MyUtil } from "@/utils/myutil";
-
-const STAT_TOTAL_NOTES = "totalNotes";
-const STAT_TODAY_EDITED = "todayEdited";
-const STAT_TOTAL_SIZE = "totalSize";
-
-const iconSVGs = {
-	"md": [
-		{ tagName: "path", attributes: { d: "M14 2H6A2 2 0 0 0 4 4V20A2 2 0 0 0 6 22H18A2 2 0 0 0 20 20V8L14 2Z" } },
-		{ tagName: "path", attributes: { d: "M14 2V8H20" } },
-	],
-	"base": [
-		{ tagName: "rect", attributes: { x: "4", y: "3", width: "16", height: "20", rx: "2", stroke: "currentColor", "stroke-width": "2", fill: "none" } },
-		{ tagName: "path", attributes: { d: "M6 10H18", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } },
-		{ tagName: "path", attributes: { d: "M6 16H18", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } },
-		{ tagName: "path", attributes: { d: "M10 4V24", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } }
-	],
-	"canvas": [
-		{ tagName: "rect", attributes: { x: "4", y: "3", width: "16", height: "20", rx: "2", stroke: "currentColor", "stroke-width": "2", fill: "none" } },
-		// Three bold nodes, spread out inside the rect
-		{ tagName: "circle", attributes: { cx: "8", cy: "9", r: "2", fill: "currentColor" } },
-		{ tagName: "circle", attributes: { cx: "16", cy: "9", r: "2", fill: "currentColor" } },
-		{ tagName: "circle", attributes: { cx: "12", cy: "17", r: "2", fill: "currentColor" } },
-		// Connecting lines
-		{ tagName: "path", attributes: { d: "M10 9L14 9", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } },
-		{ tagName: "path", attributes: { d: "M9.4 10.6L12 15", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } },
-		{ tagName: "path", attributes: { d: "M14.6 10.6L12 15", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } }
-	],
-}
 
 declare module "obsidian" {
 	interface App {
@@ -50,81 +22,30 @@ export default class StartPageCreator {
 	private container: Element;
 	private stats = [
 		{
-			id: STAT_TOTAL_NOTES,
+			id: ID_STAT_TOTAL_NOTES,
 			data: {
 				number: 0,
 				label: function () {
 					return t("total_notes");
-				},
-				icon: [
-					{ tagName: "path", attributes: { d: "M14 2H6A2 2 0 0 0 4 4V20A2 2 0 0 0 6 22H18A2 2 0 0 0 20 20V8L14 2Z" } },
-					{ tagName: "path", attributes: { d: "M14 2V8H20" } },
-				],
+				}
 			},
 		},
 		{
-			id: STAT_TODAY_EDITED,
+			id: ID_STAT_TODAY_EDITED,
 			data: {
 				number: 0,
 				label: function () {
 					return t("today_edited");
-				},
-				icon: [
-					{ tagName: "path", attributes: { d: "M12 8V12L15 15" } },
-					{ tagName: "circle", attributes: { cx: 12, cy: 12, r: 10, stroke: "currentColor", "stroke-width": 2 } },
-				],
+				}
 			},
 		},
 		{
-			id: STAT_TOTAL_SIZE,
+			id: ID_STAT_TOTAL_SIZE,
 			data: {
 				number: "0",
 				label: function () {
 					return t("total_size");
-				},
-				icon: [
-					{
-						tagName: "rect",
-						attributes: {
-							x: "3",
-							y: "6",
-							width: "18",
-							height: "12",
-							rx: "2",
-							ry: "2",
-							stroke: "currentColor",
-							"stroke-width": "2",
-							fill: "none",
-						},
-					},
-					{
-						tagName: "circle",
-						attributes: {
-							cx: "7",
-							cy: "12",
-							r: "1",
-							fill: "currentColor",
-						},
-					},
-					{
-						tagName: "path",
-						attributes: {
-							d: "M11 10H17",
-							stroke: "currentColor",
-							"stroke-width": "2",
-							"stroke-linecap": "round",
-						},
-					},
-					{
-						tagName: "path",
-						attributes: {
-							d: "M11 14H15",
-							stroke: "currentColor",
-							"stroke-width": "2",
-							"stroke-linecap": "round",
-						},
-					},
-				],
+				}
 			},
 		},
 	];
@@ -157,44 +78,32 @@ export default class StartPageCreator {
 		this.recentNotes = recentNotes;
 
 		this.stats.forEach((stat) => {
-			if (stat.id === STAT_TOTAL_NOTES) {
+			if (stat.id === ID_STAT_TOTAL_NOTES) {
 				stat.data.number = this.app.vault.getMarkdownFiles().length;
-			} else if (stat.id === STAT_TODAY_EDITED) {
+			} else if (stat.id === ID_STAT_TODAY_EDITED) {
 				stat.data.number = this.getTodayModifiedNoteCount();
-			} else if (stat.id === STAT_TOTAL_SIZE) {
-				stat.data.number = this.formatSize(this.getTotalSize());
+			} else if (stat.id === ID_STAT_TOTAL_SIZE) {
+				stat.data.number = MyUtil.formatSize(this.getTotalSize());
 			}
 		});
 	}
 
-	/**
-	 * 更新指定笔记的修改时间显示
-	 * @param notes 需要更新的笔记列表
-	 */
 	public async updateNoteModifiedTimes(notes: TFile[]) {
 		for (const note of notes) {
 			const noteElement = this.container.querySelector(`[data-note-path="${note.path}"] .note-date`);
 			if (noteElement) {
-				const formattedDate = this.formatDate(note.stat.mtime);
+				const formattedDate = MyUtil.formatDate(note.stat.mtime);
 				noteElement.textContent = formattedDate;
 			}
 		}
 	}
 
-	// 创建头部
 	private createHeader(): HTMLElement {
 		const header = this.createElement("header", "header");
 
 		// Logo
 		const logo = this.createElement("div", "logo");
-		const logoIcon = this.createSVG(
-			[
-				{ tagName: "path", attributes: { d: "M12 2L2 7L12 12L22 7L12 2Z", "stroke-linecap": "none" } },
-				{ tagName: "path", attributes: { d: "M2 17L12 22L22 17", "stroke-linecap": "none" } },
-				{ tagName: "path", attributes: { d: "M2 12L12 17L22 12", "stroke-linecap": "none" } },
-			],
-			"logo-icon"
-		);
+		const logoIcon = SvgUtil.createLogoIcon();
 		const logoText = this.createElement("span", "logo-text", "Start Page for Obsidian");
 
 		logo.appendChild(logoIcon);
@@ -204,13 +113,7 @@ export default class StartPageCreator {
 		const headerActions = this.createElement("div", "header-actions");
 
 		const newNoteBtn = this.createElement("button");
-		const newNoteIcon = this.createSVG(
-			[
-				{ tagName: "path", attributes: { d: "M12 5V19" } },
-				{ tagName: "path", attributes: { d: "M5 12H19" } },
-			],
-			"new-note-icon"
-		);
+		const newNoteIcon = SvgUtil.createNewNoteIcon();
 		newNoteBtn.addEventListener("click", async () => {
 			const parent: TFolder = this.app.fileManager.getNewFileParent("");
 			if (!parent) {
@@ -240,15 +143,14 @@ export default class StartPageCreator {
 		return header;
 	}
 
-	// 创建统计卡片
 	private createStatsSection(): HTMLElement {
 		const statsSection = this.createElement("div", "stats-section");
 
 		this.stats.forEach((stat) => {
 			const statCard = this.createElement("div", "stat-card");
 			const statIcon = this.createElement("div", "stat-icon");
-			const svg = this.createSVG(stat.data.icon);
-			statIcon.appendChild(svg);
+			const svg = SvgUtil.createStatIcon(stat.id);
+			statIcon.appendChild(svg!);
 
 			const statContent = this.createElement("div", "stat-content");
 			const statNumber = this.createElement("div", "stat-number", stat.data.number.toString());
@@ -264,7 +166,6 @@ export default class StartPageCreator {
 		return statsSection;
 	}
 
-	// 创建笔记项
 	private createNoteItem(note: TFile | null, isPinned: boolean = false): HTMLElement | null {
 		if (!note) {
 			return null;
@@ -286,7 +187,6 @@ export default class StartPageCreator {
 			}
 		});
 
-		// 为置顶笔记添加右键菜单
 		if (isPinned) {
 			noteItem.addEventListener("contextmenu", (event) => {
 				event.preventDefault();
@@ -297,11 +197,9 @@ export default class StartPageCreator {
 					item.setTitle(t("remove_from_pinned_notes"))
 						.setIcon("pin-off")
 						.onClick(async () => {
-							// 从置顶笔记中移除
 							this.plugin.settings.pinnedNotes = this.plugin.settings.pinnedNotes.filter((path) => path !== note.path);
 							await this.plugin.saveSettings();
 
-							// 刷新启动页面
 							this.refreshStartPage();
 						});
 				});
@@ -312,7 +210,7 @@ export default class StartPageCreator {
 
 		const noteIcon = this.createElement("div", "note-icon");
 		const fileType = note.extension;
-		const iconSvg = this.createSVG((iconSVGs as Record<string, SVGTag[]>)[fileType] || iconSVGs["md"]);
+		const iconSvg = SvgUtil.createFileIcon(fileType);
 		noteIcon.appendChild(iconSvg);
 
 		const noteContent = this.createElement("div", "note-content");
@@ -320,7 +218,7 @@ export default class StartPageCreator {
 
 		const noteMeta = this.createElement("div", "note-meta", "");
 
-		const noteDate = this.formatDate(note.stat.mtime);
+		const noteDate = MyUtil.formatDate(note.stat.mtime);
 		let folderPath = note.parent ? note.parent.path : "/";
 		if (!folderPath.startsWith("/")) {
 			folderPath = "/" + folderPath;
@@ -336,10 +234,7 @@ export default class StartPageCreator {
 
 		const noteActions = this.createElement("div", "note-actions");
 		const editBtn = this.createElement("button", "btn-icon");
-		const editIcon = this.createSVG([
-			{ tagName: "path", attributes: { d: "M11 4H4A2 2 0 0 0 2 6V20A2 2 0 0 0 4 22H18A2 2 0 0 0 20 20V13" } },
-			{ tagName: "path", attributes: { d: "M18.5 2.5L22 6L12 16H6V10L18.5 2.5Z" } },
-		]);
+		const editIcon = SvgUtil.createEditIcon();
 		editBtn.appendChild(editIcon);
 		noteActions.appendChild(editBtn);
 
@@ -350,14 +245,12 @@ export default class StartPageCreator {
 		return noteItem;
 	}
 
-	// 创建笔记区块
-	private createNotesSection(title: string, notes: TFile[] | null, isPinned: boolean = false, icon: SVGTag[] = []): HTMLElement {
+	private createNotesSection(title: string, notes: TFile[] | null, isPinned: boolean = false, icon: SVGSVGElement): HTMLElement {
 		const section = this.createElement("section", "section");
 		const sectionHeader = this.createElement("div", "section-header");
 
 		const sectionTitle = this.createElement("h2", "section-title");
-		const titleIcon = this.createSVG(icon, "section-icon");
-		sectionTitle.appendChild(titleIcon);
+		sectionTitle.appendChild(icon);
 		sectionTitle.appendChild(document.createTextNode(title));
 
 		if (isPinned) {
@@ -394,41 +287,13 @@ export default class StartPageCreator {
 		return section;
 	}
 
-	// 创建主要内容网格
 	private createContentGrid(): HTMLElement {
 		const contentGrid = this.createElement("div", "content-grid");
 
-		// 置顶笔记
-		const pinnedSection = this.createNotesSection(t("pinned_notes"), this.pinnedNotes, true, [
-			{
-				tagName: "path",
-				attributes: {
-					d: "M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z",
-					fill: "currentColor",
-				},
-			},
-		]);
+		const pinnedSection = this.createNotesSection(t("pinned_notes"), this.pinnedNotes, true, SvgUtil.createPinnedNoteIcon());
 		pinnedSection.classList.add("pinned-notes");
 
-		// 最近编辑
-		const recentSection = this.createNotesSection(t("recent_notes"), this.recentNotes, false, [
-			{
-				tagName: "path",
-				attributes: {
-					d: "M12 8V12L15 15",
-				},
-			},
-			{
-				tagName: "circle",
-				attributes: {
-					cx: 12,
-					cy: 12,
-					r: 10,
-					stroke: "currentColor",
-					"stroke-width": 2,
-				},
-			},
-		]);
+		const recentSection = this.createNotesSection(t("recent_notes"), this.recentNotes, false, SvgUtil.createRecentNoteIcon());
 		recentSection.classList.add("recent-notes");
 
 		contentGrid.appendChild(pinnedSection);
@@ -437,7 +302,6 @@ export default class StartPageCreator {
 		return contentGrid;
 	}
 
-	// 创建主要内容区域
 	private createMainContent(): HTMLElement {
 		const mainContent = this.createElement("main", "main-content");
 
@@ -450,7 +314,6 @@ export default class StartPageCreator {
 		return mainContent;
 	}
 
-	// 创建页脚版权信息
 	private async createFooter(): Promise<HTMLElement> {
 		const footer = this.createElement("footer", "footer");
 
@@ -462,7 +325,6 @@ export default class StartPageCreator {
 		return footer;
 	}
 
-	// 异步更新页脚文本，避免阻塞UI
 	private async updateFooterTextAsync(footerElement: HTMLElement): Promise<void> {
 		try {
 			const footerText = await FooterTextUtil.getFooterText(this.plugin);
@@ -470,10 +332,7 @@ export default class StartPageCreator {
 
 			if (this.plugin.settings.showCustomFooterText && this.plugin.settings.useRandomFooterText) {
 				if (!footerElement.querySelector("#refresh-footer-text")) {
-					const refreshSvg = this.createSVG([
-						{ tagName: "path", attributes: { d: "M3 2v6h6" } },
-						{ tagName: "path", attributes: { d: "M3 13a9 9 0 1 0 3-7.7L3 8" } },
-					], "refresh-icon");
+					const refreshSvg = SvgUtil.createRefreshIcon();
 					refreshSvg.setAttribute("id", "refresh-footer-text");
 					refreshSvg.addEventListener("click", () => {
 						this.plugin.settings.todayRandomEnFooterText = "";
@@ -488,37 +347,6 @@ export default class StartPageCreator {
 		} catch (error) {
 			console.error("Failed to load footer text:", error);
 		}
-	}
-
-	// 工具函数
-	private createSVG(tags: SVGTag[], className: string | null = null): SVGSVGElement {
-		const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-		svg.setAttribute("viewBox", "0 0 24 24");
-		svg.setAttribute("fill", "none");
-		svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-		if (className) svg.setAttribute("class", className);
-
-		tags.forEach((tag) => {
-			const element = document.createElementNS("http://www.w3.org/2000/svg", tag.tagName);
-
-			if (tag.tagName === "path" && !tag.attributes.fill) {
-				tag.attributes.stroke = tag.attributes.stroke || "currentColor";
-				tag.attributes["stroke-width"] = tag.attributes["stroke-width"] || "2";
-				tag.attributes["stroke-linecap"] = tag.attributes["stroke-linecap"] || "round";
-				tag.attributes["stroke-linejoin"] = tag.attributes["stroke-linejoin"] || "round";
-			}
-
-			for (let [key, value] of Object.entries(tag.attributes)) {
-				if (value === undefined) continue;
-				if (typeof value === "number") value = value.toString();
-
-				element.setAttribute(key, value);
-			}
-
-			svg.appendChild(element);
-		});
-
-		return svg;
 	}
 
 	private createElement(tag: string, className: string = "", textContent: string = ""): HTMLElement {
@@ -573,12 +401,12 @@ export default class StartPageCreator {
 
 	getTodayModifiedNoteCount(): number {
 		const today = new Date();
-		today.setHours(0, 0, 0, 0); // 设置为今天的凌晨 0 点
+		today.setHours(0, 0, 0, 0);
 
 		const markdownFiles: TFile[] = this.app.vault.getMarkdownFiles();
 
 		const count = markdownFiles.filter((file) => {
-			const modifiedTime = file.stat.mtime; // 毫秒时间戳
+			const modifiedTime = file.stat.mtime;
 			return modifiedTime >= today.getTime();
 		}).length;
 
@@ -597,49 +425,5 @@ export default class StartPageCreator {
 		});
 
 		return totalSize;
-	}
-
-	private formatDate(timestamp: number): string {
-		const date = new Date(timestamp);
-		const now = new Date();
-		const diff = now.getTime() - date.getTime();
-
-		// Less than 24 hours
-		if (diff < 24 * 60 * 60 * 1000) {
-			const hours = Math.floor(diff / (60 * 60 * 1000));
-			if (hours === 0) {
-				const minutes = Math.floor(diff / (60 * 1000));
-				return t("minutes_ago").replace("{minutes}", minutes.toString());
-			}
-			return t("hours_ago").replace("{hours}", hours.toString());
-		}
-
-		// Less than 7 days
-		if (diff < 7 * 24 * 60 * 60 * 1000) {
-			const days = Math.floor(diff / (24 * 60 * 60 * 1000));
-			return t("days_ago").replace("{days}", days.toString());
-		}
-
-		// Otherwise show full date
-		return date.toLocaleDateString("zh-CN", {
-			year: "numeric",
-			month: "2-digit",
-			day: "2-digit",
-			hour: "2-digit",
-			minute: "2-digit",
-			second: "2-digit",
-		});
-	}
-
-	private formatSize(size: number): string {
-		if (size < 1024) {
-			return size + "B";
-		} else if (size < 1024 * 1024) {
-			return (size / 1024).toFixed(0) + "KB";
-		} else if (size < 1024 * 1024 * 1024) {
-			return (size / (1024 * 1024)).toFixed(0) + "MB";
-		} else {
-			return (size / (1024 * 1024 * 1024)).toFixed(0) + "GB";
-		}
 	}
 }
