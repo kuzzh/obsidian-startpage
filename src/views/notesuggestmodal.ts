@@ -10,7 +10,7 @@ export default class NoteSuggestModal extends SuggestModal<TFile> {
 
 	getSuggestions(query: string): TFile[] {
 		return this.app.vault
-			.getMarkdownFiles()
+			.getFiles()
 			.filter(file => file.path.toLowerCase().includes(query.toLowerCase()));
 	}
 
