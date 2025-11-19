@@ -14,6 +14,7 @@ export class StartPageView extends ItemView {
 	private refreshTimer: number | null = null;
 	private readonly REFRESH_INTERVAL = 60000; // Refresh every 1 minute
 	private startPageCreator: StartPageCreator;
+	private isScrollEventRegistered = false;
 
 	constructor(leaf: any, app: App, plugin: StartPagePlugin) {
 		super(leaf);
@@ -28,7 +29,8 @@ export class StartPageView extends ItemView {
 			this.showTitleNavigationBar(true);
 		} else if (this.plugin.settings.showTitleNavigationBar === "hide") {
 			this.showTitleNavigationBar(false);
-		} else { // default
+		} else {
+			// default
 			if (Platform.isDesktop) {
 				this.showTitleNavigationBar(false);
 			} else {
@@ -134,7 +136,7 @@ export class StartPageView extends ItemView {
 
 		const pinnedNotes = this.getTFiles(this.plugin.settings.pinnedNotes);
 		const recentNotes = this.getRecentNotes(this.plugin.settings.recentNotesLimit);
-		
+
 		const notesToUpdate = pinnedNotes.concat(recentNotes).filter((file) => {
 			const diff = Date.now() - file.stat.mtime;
 			return diff < 24 * 60 * 60 * 1000;
@@ -148,11 +150,15 @@ export class StartPageView extends ItemView {
 	public async renderContent() {
 		const container = this.containerEl.children[1] as HTMLElement;
 
-		this.registerDomEvent(container, "scroll", () => {
-			debounce(() => {
-				this.saveScrollPosition();
-			}, 300);
-		});
+		if (!this.isScrollEventRegistered) {
+			this.registerDomEvent(container, "scroll", () => {
+				debounce(() => {
+					this.saveScrollPosition();
+				}, 300);
+			});
+
+			this.isScrollEventRegistered = true;
+		}
 
 		if (!this.startPageCreator) {
 			this.startPageCreator = new StartPageCreator(this.app, this.plugin, container);
@@ -204,13 +210,13 @@ export class StartPageView extends ItemView {
 		const recentlyOpenedPaths = this.app.workspace.getLastOpenFiles();
 
 		const allFiles = this.plugin.settings.includeAllFilesInRecent ? this.app.vault.getFiles() : this.app.vault.getMarkdownFiles();
-		
+
 		if (allFiles.length === 0) {
 			return [];
 		}
 
 		// Calculate the most recent time for each file (the maximum of modification time or access time)
-		const filesWithTime = allFiles.map(file => {
+		const filesWithTime = allFiles.map((file) => {
 			let lastAccessTime = 0;
 
 			// Calculate access time based on position in the list of recently opened files
@@ -218,7 +224,7 @@ export class StartPageView extends ItemView {
 			if (openIndex !== -1) {
 				// Convert the index to a timestamp, the earlier the file, the newer the time
 				// Use the current time minus the index minutes to simulate the access time
-				lastAccessTime = Date.now() - (openIndex * 60 * 1000);
+				lastAccessTime = Date.now() - openIndex * 60 * 1000;
 			}
 
 			// Take the maximum value of modification time and access time
@@ -231,13 +237,13 @@ export class StartPageView extends ItemView {
 		return filesWithTime
 			.sort((a, b) => b.lastTime - a.lastTime)
 			.slice(0, limit)
-			.map(item => item.file);
+			.map((item) => item.file);
 	}
 
 	showTitleNavigationBar(show: boolean) {
 		const viewHeader = this.containerEl.querySelector('.workspace-leaf-content[data-type="start-page-view"] .view-header');
 		if (viewHeader) {
-			(viewHeader as HTMLElement).style.display = show ? '' : 'none';
+			(viewHeader as HTMLElement).style.display = show ? "" : "none";
 		}
 	}
 }
