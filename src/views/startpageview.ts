@@ -1,8 +1,7 @@
-import { App, ItemView, TFile, Menu, EventRef, Platform } from "obsidian";
+import { App, ItemView, TFile, Menu, EventRef, Platform, debounce } from "obsidian";
 import StartPagePlugin from "@/main";
 import { t } from "@/i18n";
 import StartPageCreator from "@/core/startpagecreator";
-import Debounce from "@/utils/debounce";
 
 export const VIEW_TYPE_START_PAGE = "start-page-view";
 
@@ -15,7 +14,6 @@ export class StartPageView extends ItemView {
 	private refreshTimer: number | null = null;
 	private readonly REFRESH_INTERVAL = 60000; // Refresh every 1 minute
 	private startPageCreator: StartPageCreator;
-	private debounce: Debounce = new Debounce();
 
 	constructor(leaf: any, app: App, plugin: StartPagePlugin) {
 		super(leaf);
@@ -90,8 +88,6 @@ export class StartPageView extends ItemView {
 	}
 
 	async onClose() {
-		this.debounce.cancelAll();
-
 		// Clean up event listeners and timer when view is closed
 		if (this.fileChangeEventRef) {
 			this.app.vault.offref(this.fileChangeEventRef);
@@ -153,7 +149,7 @@ export class StartPageView extends ItemView {
 		const container = this.containerEl.children[1] as HTMLElement;
 
 		this.registerDomEvent(container, "scroll", () => {
-			this.debounce.debounce("save-scroll-position", () => {
+			debounce(() => {
 				this.saveScrollPosition();
 			}, 300);
 		});
