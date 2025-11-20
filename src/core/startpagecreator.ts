@@ -256,7 +256,7 @@ export default class StartPageCreator {
 		noteMeta.appendChild(this.createElement("div", "note-date", noteDate));
 		const folderIcon = SvgUtil.createFolderIcon();
 		noteMeta.appendChild(folderIcon);
-		noteMeta.appendChild(document.createTextNode(MyUtil.truncateMiddle(folderPath)));
+		noteMeta.appendChild(this.createElement("div", "note-folder", MyUtil.truncateMiddle(folderPath)));
 
 		noteTitle.setAttribute("title", note.basename);
 		noteContent.appendChild(noteTitle);

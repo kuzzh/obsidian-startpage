@@ -256,6 +256,16 @@
 }
 .start-page-container .note-date {
 	margin-right: 8px;
+	flex-shrink: 0;
+	white-space: nowrap;
+}
+
+.start-page-container .note-folder {
+	flex: 1;
+	min-width: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .start-page-container .note-actions {
@@ -283,6 +293,11 @@
 	align-items: center;
 	gap: 4px;
 	margin: 5px;
+}
+
+.start-page-container .footer svg {
+	min-width: 16px;
+	min-height: 16px;
 }
 
 /* 动画效果 */
