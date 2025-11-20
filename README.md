@@ -7,26 +7,31 @@ A modern startup homepage plugin for Obsidian that provides a beautiful dashboar
 ## Features
 
 ### Smart Homepage
-- **Automatic Startup Homepage**: Automatically opens a customized homepage when the plugin starts, with support for replacing new tabs
+- **Automatic Startup Homepage**: Automatically replaces new tabs with the start page when enabled
 - **Modern Design**: Card-based layout with responsive design, perfectly adapted to various screen sizes
 - **Dashboard Statistics**: Real-time display of vault statistics (total notes, today's edits, total storage space)
-- **Quick Actions**: Built-in new note button for one-click note creation
+- **Quick Search**: Built-in search box with keyboard shortcuts - just start typing to search your notes
 - **Toolbar Integration**: Adds a homepage icon to the left toolbar for quick access anytime
+- **Command Palette**: Access start page via commands ("Open start page" and "Open start page in new tab")
 
 ### Note Management
 - **Pinned Notes**: Set important notes to be displayed at the top of the homepage for quick access
-- **Recent Notes**: Display a list of recently modified notes, sorted by modification time
-- **Smart Search**: Support fuzzy search for selecting pinned notes
-- **Dynamic Count**: Customizable number of recent notes to display (5-50 notes)
-- **Context Menu**: Support adding/removing pinned notes via right-click context menu in file explorer
+- **Recent Notes**: Display recently accessed and modified notes, intelligently sorted by both modification time and access time
+- **Smart Search Modal**: Full-featured search with fuzzy matching and case-sensitive option
+- **Dynamic Count**: Customizable number of recent notes to display (5-50 notes, adjustable directly on the homepage)
+- **Context Menu**: Support adding/removing pinned notes via right-click context menu in file explorer and on pinned notes
+- **Import from Bookmarks**: Easily import pinned notes from Obsidian's built-in bookmarks feature
+- **Reorder Pinned Notes**: Move pinned notes up or down in the settings to customize the display order
 
 ### User Experience
-- **Smart Time Display**: Automatically shows relative time (minutes ago, hours ago, days ago)
-- **Multi-language Support**: Supports both Chinese and English interfaces with dynamic switching
-- **Real-time Refresh**: Automatically refreshes homepage content when files change
-- **Timed Updates**: Notes modified within 24 hours will trigger periodic refresh (every minute)
-- **Right-click Menu**: Supports right-click refresh functionality
+- **Smart Time Display**: Automatically shows relative time (minutes ago, hours ago, days ago) for recent notes
+- **Multi-language Support**: Automatically uses Obsidian's language setting (supports Chinese and English)
+- **Real-time Refresh**: Automatically refreshes homepage content when files are modified, created, deleted, or renamed
+- **Timed Updates**: Notes modified within 24 hours trigger periodic time display refresh (every minute)
+- **Right-click Menu**: Supports right-click refresh functionality on the start page
 - **Theme Adaptation**: Perfect adaptation to Obsidian's light and dark themes
+- **Scroll Position Memory**: Remembers and restores your scroll position when returning to the start page
+- **Keyboard Navigation**: Type any character while on the start page to instantly open search modal
 
 ## Installation
 
@@ -72,20 +77,20 @@ A modern startup homepage plugin for Obsidian that provides a beautiful dashboar
 ### Mobile Interface
 
 #### Light Theme
-<img src="Screenshots/startpage-mobile-light.jpg" alt="StartPage Mobile Light" width="300"/>
+<img src="Screenshots/startpage-mobile-light.png" alt="StartPage Mobile Light" width="400"/>
 
 *StartPage interface in light theme on mobile*
 
-<img src="Screenshots/setting-mobile-light.jpg" alt="Settings Mobile Light" width="300"/>
+<img src="Screenshots/setting-mobile-light.png" alt="Settings Mobile Light" width="400"/>
 
 *Plugin settings interface in light theme on mobile*
 
 #### Dark Theme
-<img src="Screenshots/startpage-mobile-dark.png" alt="StartPage Mobile Dark" width="300"/>
+<img src="Screenshots/startpage-mobile-dark.png" alt="StartPage Mobile Dark" width="400"/>
 
 *StartPage interface in dark theme on mobile*
 
-<img src="Screenshots/setting-mobile-dark.png" alt="Settings Mobile Dark" width="300"/>
+<img src="Screenshots/setting-mobile-dark.png" alt="Settings Mobile Dark" width="400"/>
 
 *Plugin settings interface in dark theme on mobile*
 
@@ -108,15 +113,36 @@ A modern startup homepage plugin for Obsidian that provides a beautiful dashboar
 3. Click the "Select notes" button.
 4. Enter note names in the popup search box for fuzzy search.
 5. Select the notes to pin; they will be displayed in the "Pinned notes" section on the homepage.
-6. Click the "Manage" button in the pinned notes area to quickly jump to the settings page.
+6. Alternatively, right-click any file in the file explorer and select "Add to pinned notes".
+7. You can also import all your bookmarked notes by clicking "Import bookmarks" in the settings.
+8. Click the "Manage" button in the pinned notes area on the homepage to quickly jump to the settings page.
+9. Reorder pinned notes using the up/down arrow buttons in the settings.
 
 ### Custom Settings
 
-- **Language Settings**: Choose between Chinese and English interface with dynamic switching.
-- **Recent Notes Count**: Adjust the display count directly on the homepage (5-50 notes) or modify in settings.
-- **Pinned Notes Management**: Add or remove pinned notes in the settings page.
-- **Replace New Tab**: Option to automatically display the start page when opening new tabs.
-- **Real-time Preview**: All setting changes take effect immediately on the homepage.
+#### General Settings
+- **Include All Files**: Choose to show all file types or only markdown files in recent notes
+- **Recent Notes Count**: Adjust the display count (5-50 notes) directly on the homepage or in settings
+
+#### Appearance Settings
+- **Title Navigation Bar**: Choose to show, hide, or use default behavior (hidden on desktop, shown on mobile)
+- **Show Statistics Bar**: Toggle the dashboard statistics section on/off
+
+#### New Tab Settings
+- **Replace New Tab**: Automatically display the start page when opening new tabs
+
+#### Footer Settings
+- **Custom Footer Text**: Enable and set custom footer text for the start page
+- **Random Footer Text**: Use randomly generated quotes/text (automatically fetched daily)
+- **Refresh Footer**: Click the refresh icon to get a new random quote
+
+#### Pinned Notes Management
+- **Select Notes**: Add notes via fuzzy search modal
+- **Import from Bookmarks**: Import all bookmarked files to pinned notes
+- **Reorder**: Move notes up or down to customize display order
+- **Remove**: Remove notes from pinned list
+
+**Note**: All setting changes take effect immediately on the homepage.
 
 ## Development
 
@@ -167,35 +193,44 @@ npm run build
 
 ### Dashboard Statistics
 
-- **Total Notes**: Displays the count of all Markdown files in the vault.
-- **Today's Edits**: Statistics of notes modified today.
-- **Total Storage**: Shows the total size of all note files (automatically formatted as B/KB/MB/GB).
-- **Real-time Updates**: Statistics data updates automatically with file changes.
+- **Total Notes**: Displays the count of all Markdown files in the vault
+- **Today's Edits**: Statistics of notes modified today (since midnight)
+- **Total Storage**: Shows the total size of all files (respects "Include All Files" setting; automatically formatted as B/KB/MB/GB)
+- **Real-time Updates**: Statistics data updates automatically with file changes
+- **Interactive**: Click any stat card to open the search modal
+- **Toggle Visibility**: Can be hidden via the "Show stat. bar" setting
 
 ### Note Display
 
 - **Pinned Notes Section**:
-  - Displays user-manually set important notes.
-  - Supports unlimited pinned notes.
-  - One-click management function to quickly jump to settings page.
+  - Displays user-manually set important notes in customizable order
+  - Supports unlimited pinned notes
+  - One-click management button to quickly jump to settings page
+  - Right-click on any pinned note to remove it from pinned list
+  - Shows file icon, title, folder path, and modification time
+  - Click to open the note in the current tab or reveal if already open
 - **Recent Notes Section**:
-  - Displays recently edited notes sorted by modification time.
-  - Supports dynamic adjustment of display count (5-50 notes).
-  - Smart time display (relative and absolute time).
+  - Displays recently accessed and modified notes with intelligent sorting
+  - Combines modification time and access time (recently opened files rank higher)
+  - Supports dynamic adjustment of display count (5-50 notes) directly on the page
+  - Smart time display (relative time like "5 minutes ago" for recent notes)
+  - Shows file type icon, title, folder path, and modification time
+  - Respects "Include All Files" setting (all file types vs. markdown only)
 
 ### Smart Refresh Mechanism
 
-- **File Monitoring**: Automatically monitors file modification, creation, deletion, and rename events.
-- **Timed Refresh**: Notes modified within 24 hours will trigger periodic refresh (every minute).
-- **Manual Refresh**: Supports right-click menu manual refresh functionality.
-- **Performance Optimization**: Intelligently determines whether refresh is needed to avoid unnecessary performance consumption.
+- **File Monitoring**: Automatically monitors file modification, creation, deletion, and rename events
+- **Timed Refresh**: Notes modified within 24 hours trigger periodic time display updates (every minute)
+- **Manual Refresh**: Right-click anywhere on the start page and select "Refresh"
+- **Performance Optimization**: Intelligently determines whether refresh is needed to avoid unnecessary performance consumption
+- **Scroll Position**: Automatically saves and restores scroll position when navigating away and back
 
 ### Multi-language Support
 
-- **Bilingual Interface**: Complete support for Chinese and English interfaces.
-- **Dynamic Switching**: Can switch languages in settings in real-time without restart.
-- **Localized Display**: Time format, number format, etc. are fully localized.
-- **Extensibility**: Architecture supports easy addition of more languages.
+- **Automatic Language Detection**: Automatically uses Obsidian's interface language setting
+- **Bilingual Interface**: Complete support for Chinese and English interfaces
+- **Localized Display**: Time format, number format, and all UI text are fully localized
+- **Extensibility**: Architecture supports easy addition of more languages
 
 ## Interface Features
 
@@ -206,17 +241,22 @@ npm run build
 - **Theme Compatibility**: Automatically adapts to Obsidian's light and dark themes.
 
 ### Interactive Experience
-- **Hover Effects**: Rich mouse hover animation effects.
-- **Click Feedback**: Clear click feedback and state changes.
-- **Keyboard Support**: Complete keyboard navigation support.
-- **Accessibility**: Follows accessibility design principles.
+- **Hover Effects**: Rich mouse hover animation effects on note items and buttons
+- **Click Feedback**: Clear click feedback and state changes
+- **Keyboard Support**: Type any character to instantly open search; complete keyboard navigation in search modal
+- **Smart Search**: Click search box or stat cards to open full-featured search modal with fuzzy matching
+- **Create Notes**: Press Enter in empty search results to create a new note with the search query as title
+- **Accessibility**: Follows accessibility design principles with proper ARIA labels
 
 ## Technical Features
 
-- **TypeScript Development**: Uses TypeScript to ensure code quality and type safety.
-- **Modular Architecture**: Clear module separation for easy maintenance and extension.
-- **Performance Optimization**: Smart caching and lazy loading for smooth experience.
-- **Memory Management**: Automatic cleanup of timers and event listeners to avoid memory leaks.
+- **TypeScript Development**: Uses TypeScript to ensure code quality and type safety
+- **Modular Architecture**: Clear separation between core logic, views, and utilities
+- **Performance Optimization**: Efficient file monitoring and debounced scroll position saving
+- **Memory Management**: Automatic cleanup of timers and event listeners to avoid memory leaks
+- **Settings Backup**: Automatic daily backup of settings to prevent data loss
+- **Event System**: Proper event registration and cleanup using Obsidian's event system
+- **Mobile Support**: Fully functional on both desktop and mobile platforms
 
 ## Contributing
 
