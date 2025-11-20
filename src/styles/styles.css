@@ -537,6 +537,14 @@
 	background: var(--background-modifier-active-hover);
 }
 
+.my-search-modal .search-result-item-file-name {
+	font-weight: 500;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 100%;
+}
+
 .my-search-modal .search-result-item-tag {
 	flex: 1;
 	text-transform: uppercase;
@@ -550,6 +558,8 @@
 	margin-inline-start: auto;
 	padding: 0 var(--size-4-1);
 	align-self: center;
+	min-width: 16px;
+	min-height: 16px;
 }
 
 .my-search-modal .search-result-item-folder-name,
@@ -559,6 +569,7 @@
 	color: var(--nav-tag-color);
 	margin-left: 4px;
 	font-size: 12px;
+	flex-shrink: 0;
 }
 
 /* 响应式设计 */
@@ -629,6 +640,16 @@
 		left: 10px !important;
 		transform: translateX(10px);
 		bottom: unset !important;
+		border: var(--modal-border-width) solid var(--modal-border-color) !important;
+	}
+
+	.my-search-modal .search-result-item {
+		font-size: 12px;
+	}
+
+	.my-search-modal .search-result-item-folder-icon,
+	.my-search-modal .search-result-item-folder-name {
+		display: none;
 	}
 
 	button:not(.clickable-icon).mobile-tap {

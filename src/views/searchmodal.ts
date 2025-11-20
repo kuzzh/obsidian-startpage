@@ -116,9 +116,12 @@ export default class SearchModal extends Modal {
 			const file = this.filteredResults[i];
 			const itemEl = listEl.createEl("li", { cls: "search-result-item" });
 			const fileNameWithoutExt = MyUtil.getFileNameWithoutExtension(file.name);
-			const truncatedFileName = MyUtil.truncateMiddle(fileNameWithoutExt);
-			itemEl.setText(truncatedFileName);
+
+			const fileNameEl = document.createElement("span");
+			fileNameEl.addClass("search-result-item-file-name");
+			fileNameEl.setText(fileNameWithoutExt);
 			itemEl.setAttribute("title", fileNameWithoutExt);
+			itemEl.appendChild(fileNameEl);
 
 			const tagEl = document.createElement("span");
 			tagEl.addClass("search-result-item-tag");
