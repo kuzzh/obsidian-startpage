@@ -186,6 +186,11 @@ export default class StartPageCreator {
 			statCard.appendChild(statIcon);
 			statCard.appendChild(statContent);
 			statsSection.appendChild(statCard);
+
+			statCard.addEventListener("click", () => {
+				// open search modal
+				this.showSearchModal();
+			});
 		});
 
 		return statsSection;
@@ -334,7 +339,7 @@ export default class StartPageCreator {
 			const statsSection = this.createStatsSection();
 			mainContent.appendChild(statsSection);
 		}
-		
+
 		const contentGrid = this.createContentGrid();
 		mainContent.appendChild(contentGrid);
 
