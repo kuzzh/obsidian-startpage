@@ -28,7 +28,6 @@ export default class SearchModal extends Modal {
 		modalEl.addClass("my-search-modal");
 
 		const searchContainer = contentEl.createDiv("search-container");
-		searchContainer.style.position = "relative";
 
 		this.searchComponent = new SearchComponent(searchContainer);
 		this.searchComponent.setPlaceholder(t("search_placeholder")).onChange((value: string) => {

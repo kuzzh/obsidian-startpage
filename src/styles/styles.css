@@ -471,6 +471,7 @@
 }
 
 .my-search-modal .search-container {
+	position: relative;
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -707,7 +708,8 @@
 		top: 10%;
 		left: 10px !important;
 		transform: translateX(10px);
-		bottom: unset !important;
+		bottom: 10% !important;
+		max-height: 90vh !important;
 		border: var(--modal-border-width) solid var(--modal-border-color) !important;
 	}
 
