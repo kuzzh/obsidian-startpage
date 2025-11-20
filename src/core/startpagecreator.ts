@@ -134,36 +134,17 @@ export default class StartPageCreator {
 		logo.appendChild(logoText);
 		logo.appendChild(searchBoxContainer);
 
-		// Header actions
-		// const headerActions = this.createElement("div", "header-actions");
+		// Header actions (Update badge if available)
+		const headerActions = this.createElement("div", "header-actions");
 
-		// const newNoteBtn = this.createElement("button");
-		// const newNoteIcon = SvgUtil.createNewNoteIcon();
-		// newNoteBtn.addEventListener("click", async () => {
-		// 	const parent: TFolder = this.app.fileManager.getNewFileParent("");
-		// 	if (!parent) {
-		// 		console.error("Unable to get the currently selected directory");
-		// 		return;
-		// 	}
-
-		// 	let newFilePath = parent.path === "/" ? "Untitled.md" : parent.path + "/Untitled.md";
-		// 	let index = 1;
-		// 	let existFile = this.app.vault.getAbstractFileByPath(newFilePath);
-		// 	while (existFile) {
-		// 		newFilePath = parent.path === "/" ? `Untitled ${index++}.md` : parent.path + `/Untitled ${index++}.md`;
-		// 		existFile = this.app.vault.getAbstractFileByPath(newFilePath);
-		// 	}
-
-		// 	const file = await this.app.vault.create(newFilePath, "");
-		// 	this.app.workspace.openLinkText(file.path, "", false);
-		// });
-		// newNoteBtn.appendChild(newNoteIcon);
-		// newNoteBtn.appendChild(document.createTextNode(t("new_note")));
-
-		// headerActions.appendChild(newNoteBtn);
+		// Check if there's a new version available
+		if (this.hasUpdate()) {
+			const updateBadge = this.createUpdateBadge();
+			headerActions.appendChild(updateBadge);
+		}
 
 		header.appendChild(logo);
-		// header.appendChild(headerActions);
+		header.appendChild(headerActions);
 
 		return header;
 	}
@@ -515,5 +496,52 @@ export default class StartPageCreator {
 		if (this.globalKeyHandler) {
 			document.removeEventListener("keydown", this.globalKeyHandler, true);
 		}
+	}
+
+	/**
+	 * Check if there's a new version available
+	 */
+	private hasUpdate(): boolean {
+		const currentVersion = this.plugin.manifest.version;
+		const latestVersion = this.plugin.settings.latestVersion;
+		
+		if (!latestVersion) {
+			return false;
+		}
+
+		// Simple version comparison
+		const current = currentVersion.split(".").map(Number);
+		const latest = latestVersion.split(".").map(Number);
+
+		for (let i = 0; i < Math.max(current.length, latest.length); i++) {
+			const c = current[i] || 0;
+			const l = latest[i] || 0;
+			if (l > c) return true;
+			if (l < c) return false;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Create update badge element
+	 */
+	private createUpdateBadge(): HTMLElement {
+		const badge = this.createElement("div", "update-badge");
+		badge.setAttribute("title", t("new_version_available"));
+
+		const badgeIcon = this.createElement("span", "update-badge-icon", "🎉");
+		const badgeText = this.createElement("span", "update-badge-text", 
+			t("update_to_version").replace("{version}", this.plugin.settings.latestVersion));
+
+		badge.appendChild(badgeIcon);
+		badge.appendChild(badgeText);
+
+		badge.addEventListener("click", () => {
+			// Open plugin releases page
+			window.open("https://github.com/kuzzh/obsidian-startpage/releases", "_blank");
+		});
+
+		return badge;
 	}
 }

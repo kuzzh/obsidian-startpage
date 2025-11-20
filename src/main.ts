@@ -3,6 +3,7 @@ import { StartPageView, VIEW_TYPE_START_PAGE } from "@/views/startpageview";
 import { StartPageSettingTab } from "@/views/startpagesettingtab";
 import { StartPageSettings, DEFAULT_SETTINGS } from "@/types";
 import { setLocale, t } from "@/i18n";
+import { VersionChecker } from "@/utils/versionchecker";
 import "@/types";
 
 export default class StartPagePlugin extends Plugin {
@@ -19,6 +20,9 @@ export default class StartPagePlugin extends Plugin {
 		setLocale(obsidianLang);
 
 		this.registerView(VIEW_TYPE_START_PAGE, (leaf) => new StartPageView(leaf, this.app, this));
+
+		// Check for updates in background
+		this.checkForUpdates();
 
 		// Add ribbon button
 		this.addRibbonIcon("home", "Open start page", () => {
@@ -94,6 +98,8 @@ export default class StartPagePlugin extends Plugin {
 				customFooterText: typeof savedData.customFooterText === "string" ? savedData.customFooterText : "",
 				scrollPosition: typeof savedData.scrollPosition === "number" ? savedData.scrollPosition : 0,
 				showStatBar: typeof savedData.showStatBar === "boolean" ? savedData.showStatBar : true,
+				lastVersionCheck: typeof savedData.lastVersionCheck === "number" ? savedData.lastVersionCheck : 0,
+				latestVersion: typeof savedData.latestVersion === "string" ? savedData.latestVersion : "",
 			};
 		} else {
 			// First installation or data corruption, use default settings
@@ -204,5 +210,42 @@ export default class StartPagePlugin extends Plugin {
 
 	onunload() {
 		this.app.workspace.getLeavesOfType(VIEW_TYPE_START_PAGE).forEach((leaf) => leaf.detach());
+	}
+
+	/**
+	 * Check for plugin updates in background
+	 */
+	async checkForUpdates() {
+		const now = Date.now();
+		const ONE_DAY = 24 * 60 * 60 * 1000; // 24 hours
+
+		// Check once per day
+		if (now - this.settings.lastVersionCheck < ONE_DAY) {
+			return;
+		}
+
+		try {
+			const versionInfo = await VersionChecker.checkForUpdate(this.manifest.version);
+			
+			if (versionInfo && versionInfo.hasUpdate) {
+				this.settings.latestVersion = versionInfo.latestVersion;
+				this.settings.lastVersionCheck = now;
+				await this.saveSettings();
+
+				// Refresh start page views to show the update badge
+				const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_START_PAGE);
+				leaves.forEach((leaf) => {
+					if (leaf.view instanceof StartPageView) {
+						leaf.view.renderContent();
+					}
+				});
+			} else {
+				// No update, just update the check timestamp
+				this.settings.lastVersionCheck = now;
+				await this.saveSettings();
+			}
+		} catch (error) {
+			console.error("Error checking for updates:", error);
+		}
 	}
 }

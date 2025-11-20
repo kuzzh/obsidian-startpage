@@ -24,6 +24,8 @@ export interface StartPageSettings {
 	customFooterText: string;
 	scrollPosition: number; // Scroll position for start page
 	showStatBar: boolean;
+	lastVersionCheck: number; // Last time version check was performed
+	latestVersion: string; // Latest version from GitHub
 }
 
 export const DEFAULT_SETTINGS: StartPageSettings = {
@@ -39,4 +41,6 @@ export const DEFAULT_SETTINGS: StartPageSettings = {
 	customFooterText: "",
 	scrollPosition: 0,
 	showStatBar: true,
+	lastVersionCheck: 0,
+	latestVersion: "",
 };

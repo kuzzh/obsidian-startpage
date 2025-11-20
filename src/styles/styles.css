@@ -53,7 +53,8 @@
 
 .start-page-container .header-actions {
 	display: flex;
-	gap: 12px;
+	align-items: center;
+	gap: 10px;
 }
 
 /* 按钮样式 */
@@ -254,6 +255,7 @@
 	font-size: 12px;
 	color: var(--text-faint);
 }
+
 .start-page-container .note-date {
 	margin-right: 8px;
 	flex-shrink: 0;
@@ -306,6 +308,7 @@
 		opacity: 0;
 		transform: translateY(20px);
 	}
+
 	to {
 		opacity: 1;
 		transform: translateY(0);
@@ -572,37 +575,95 @@
 	flex-shrink: 0;
 }
 
+/* Update Badge Styles */
+.update-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 12px;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: white;
+	border-radius: 20px;
+	font-size: 13px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+	user-select: none;
+	animation: pulse-badge 2s ease-in-out infinite;
+}
+
+.update-badge:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+	background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.update-badge:active {
+	transform: translateY(0);
+}
+
+.update-badge-icon {
+	font-size: 16px;
+	line-height: 1;
+}
+
+.update-badge-text {
+	line-height: 1;
+	white-space: nowrap;
+}
+
+@keyframes pulse-badge {
+	0%, 100% {
+		box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+	}
+
+	50% {
+		box-shadow: 0 2px 16px rgba(102, 126, 234, 0.6);
+	}
+}
+
 /* 响应式设计 */
 @media (max-width: 1200px) {
 	.start-page-container {
 		padding: 5px !important;
 		overflow-x: hidden !important;
 	}
+
 	.start-page-container .header {
 		margin-bottom: 10px;
 	}
+
 	.start-page-container .logo-text {
 		display: none;
 	}
+
 	.start-page-container .search-box {
 		flex: 1;
+		min-width: 0px;
 	}
+
 	.start-page-container .recent-notes-limit-label {
 		display: none;
 	}
+
 	.start-page-container .content-grid {
 		grid-template-columns: 1fr;
 	}
+
 	.start-page-container .stat-icon {
 		display: none;
 	}
+
 	.start-page-container .stats-section {
 		margin-bottom: 10px;
 		grid-template-columns: repeat(3, 1fr);
 	}
+
 	.start-page-container .stat-card {
 		padding: 5px;
 	}
+
 	.start-page-container .stat-content {
 		display: flex;
 		flex-direction: column;
@@ -610,23 +671,29 @@
 		justify-content: center;
 		width: 100%;
 	}
+
 	.start-page-container .stat-number {
 		font-size: 20px;
 	}
+
 	.start-page-container .stat-label {
 		font-size: 12px;
 		text-align: center;
 	}
+
 	.start-page-container .section {
 		overflow: unset;
 		overflow-x: hidden;
 	}
+
 	.start-page-container .section-header {
 		margin-bottom: 12px;
 	}
+
 	.start-page-container .main-content {
 		min-height: unset !important;
 	}
+
 	.start-page-container .content-grid {
 		gap: 10px;
 	}
@@ -676,6 +743,7 @@
 	.pinned-note-item .note-actions {
 		justify-content: flex-start;
 	}
+
 	.pinned-note-item .control-button,
 	.pinned-note-item .remove-button {
 		height: 24px;
