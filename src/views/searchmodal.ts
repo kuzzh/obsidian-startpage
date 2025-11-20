@@ -144,7 +144,6 @@ export default class SearchModal extends Modal {
 			}
 
 			itemEl.onClickEvent(() => {
-				console.log(`你选择了: ${file.name}`);
 				this.onChooseItem(file);
 				this.close();
 			});
