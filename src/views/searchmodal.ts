@@ -104,7 +104,7 @@ export default class SearchModal extends Modal {
 			const emptyEl = this.resultsContainer.createDiv("search-empty-state");
 			const query = this.searchComponent.getValue();
 			if (query) {
-				emptyEl.setHTMLUnsafe(t("no_results_press_enter").replace("{query}", query));
+				emptyEl.innerHTML = t("no_results_press_enter").replace("{query}", query);
 			} else {
 				emptyEl.setText(t("no_results"));
 			}

@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting, Platform, TextComponent, ToggleComponent } from "obsidian";
+import { App, PluginSettingTab, Setting, Platform, TextComponent, ToggleComponent, Notice } from "obsidian";
 import StartPagePlugin from "@/main";
 import { VIEW_TYPE_START_PAGE, StartPageView } from "@/views/startpageview";
 import { t } from "@/i18n";
@@ -58,6 +58,63 @@ export class StartPageSettingTab extends PluginSettingTab {
 		}
 		if (this.useRandomFooterTextComponent) {
 			this.useRandomFooterTextComponent.setDisabled(!this.plugin.settings.showCustomFooterText);
+		}
+	}
+
+	private async importFromBookmarks() {
+		try {
+			// Access the bookmarks plugin via app.internalPlugins
+			const bookmarksPlugin = (this.app as any).internalPlugins?.getPluginById('bookmarks');
+			
+			if (!bookmarksPlugin || !bookmarksPlugin.enabled) {
+				new Notice(t("import_bookmarks_no_bookmarks"));
+				return;
+			}
+
+			const bookmarks = bookmarksPlugin.instance?.items || [];
+			
+			// Filter file bookmarks and extract their paths
+			const bookmarkedFilePaths: string[] = [];
+			const extractFilePaths = (items: any[]) => {
+				for (const item of items) {
+					if (item.type === 'file' && item.path) {
+						bookmarkedFilePaths.push(item.path);
+					} else if (item.type === 'group' && item.items) {
+						// Recursively process groups
+						extractFilePaths(item.items);
+					}
+				}
+			};
+			
+			extractFilePaths(bookmarks);
+
+			if (bookmarkedFilePaths.length === 0) {
+				new Notice(t("import_bookmarks_no_bookmarks"));
+				return;
+			}
+
+			// Filter out already pinned notes
+			const newPinnedNotes = bookmarkedFilePaths.filter(
+				path => !this.plugin.settings.pinnedNotes.includes(path)
+			);
+
+			if (newPinnedNotes.length === 0) {
+				new Notice(t("import_bookmarks_already_exist"));
+				return;
+			}
+
+			// Add new bookmarked notes to pinned notes
+			this.plugin.settings.pinnedNotes.push(...newPinnedNotes);
+			await this.plugin.saveSettings();
+			this.refreshStartPage();
+			this.display();
+
+			// Show success message
+			const message = t("import_bookmarks_success").replace("{count}", newPinnedNotes.length.toString());
+			new Notice(message);
+		} catch (error) {
+			console.error('Error importing bookmarks:', error);
+			new Notice(t("import_bookmarks_no_bookmarks"));
 		}
 	}
 
@@ -232,6 +289,15 @@ export class StartPageSettingTab extends PluginSettingTab {
                             this.display();
                         }
                     }).open();
+                });
+            });
+
+        new Setting(containerEl)
+            .setName(t("pinned_notes_import_from_bookmarks"))
+            .setDesc(t("pinned_notes_import_from_bookmarks_desc"))
+            .addButton((button) => {
+                button.setButtonText(t("pinned_notes_import_from_bookmarks_button")).onClick(async () => {
+                    await this.importFromBookmarks();
                 });
             });
     }
