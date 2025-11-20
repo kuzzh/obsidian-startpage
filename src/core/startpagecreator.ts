@@ -1,11 +1,12 @@
-import  {ID_STAT_TOTAL_NOTES, ID_STAT_TODAY_EDITED, ID_STAT_TOTAL_SIZE} from "@/types";
-import { App, TFolder, TFile, Menu } from "obsidian";
+import { ID_STAT_TOTAL_NOTES, ID_STAT_TODAY_EDITED, ID_STAT_TOTAL_SIZE } from "@/types";
+import { App, TFolder, TFile, Menu, Platform } from "obsidian";
 import StartPagePlugin from "@/main";
 import { t } from "@/i18n";
 import { VIEW_TYPE_START_PAGE, StartPageView } from "@/views/startpageview";
 import FooterTextUtil from "@/utils/footertextutil";
 import SvgUtil from "@/utils/svgutil";
 import { MyUtil } from "@/utils/myutil";
+import SearchModal from "@/views/searchmodal";
 
 declare module "obsidian" {
 	interface App {
@@ -20,6 +21,9 @@ export default class StartPageCreator {
 	private app: App;
 	private plugin: StartPagePlugin;
 	private container: Element;
+	private searchBox: HTMLInputElement;
+	private globalKeyHandler: (e: KeyboardEvent) => void;
+	private initialQuery: string = "";
 	private stats = [
 		{
 			id: ID_STAT_TOTAL_NOTES,
@@ -27,7 +31,7 @@ export default class StartPageCreator {
 				number: 0,
 				label: function () {
 					return t("total_notes");
-				}
+				},
 			},
 		},
 		{
@@ -36,7 +40,7 @@ export default class StartPageCreator {
 				number: 0,
 				label: function () {
 					return t("today_edited");
-				}
+				},
 			},
 		},
 		{
@@ -45,7 +49,7 @@ export default class StartPageCreator {
 				number: "0",
 				label: function () {
 					return t("total_size");
-				}
+				},
 			},
 		},
 	];
@@ -71,6 +75,12 @@ export default class StartPageCreator {
 		this.container.appendChild(header);
 		this.container.appendChild(mainContent);
 		this.container.appendChild(footer);
+
+		this.setupGlobalKeyListener();
+	}
+
+	public destroy(): void {
+		this.removeGlobalKeyListener();
 	}
 
 	private initData(pinnedNotes: TFile[] | null, recentNotes: TFile[] | null): void {
@@ -106,39 +116,54 @@ export default class StartPageCreator {
 		const logoIcon = SvgUtil.createLogoIcon();
 		const logoText = this.createElement("span", "logo-text", "Start Page for Obsidian");
 
+		this.searchBox = this.createElement("input", "search-box", "") as HTMLInputElement;
+		this.searchBox.type = "text";
+		this.searchBox.placeholder = t("search_placeholder");
+		this.searchBox.addEventListener("click", (e) => {
+			this.showSearchModal();
+		});
+		
+		this.searchBox.addEventListener("focus", (e) => {
+			(e.target as HTMLInputElement).blur();
+		});
+
+		const searchBoxContainer = this.createElement("div", "search-box-container");
+		searchBoxContainer.appendChild(this.searchBox);
+
 		logo.appendChild(logoIcon);
 		logo.appendChild(logoText);
+		logo.appendChild(searchBoxContainer);
 
 		// Header actions
-		const headerActions = this.createElement("div", "header-actions");
+		// const headerActions = this.createElement("div", "header-actions");
 
-		const newNoteBtn = this.createElement("button");
-		const newNoteIcon = SvgUtil.createNewNoteIcon();
-		newNoteBtn.addEventListener("click", async () => {
-			const parent: TFolder = this.app.fileManager.getNewFileParent("");
-			if (!parent) {
-				console.error("Unable to get the currently selected directory");
-				return;
-			}
+		// const newNoteBtn = this.createElement("button");
+		// const newNoteIcon = SvgUtil.createNewNoteIcon();
+		// newNoteBtn.addEventListener("click", async () => {
+		// 	const parent: TFolder = this.app.fileManager.getNewFileParent("");
+		// 	if (!parent) {
+		// 		console.error("Unable to get the currently selected directory");
+		// 		return;
+		// 	}
 
-			let newFilePath = parent.path === "/" ? "Untitled.md" : parent.path + "/Untitled.md";
-			let index = 1;
-			let existFile = this.app.vault.getAbstractFileByPath(newFilePath);
-			while (existFile) {
-				newFilePath = parent.path === "/" ? `Untitled ${index++}.md` : parent.path + `/Untitled ${index++}.md`;
-				existFile = this.app.vault.getAbstractFileByPath(newFilePath);
-			}
+		// 	let newFilePath = parent.path === "/" ? "Untitled.md" : parent.path + "/Untitled.md";
+		// 	let index = 1;
+		// 	let existFile = this.app.vault.getAbstractFileByPath(newFilePath);
+		// 	while (existFile) {
+		// 		newFilePath = parent.path === "/" ? `Untitled ${index++}.md` : parent.path + `/Untitled ${index++}.md`;
+		// 		existFile = this.app.vault.getAbstractFileByPath(newFilePath);
+		// 	}
 
-			const file = await this.app.vault.create(newFilePath, "");
-			this.app.workspace.openLinkText(file.path, "", false);
-		});
-		newNoteBtn.appendChild(newNoteIcon);
-		newNoteBtn.appendChild(document.createTextNode(t("new_note")));
+		// 	const file = await this.app.vault.create(newFilePath, "");
+		// 	this.app.workspace.openLinkText(file.path, "", false);
+		// });
+		// newNoteBtn.appendChild(newNoteIcon);
+		// newNoteBtn.appendChild(document.createTextNode(t("new_note")));
 
-		headerActions.appendChild(newNoteBtn);
+		// headerActions.appendChild(newNoteBtn);
 
 		header.appendChild(logo);
-		header.appendChild(headerActions);
+		// header.appendChild(headerActions);
 
 		return header;
 	}
@@ -414,9 +439,7 @@ export default class StartPageCreator {
 	}
 
 	getTotalSize(): number {
-		const allFiles: TFile[] = this.plugin.settings.includeAllFilesInRecent
-			? this.app.vault.getFiles()
-			: this.app.vault.getMarkdownFiles();
+		const allFiles: TFile[] = this.plugin.settings.includeAllFilesInRecent ? this.app.vault.getFiles() : this.app.vault.getMarkdownFiles();
 
 		let totalSize = 0;
 
@@ -425,5 +448,65 @@ export default class StartPageCreator {
 		});
 
 		return totalSize;
+	}
+
+	private setupGlobalKeyListener(): void {
+		this.globalKeyHandler = (e: KeyboardEvent) => {
+			// 检查当前活动视图是否是 start page
+			const activeView = this.app.workspace.getActiveViewOfType(StartPageView);
+			if (!activeView) {
+				return;
+			}
+
+			// 排除功能键和组合键
+			if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) {
+				return;
+			}
+
+			// 只处理可打印字符（字母、数字等）
+			if (e.key.length !== 1) {
+				return;
+			}
+
+			// 排除在输入框中输入的情况
+			if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+				return;
+			}
+
+			if (document.querySelector('.modal-container')) {
+				return;
+			}
+
+			this.initialQuery = e.key;
+
+			this.showSearchModal();
+
+			e.preventDefault();
+			e.stopPropagation();
+		};
+
+		document.addEventListener("keydown", this.globalKeyHandler, true);
+	}
+
+	private showSearchModal(): void {
+		if (document.querySelector('.modal-container')) {
+			return;
+		}
+
+		const modal = new SearchModal(
+			this.app,
+			(item: TFile) => {
+				this.app.workspace.openLinkText(item.path, "", false);
+			},
+			this.initialQuery
+		);
+		modal.open();
+		this.initialQuery = "";
+	}
+
+	private removeGlobalKeyListener(): void {
+		if (this.globalKeyHandler) {
+			document.removeEventListener("keydown", this.globalKeyHandler, true);
+		}
 	}
 }

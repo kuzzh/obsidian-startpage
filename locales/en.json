@@ -57,5 +57,10 @@
     "footer_settings_heading": "Footer",
     "pinned_notes_settings_heading": "Pinned Notes",
     "default_footer_text": "I think, therefore I am. — René Descartes",
-    "loading_footer_text": "Loading..."
+    "loading_footer_text": "Loading...",
+    "search_modal_title": "Search",
+    "search_placeholder": "Type to start search...",
+    "case_sensitive": "Case sensitive",
+    "no_results": "No matching results.",
+    "no_results_press_enter": "No matching results. Press <b>Enter</b> to create a new note \"<b>{query}</b>\"."
 }

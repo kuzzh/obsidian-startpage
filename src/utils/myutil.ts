@@ -25,6 +25,16 @@ export class MyUtil {
         return "/" + dir;
     }
 
+    /**
+     * 获取文件名（不包括扩展名）
+     */
+	static getFileNameWithoutExtension(fileName: string): string {
+		return fileName.slice(0, fileName.lastIndexOf("."));
+	}
+
+    /**
+     * 格式化时间戳为相对时间
+     */
     static formatDate(timestamp: number): string {
 		const date = new Date(timestamp);
 		const now = new Date();
@@ -57,6 +67,9 @@ export class MyUtil {
 		});
 	}
 
+    /**
+     * 格式化文件大小
+     */
 	static formatSize(size: number): string {
 		if (size < 1024) {
 			return size + "B";

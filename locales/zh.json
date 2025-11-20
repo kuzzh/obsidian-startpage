@@ -56,6 +56,11 @@
     "new_tab_settings_heading": "新标签页",
     "footer_settings_heading": "页脚",
     "pinned_notes_settings_heading": "固定的笔记",
-    "default_footer_text": "天行健，君子以自强不息。——《周易》",
-    "loading_footer_text": "加载中..."
+    "default_footer_text": "天行健,君子以自强不息。——《周易》",
+    "loading_footer_text": "加载中...",
+    "search_modal_title": "搜索",
+    "search_placeholder": "输入搜索内容",
+    "case_sensitive": "区分大小写",
+    "no_results": "没有找到匹配的结果。",
+    "no_results_press_enter": "没有找到匹配的结果。按 <b>Enter</b> 键创建新笔记 \"<b>{query}</b>\"。"
   }

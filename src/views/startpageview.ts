@@ -90,6 +90,9 @@ export class StartPageView extends ItemView {
 	}
 
 	async onClose() {
+		if (this.startPageCreator) {
+			this.startPageCreator.destroy();
+		}
 		// Clean up event listeners and timer when view is closed
 		if (this.fileChangeEventRef) {
 			this.app.vault.offref(this.fileChangeEventRef);
