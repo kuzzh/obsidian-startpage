@@ -603,6 +603,11 @@
 	.start-page-container .content-grid {
 		gap: 10px;
 	}
+
+	.start-page-container .note-icon,
+	.start-page-container .note-actions {
+		display: none;
+	}
 }
 
 @media (max-width: 768px) {
