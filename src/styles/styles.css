@@ -437,9 +437,9 @@
 	transform: translateX(-50%);
 	position: fixed;
 	width: 600px;
-	max-width: 90vw;
-	min-height: 100px;
-	max-height: calc(80vh - 20%);
+	max-width: 90vw !important;
+	min-height: 100px !important;
+	max-height: calc(80vh - 20%) !important;
 	display: flex;
 	flex-direction: column;
 }
@@ -607,6 +607,16 @@
 	.start-page-container .note-icon,
 	.start-page-container .note-actions {
 		display: none;
+	}
+
+	.my-search-modal {
+		left: 10px !important;
+		transform: translateX(10px);
+		bottom: unset !important;
+	}
+
+	button:not(.clickable-icon).mobile-tap {
+		box-shadow: none !important;
 	}
 }
 
