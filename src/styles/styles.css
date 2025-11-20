@@ -550,6 +550,7 @@
 @media (max-width: 1200px) {
 	.start-page-container {
 		padding: 5px !important;
+		overflow-x: hidden !important;
 	}
 	.start-page-container .header {
 		margin-bottom: 10px;
