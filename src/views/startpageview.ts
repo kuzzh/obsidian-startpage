@@ -15,6 +15,7 @@ export class StartPageView extends ItemView {
 	private readonly REFRESH_INTERVAL = 60000; // Refresh every 1 minute
 	private startPageCreator: StartPageCreator;
 	private isScrollEventRegistered = false;
+	private debouncedSaveScrollPosition: () => void;
 
 	constructor(leaf: any, app: App, plugin: StartPagePlugin) {
 		super(leaf);
@@ -24,6 +25,11 @@ export class StartPageView extends ItemView {
 		this.navigation = true;
 		this.icon = "home";
 		this.contentEl.addClass("start-page-view");
+
+		// Create debounced function once during initialization
+		this.debouncedSaveScrollPosition = debounce(() => {
+			this.saveScrollPosition();
+		}, 300);
 
 		if (this.plugin.settings.showTitleNavigationBar === "show") {
 			this.showTitleNavigationBar(true);
@@ -155,9 +161,7 @@ export class StartPageView extends ItemView {
 
 		if (!this.isScrollEventRegistered) {
 			this.registerDomEvent(container, "scroll", () => {
-				debounce(() => {
-					this.saveScrollPosition();
-				}, 300);
+				this.debouncedSaveScrollPosition();
 			});
 
 			this.isScrollEventRegistered = true;
