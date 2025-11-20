@@ -93,6 +93,7 @@ export default class StartPagePlugin extends Plugin {
 				todayRandomZhFooterText: typeof savedData.todayRandomZhFooterText === "string" ? savedData.todayRandomZhFooterText : "",
 				customFooterText: typeof savedData.customFooterText === "string" ? savedData.customFooterText : "",
 				scrollPosition: typeof savedData.scrollPosition === "number" ? savedData.scrollPosition : 0,
+				showStatBar: typeof savedData.showStatBar === "boolean" ? savedData.showStatBar : true,
 			};
 		} else {
 			// First installation or data corruption, use default settings

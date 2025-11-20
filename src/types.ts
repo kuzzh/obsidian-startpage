@@ -23,6 +23,7 @@ export interface StartPageSettings {
 	todayRandomZhFooterText: string; // 今日中文随机脚本文字，格式：2025118|百日依山尽，黄河入海流
 	customFooterText: string;
 	scrollPosition: number; // Scroll position for start page
+	showStatBar: boolean;
 }
 
 export const DEFAULT_SETTINGS: StartPageSettings = {
@@ -37,4 +38,5 @@ export const DEFAULT_SETTINGS: StartPageSettings = {
 	todayRandomZhFooterText: "",
 	customFooterText: "",
 	scrollPosition: 0,
+	showStatBar: true,
 };

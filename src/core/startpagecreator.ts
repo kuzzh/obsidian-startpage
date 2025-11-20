@@ -330,10 +330,12 @@ export default class StartPageCreator {
 	private createMainContent(): HTMLElement {
 		const mainContent = this.createElement("main", "main-content");
 
-		const statsSection = this.createStatsSection();
+		if (this.plugin.settings.showStatBar) {
+			const statsSection = this.createStatsSection();
+			mainContent.appendChild(statsSection);
+		}
+		
 		const contentGrid = this.createContentGrid();
-
-		mainContent.appendChild(statsSection);
 		mainContent.appendChild(contentGrid);
 
 		return mainContent;

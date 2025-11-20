@@ -126,6 +126,17 @@ export class StartPageSettingTab extends PluginSettingTab {
 					this.updateTitleNavigationBar();
 				});
 			});
+		new Setting(containerEl)
+			.setName(t("show_stat_bar"))
+			.setDesc(t("show_stat_bar_desc"))
+			.addToggle((toggle) => {
+				toggle.setValue(this.plugin.settings.showStatBar);
+				toggle.onChange(async (value) => {
+					this.plugin.settings.showStatBar = value;
+					await this.plugin.saveSettings();
+					this.refreshStartPage();
+				});
+			});
     }
 
     private createNewTabSettings(containerEl: HTMLElement) {

@@ -62,5 +62,7 @@
     "search_placeholder": "Type to start search...",
     "case_sensitive": "Case sensitive",
     "no_results": "No matching results.",
-    "no_results_press_enter": "No matching results. Press <b>Enter</b> to create a new note \"<b>{query}</b>\"."
+    "no_results_press_enter": "No matching results. Press <b>Enter</b> to create a new note \"<b>{query}</b>\".",
+    "show_stat_bar": "Show stat. bar",
+    "show_stat_bar_desc": "Show stat. bar on the start page"
 }

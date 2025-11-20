@@ -62,5 +62,7 @@
     "search_placeholder": "输入搜索内容",
     "case_sensitive": "区分大小写",
     "no_results": "没有找到匹配的结果。",
-    "no_results_press_enter": "没有找到匹配的结果。按 <b>Enter</b> 键创建新笔记 \"<b>{query}</b>\"。"
+    "no_results_press_enter": "没有找到匹配的结果。按 <b>Enter</b> 键创建新笔记 \"<b>{query}</b>\"。",
+    "show_stat_bar": "显示统计栏",
+    "show_stat_bar_desc": "在启动首页中显示统计栏"
   }
