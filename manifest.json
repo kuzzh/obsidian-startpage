@@ -1,7 +1,7 @@
 {
 	"id": "start-page",
 	"name": "Startpage",
-	"version": "0.3.1",
+	"version": "0.3.2",
 	"minAppVersion": "1.8.0",
 	"description": "Automatically opens a customized homepage upon startup, displaying pinned and recent notes.",
 	"author": "kuzzh",
