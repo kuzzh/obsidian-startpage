@@ -538,8 +538,12 @@ export default class StartPageCreator {
 		badge.appendChild(badgeText);
 
 		badge.addEventListener("click", () => {
-			// Open plugin releases page
-			window.open("https://github.com/kuzzh/obsidian-startpage/releases", "_blank");
+			const setting = this.app.setting;
+			setting.open();
+
+			setTimeout(() => {
+				setting.openTabById("community-plugins");
+			}, 100);
 		});
 
 		return badge;
