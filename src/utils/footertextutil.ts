@@ -3,7 +3,7 @@ import StartPagePlugin from "@/main";
 import { StartPageSettings } from "@/types";
 import { getLanguage } from "obsidian";
 
-const QUOTE_API_URL_EN = "https://florinbobis-quotes-net.hf.space/quotes/random?dataset=quotable";
+const QUOTE_API_URL_EN = "http://api.quotable.io/random";
 const QUOTE_API_URL_ZH = "https://v2.jinrishici.com/one.json?client=browser-sdk/1.2";
 
 export default class FooterTextUtil {
@@ -87,20 +87,19 @@ export default class FooterTextUtil {
         return t("default_footer_text");
     }
 
-    // {
-    // "id": 37519,
-    // "author": "Dorothy Thompson",
-    // "quoteText": "Only when we are no longer afraid do we begin to live.",
-    // "source": null,
-    // "dataSet": "quotable",
-    // "book": null,
-    // "categories": "famous quotes",
-    // "url": null,
-    // "isbn": null,
-    // "language": "english",
-    // "originalLanguage": null,
-    // "dateCreated": "2024-09-17T20:26:38.38137"
-    // }   
+// {
+//   "_id": "YC9amT8URZZ",
+//   "content": "Science is organized knowledge. Wisdom is organized life.",
+//   "author": "Immanuel Kant",
+//   "tags": [
+//     "Famous Quotes",
+//     "Wisdom"
+//   ],
+//   "authorSlug": "immanuel-kant",
+//   "length": 57,
+//   "dateAdded": "2020-10-14",
+//   "dateModified": "2023-04-14"
+// }
     static async getEnglishRandomFooterText(plugin: StartPagePlugin): Promise<string> {
         const settings: StartPageSettings = plugin.settings;
         const today: string = new Date().toISOString().slice(0, 10);
@@ -117,7 +116,7 @@ export default class FooterTextUtil {
             
             let result = await response.json();
             if (!result.statusCode) {
-                let text = `${result.quoteText} - ${result.author}`;
+                let text = `${result.content} - ${result.author}`;
                 settings.todayRandomEnFooterText = `${today}|${text}`;
                 plugin.saveSettings();
                 return text;
