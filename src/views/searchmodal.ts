@@ -85,10 +85,44 @@ export default class SearchModal extends Modal {
 			this.filteredResults = [];
 		} else {
 			if (this.caseSensitive) {
-				this.filteredResults = this.allFiles.filter((file) => file.name.includes(query));
+				this.filteredResults = this.allFiles.filter((file) => {
+					// Search in file name
+					if (file.name.includes(query)) {
+						return true;
+					}
+					
+					// Search in aliases
+					const cache = this.app.metadataCache.getFileCache(file);
+					const aliases = cache?.frontmatter?.aliases || cache?.frontmatter?.alias;
+					if (aliases) {
+						const aliasArray = Array.isArray(aliases) ? aliases : [aliases];
+						return aliasArray.some((alias: string) => 
+							typeof alias === 'string' && alias.includes(query)
+						);
+					}
+					
+					return false;
+				});
 			} else {
 				const lowerCaseQuery = query.toLowerCase();
-				this.filteredResults = this.allFiles.filter((file) => file.name.toLowerCase().includes(lowerCaseQuery));
+				this.filteredResults = this.allFiles.filter((file) => {
+					// Search in file name
+					if (file.name.toLowerCase().includes(lowerCaseQuery)) {
+						return true;
+					}
+					
+					// Search in aliases
+					const cache = this.app.metadataCache.getFileCache(file);
+					const aliases = cache?.frontmatter?.aliases || cache?.frontmatter?.alias;
+					if (aliases) {
+						const aliasArray = Array.isArray(aliases) ? aliases : [aliases];
+						return aliasArray.some((alias: string) => 
+							typeof alias === 'string' && alias.toLowerCase().includes(lowerCaseQuery)
+						);
+					}
+					
+					return false;
+				});
 			}
 		}
 
@@ -121,6 +155,19 @@ export default class SearchModal extends Modal {
 			fileNameEl.setText(fileNameWithoutExt);
 			itemEl.setAttribute("title", fileNameWithoutExt);
 			itemEl.appendChild(fileNameEl);
+
+			// Check if file has matching aliases
+			const query = this.searchComponent.getValue();
+			const cache = this.app.metadataCache.getFileCache(file);
+			const aliases = cache?.frontmatter?.aliases || cache?.frontmatter?.alias;
+			const matchedAlias = this.getMatchedAlias(aliases, query);
+			
+			if (matchedAlias) {
+				const aliasEl = document.createElement("span");
+				aliasEl.addClass("search-result-item-alias");
+				aliasEl.setText(matchedAlias);
+				itemEl.appendChild(aliasEl);
+			}
 
 			const tagEl = document.createElement("span");
 			tagEl.addClass("search-result-item-tag");
@@ -227,5 +274,23 @@ export default class SearchModal extends Modal {
 		} catch (error) {
 			console.error('Failed to create new note:', error);
 		}
+	}
+
+	private getMatchedAlias(aliases: string | string[] | undefined, query: string): string | null {
+		if (!aliases || !query) return null;
+		
+		const aliasArray = Array.isArray(aliases) ? aliases : [aliases];
+		const searchQuery = this.caseSensitive ? query : query.toLowerCase();
+		
+		for (const alias of aliasArray) {
+			if (typeof alias !== 'string') continue;
+			
+			const aliasToCheck = this.caseSensitive ? alias : alias.toLowerCase();
+			if (aliasToCheck.includes(searchQuery)) {
+				return alias;
+			}
+		}
+		
+		return null;
 	}
 }

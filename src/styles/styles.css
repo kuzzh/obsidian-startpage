@@ -549,6 +549,19 @@
 	max-width: 100%;
 }
 
+.my-search-modal .search-result-item-alias {
+	margin-left: 8px;
+	padding: 2px 8px;
+	background-color: var(--tag-background);
+	border: 1px solid var(--tag-border-color);
+	border-radius: 12px;
+	color: var(--tag-color);
+	font-size: 11px;
+	font-weight: 500;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
 .my-search-modal .search-result-item-tag {
 	flex: 1;
 	text-transform: uppercase;
