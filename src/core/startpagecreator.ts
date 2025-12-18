@@ -483,6 +483,7 @@ export default class StartPageCreator {
 
 		const modal = new SearchModal(
 			this.app,
+			this.plugin,
 			(item: TFile) => {
 				this.app.workspace.openLinkText(item.path, "", false);
 			},

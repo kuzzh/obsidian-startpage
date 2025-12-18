@@ -2,6 +2,7 @@ import { MyUtil } from "@/utils/myutil";
 import SvgUtil from "@/utils/svgutil";
 import { t } from "@/i18n";
 import { App, Modal, SearchComponent, Setting, TFile } from "obsidian";
+import StartPagePlugin from "@/main";
 
 export default class SearchModal extends Modal {
 	private searchComponent: SearchComponent;
@@ -12,9 +13,11 @@ export default class SearchModal extends Modal {
 	private initialQuery: string = "";
 	private selectedIndex: number = -1;
 	private caseSensitive: boolean = false;
+	private plugin: StartPagePlugin;
 
-	constructor(app: App, onChoose: (item: TFile) => void, initialQuery: string = "") {
+	constructor(app: App, plugin: StartPagePlugin, onChoose: (item: TFile) => void, initialQuery: string = "") {
 		super(app);
+		this.plugin = plugin;
 		this.setTitle(t("search_modal_title"));
 		this.allFiles = this.app.vault.getFiles();
 		this.filteredResults = [];
@@ -34,6 +37,20 @@ export default class SearchModal extends Modal {
 			this.performSearch(value);
 		});
 
+		// Exclude settings button
+		const excludeSettingsBtn = searchContainer.createEl("button", {
+			cls: "search-exclude-settings-btn",
+			attr: {
+				"title": this.getExcludeTooltip()
+			}
+		});
+		const filterIcon = SvgUtil.createFilterIcon();
+		excludeSettingsBtn.appendChild(filterIcon);
+
+		excludeSettingsBtn.addEventListener("click", (e) => {
+			e.preventDefault();
+			this.openExcludeSettings();
+		});
 
 		// Case sensitivity toggle button
 		const caseSensitiveBtn = searchContainer.createEl("button", {
@@ -85,10 +102,54 @@ export default class SearchModal extends Modal {
 			this.filteredResults = [];
 		} else {
 			if (this.caseSensitive) {
-				this.filteredResults = this.allFiles.filter((file) => file.name.includes(query));
+				this.filteredResults = this.allFiles.filter((file) => {
+					// Check if file is excluded
+					if (this.isFileExcluded(file)) {
+						return false;
+					}
+					
+					// Search in file name
+					if (file.name.includes(query)) {
+						return true;
+					}
+					
+					// Search in aliases
+					const cache = this.app.metadataCache.getFileCache(file);
+					const aliases = cache?.frontmatter?.aliases || cache?.frontmatter?.alias;
+					if (aliases) {
+						const aliasArray = Array.isArray(aliases) ? aliases : [aliases];
+						return aliasArray.some((alias: string) => 
+							typeof alias === 'string' && alias.includes(query)
+						);
+					}
+					
+					return false;
+				});
 			} else {
 				const lowerCaseQuery = query.toLowerCase();
-				this.filteredResults = this.allFiles.filter((file) => file.name.toLowerCase().includes(lowerCaseQuery));
+				this.filteredResults = this.allFiles.filter((file) => {
+					// Check if file is excluded
+					if (this.isFileExcluded(file)) {
+						return false;
+					}
+					
+					// Search in file name
+					if (file.name.toLowerCase().includes(lowerCaseQuery)) {
+						return true;
+					}
+					
+					// Search in aliases
+					const cache = this.app.metadataCache.getFileCache(file);
+					const aliases = cache?.frontmatter?.aliases || cache?.frontmatter?.alias;
+					if (aliases) {
+						const aliasArray = Array.isArray(aliases) ? aliases : [aliases];
+						return aliasArray.some((alias: string) => 
+							typeof alias === 'string' && alias.toLowerCase().includes(lowerCaseQuery)
+						);
+					}
+					
+					return false;
+				});
 			}
 		}
 
@@ -121,6 +182,19 @@ export default class SearchModal extends Modal {
 			fileNameEl.setText(fileNameWithoutExt);
 			itemEl.setAttribute("title", fileNameWithoutExt);
 			itemEl.appendChild(fileNameEl);
+
+			// Check if file has matching aliases
+			const query = this.searchComponent.getValue();
+			const cache = this.app.metadataCache.getFileCache(file);
+			const aliases = cache?.frontmatter?.aliases || cache?.frontmatter?.alias;
+			const matchedAlias = this.getMatchedAlias(aliases, query);
+			
+			if (matchedAlias) {
+				const aliasEl = document.createElement("span");
+				aliasEl.addClass("search-result-item-alias");
+				aliasEl.setText(matchedAlias);
+				itemEl.appendChild(aliasEl);
+			}
 
 			const tagEl = document.createElement("span");
 			tagEl.addClass("search-result-item-tag");
@@ -227,5 +301,64 @@ export default class SearchModal extends Modal {
 		} catch (error) {
 			console.error('Failed to create new note:', error);
 		}
+	}
+
+	private getMatchedAlias(aliases: string | string[] | undefined, query: string): string | null {
+		if (!aliases || !query) return null;
+		
+		const aliasArray = Array.isArray(aliases) ? aliases : [aliases];
+		const searchQuery = this.caseSensitive ? query : query.toLowerCase();
+		
+		for (const alias of aliasArray) {
+			if (typeof alias !== 'string') continue;
+			
+			const aliasToCheck = this.caseSensitive ? alias : alias.toLowerCase();
+			if (aliasToCheck.includes(searchQuery)) {
+				return alias;
+			}
+		}
+		
+		return null;
+	}
+
+	private isFileExcluded(file: TFile): boolean {
+		const excludeList = this.plugin.settings.excludeList;
+		if (excludeList.length === 0) {
+			return false;
+		}
+
+		for (const excludePath of excludeList) {
+			// Check if the file path exactly matches
+			if (file.path === excludePath) {
+				return true;
+			}
+
+			// Check if the file is in an excluded folder
+			if (file.path.startsWith(excludePath + "/")) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private getExcludeTooltip(): string {
+		const excludeList = this.plugin.settings.excludeList;
+		if (excludeList.length === 0) {
+			return t("search_exclude_settings_tooltip").replace("{list}", t("no_results"));
+		}
+		
+		const displayList = excludeList.length <= 3 
+			? excludeList.join(", ")
+			: excludeList.slice(0, 3).join(", ") + "...";
+		
+		return t("search_exclude_settings_tooltip").replace("{list}", displayList);
+	}
+
+	private openExcludeSettings() {
+		this.close();
+		// Open settings tab and navigate to search section
+		(this.app as any).setting.open();
+		(this.app as any).setting.openTabById(this.plugin.manifest.id);
 	}
 }

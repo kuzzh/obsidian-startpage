@@ -474,7 +474,7 @@
 	position: relative;
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 4px;
 	flex-shrink: 0;
 	padding: 1em;
 }
@@ -549,6 +549,19 @@
 	max-width: 100%;
 }
 
+.my-search-modal .search-result-item-alias {
+	margin-left: 8px;
+	padding: 2px 8px;
+	background-color: var(--tag-background);
+	border: 1px solid var(--tag-border-color);
+	border-radius: 12px;
+	color: var(--tag-color);
+	font-size: 11px;
+	font-weight: 500;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
 .my-search-modal .search-result-item-tag {
 	flex: 1;
 	text-transform: uppercase;
@@ -574,6 +587,90 @@
 	margin-left: 4px;
 	font-size: 12px;
 	flex-shrink: 0;
+}
+
+/* Search Exclude Settings Button */
+.my-search-modal .search-exclude-settings-btn {
+	width: 28px;
+	height: 30px;
+	border: none;
+	color: var(--text-muted);
+	background: transparent;
+	cursor: pointer;
+	border-radius: 4px;
+	opacity: 0.5;
+	box-shadow: none;
+	transition: opacity 0.2s, background-color 0.2s;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 600;
+	font-size: 14px;
+}
+
+.my-search-modal .search-exclude-settings-btn:hover {
+	opacity: 1;
+	background: var(--background-modifier-hover);
+}
+
+.my-search-modal .search-exclude-settings-btn svg {
+	width: 20px;
+	height: 20px;
+	flex-shrink: 0;
+}
+
+/* Exclude List Item Styles */
+.exclude-list-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 0;
+	border-bottom: 1px solid var(--background-modifier-border);
+	transition: background-color 0.2s ease;
+}
+
+.exclude-list-item:last-child {
+	border-bottom: none;
+}
+
+.exclude-list-item:hover {
+	background-color: var(--background-modifier-hover);
+	border-radius: 4px;
+}
+
+.exclude-item-icon {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--text-muted);
+}
+
+.exclude-item-icon svg {
+	width: 16px;
+	height: 16px;
+}
+
+.exclude-item-path {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+}
+
+.exclude-item-path-text {
+	display: block;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	color: var(--text-normal);
+	font-size: 0.9em;
+}
+
+.exclude-item-actions {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	gap: 4px;
 }
 
 /* Update Badge Styles */
