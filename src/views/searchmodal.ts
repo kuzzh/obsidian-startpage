@@ -2,6 +2,7 @@ import { MyUtil } from "@/utils/myutil";
 import SvgUtil from "@/utils/svgutil";
 import { t } from "@/i18n";
 import { App, Modal, SearchComponent, Setting, TFile } from "obsidian";
+import StartPagePlugin from "@/main";
 
 export default class SearchModal extends Modal {
 	private searchComponent: SearchComponent;
@@ -12,9 +13,11 @@ export default class SearchModal extends Modal {
 	private initialQuery: string = "";
 	private selectedIndex: number = -1;
 	private caseSensitive: boolean = false;
+	private plugin: StartPagePlugin;
 
-	constructor(app: App, onChoose: (item: TFile) => void, initialQuery: string = "") {
+	constructor(app: App, plugin: StartPagePlugin, onChoose: (item: TFile) => void, initialQuery: string = "") {
 		super(app);
+		this.plugin = plugin;
 		this.setTitle(t("search_modal_title"));
 		this.allFiles = this.app.vault.getFiles();
 		this.filteredResults = [];
@@ -34,6 +37,20 @@ export default class SearchModal extends Modal {
 			this.performSearch(value);
 		});
 
+		// Exclude settings button
+		const excludeSettingsBtn = searchContainer.createEl("button", {
+			cls: "search-exclude-settings-btn",
+			attr: {
+				"title": this.getExcludeTooltip()
+			}
+		});
+		const filterIcon = SvgUtil.createFilterIcon();
+		excludeSettingsBtn.appendChild(filterIcon);
+
+		excludeSettingsBtn.addEventListener("click", (e) => {
+			e.preventDefault();
+			this.openExcludeSettings();
+		});
 
 		// Case sensitivity toggle button
 		const caseSensitiveBtn = searchContainer.createEl("button", {
@@ -86,6 +103,11 @@ export default class SearchModal extends Modal {
 		} else {
 			if (this.caseSensitive) {
 				this.filteredResults = this.allFiles.filter((file) => {
+					// Check if file is excluded
+					if (this.isFileExcluded(file)) {
+						return false;
+					}
+					
 					// Search in file name
 					if (file.name.includes(query)) {
 						return true;
@@ -106,6 +128,11 @@ export default class SearchModal extends Modal {
 			} else {
 				const lowerCaseQuery = query.toLowerCase();
 				this.filteredResults = this.allFiles.filter((file) => {
+					// Check if file is excluded
+					if (this.isFileExcluded(file)) {
+						return false;
+					}
+					
 					// Search in file name
 					if (file.name.toLowerCase().includes(lowerCaseQuery)) {
 						return true;
@@ -292,5 +319,46 @@ export default class SearchModal extends Modal {
 		}
 		
 		return null;
+	}
+
+	private isFileExcluded(file: TFile): boolean {
+		const excludeList = this.plugin.settings.excludeList;
+		if (excludeList.length === 0) {
+			return false;
+		}
+
+		for (const excludePath of excludeList) {
+			// Check if the file path exactly matches
+			if (file.path === excludePath) {
+				return true;
+			}
+
+			// Check if the file is in an excluded folder
+			if (file.path.startsWith(excludePath + "/")) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private getExcludeTooltip(): string {
+		const excludeList = this.plugin.settings.excludeList;
+		if (excludeList.length === 0) {
+			return t("search_exclude_settings_tooltip").replace("{list}", t("no_results"));
+		}
+		
+		const displayList = excludeList.length <= 3 
+			? excludeList.join(", ")
+			: excludeList.slice(0, 3).join(", ") + "...";
+		
+		return t("search_exclude_settings_tooltip").replace("{list}", displayList);
+	}
+
+	private openExcludeSettings() {
+		this.close();
+		// Open settings tab and navigate to search section
+		(this.app as any).setting.open();
+		(this.app as any).setting.openTabById(this.plugin.manifest.id);
 	}
 }

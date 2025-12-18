@@ -1,8 +1,9 @@
-import { App, PluginSettingTab, Setting, Platform, TextComponent, ToggleComponent, Notice } from "obsidian";
+import { App, PluginSettingTab, Setting, Platform, TextComponent, ToggleComponent, Notice, TFolder } from "obsidian";
 import StartPagePlugin from "@/main";
 import { VIEW_TYPE_START_PAGE, StartPageView } from "@/views/startpageview";
 import { t } from "@/i18n";
 import NoteSuggestModal from "@/views/notesuggestmodal";
+import FileFolderSuggestModal from "@/views/filefoldersuggestmodal";
 import SvgUtil from "@/utils/svgutil";
 import { MyUtil } from "@/utils/myutil";
 
@@ -125,6 +126,7 @@ export class StartPageSettingTab extends PluginSettingTab {
         this.createGeneralSettings(containerEl);
         this.createAppearanceSettings(containerEl);
         this.createNewTabSettings(containerEl);
+        this.createSearchSettings(containerEl);
         this.createFooterSettings(containerEl);
         this.createPinnedNotesSettings(containerEl);
 
@@ -210,6 +212,80 @@ export class StartPageSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				});
 			});
+    }
+
+    private createSearchSettings(containerEl: HTMLElement) {
+        new Setting(containerEl)
+            .setName(t("search_settings_heading"))
+            .setHeading();
+
+        new Setting(containerEl)
+            .setName(t("search_exclude_list"))
+            .setDesc(t("search_exclude_list_desc"))
+            .addButton((button) => {
+                button.setButtonText(t("search_exclude_list_add_button")).onClick(() => {
+                    new FileFolderSuggestModal(this.app, async (item) => {
+                        if (!this.plugin.settings.excludeList.includes(item.path)) {
+                            this.plugin.settings.excludeList.push(item.path);
+                            await this.plugin.saveSettings();
+                            this.display();
+                        }
+                    }).open();
+                });
+            });
+
+        this.displayCurrentExcludeList(containerEl);
+    }
+
+    private displayCurrentExcludeList(containerEl: HTMLElement) {
+        if (this.plugin.settings.excludeList.length === 0) {
+            return;
+        }
+
+        new Setting(containerEl)
+            .setName(t("current_search_exclude_list"))
+            .setHeading();
+
+        const excludeList = containerEl.createEl("ul", {
+            cls: "pinned-note-list",
+        });
+
+        this.plugin.settings.excludeList.forEach((path, index) => {
+            this.createExcludeListItem(excludeList, path, index);
+        });
+    }
+
+    private createExcludeListItem(excludeList: HTMLElement, path: string, index: number) {
+        const li = excludeList.createEl("li", { cls: "exclude-list-item" });
+        const item = this.app.vault.getAbstractFileByPath(path);
+        const isFolder = item instanceof TFolder;
+
+        // Icon container
+        const iconWrap = li.createSpan({ cls: "exclude-item-icon" });
+        const icon = isFolder ? SvgUtil.createFolderIcon() : SvgUtil.createFileIcon("md");
+        iconWrap.appendChild(icon);
+
+        // Path container with ellipsis
+        const pathContainer = li.createEl("div", { cls: "exclude-item-path" });
+        const pathText = pathContainer.createEl("span", { cls: "exclude-item-path-text", text: path });
+        pathText.setAttr("title", path);
+
+        // Actions container
+        const actionsEl = li.createEl("div", { cls: "exclude-item-actions" });
+        this.createExcludeListRemoveButton(actionsEl, path);
+    }
+
+    private createExcludeListRemoveButton(container: HTMLElement, path: string) {
+        const btn = container.createEl("button", { cls: "mod-warning remove-button control-button icon-button" });
+        btn.setAttr("aria-label", t("search_exclude_list_remove"));
+        btn.setAttr("title", t("search_exclude_list_remove"));
+        const svg = SvgUtil.createRemoveIcon();
+        btn.appendChild(svg);
+        btn.onclick = async () => {
+            this.plugin.settings.excludeList = this.plugin.settings.excludeList.filter((p) => p !== path);
+            await this.plugin.saveSettings();
+            this.display();
+        };
     }
 
     private createFooterSettings(containerEl: HTMLElement) {

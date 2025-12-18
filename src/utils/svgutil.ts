@@ -53,6 +53,23 @@ export default class SvgUtil {
         return svg;
     }
 
+    static createFilterIcon(): SVGElement {
+        const svgNs = "http://www.w3.org/2000/svg";
+        const svg = document.createElementNS(svgNs, "svg");
+        svg.setAttribute("viewBox", "0 0 24 24");
+        svg.setAttribute("width", "16");
+        svg.setAttribute("height", "16");
+        const pathNode = document.createElementNS(svgNs, "path");
+        pathNode.setAttribute("d", "M3 4h18v2.4l-7 7V20l-4 2v-9l-7-7V4z");
+        pathNode.setAttribute("stroke", "currentColor");
+        pathNode.setAttribute("stroke-width", "2");
+        pathNode.setAttribute("fill", "none");
+        pathNode.setAttribute("stroke-linecap", "round");
+        pathNode.setAttribute("stroke-linejoin", "round");
+        svg.appendChild(pathNode);
+        return svg;
+    }
+
     static createFileIcon(fileType: string): SVGSVGElement {
         return SvgUtil.createSVG((this.iconSVGs as Record<string, SVGTag[]>)[fileType] || this.iconSVGs["md"]);
     }

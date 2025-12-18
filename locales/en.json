@@ -72,5 +72,13 @@
     "show_stat_bar": "Show stat. bar",
     "show_stat_bar_desc": "Show stat. bar on the start page",
     "new_version_available": "New version available",
-    "update_to_version": "Update to v{version}"
+    "update_to_version": "Update to v{version}",
+    "search_settings_heading": "Search",
+    "search_exclude_list": "Exclude list",
+    "search_exclude_list_desc": "Files and folders to exclude from search results",
+    "search_exclude_list_add_button": "Add file or folder",
+    "search_exclude_list_remove": "Remove from exclude list",
+    "current_search_exclude_list": "Current exclude list",
+    "search_exclude_settings": "Exclude settings",
+    "search_exclude_settings_tooltip": "Excluded: {list}"
 }

@@ -19,13 +19,14 @@ export interface StartPageSettings {
 	showTitleNavigationBar: "default" | "show" | "hide";
 	showCustomFooterText: boolean;
 	useRandomFooterText: boolean;
-	todayRandomEnFooterText: string; // 今日英文随机脚本文字，格式：2025118|I think,there for I am.
-	todayRandomZhFooterText: string; // 今日中文随机脚本文字，格式：2025118|百日依山尽，黄河入海流
+	todayRandomEnFooterText: string; // 今日英文随机脚本文字,格式:2025118|I think,there for I am.
+	todayRandomZhFooterText: string; // 今日中文随机脚本文字,格式:2025118|百日依山尽,黄河入海流
 	customFooterText: string;
 	scrollPosition: number; // Scroll position for start page
 	showStatBar: boolean;
 	lastVersionCheck: number; // Last time version check was performed
 	latestVersion: string; // Latest version from GitHub
+	excludeList: string[]; // List of files/folders to exclude from search
 }
 
 export const DEFAULT_SETTINGS: StartPageSettings = {
@@ -43,4 +44,5 @@ export const DEFAULT_SETTINGS: StartPageSettings = {
 	showStatBar: true,
 	lastVersionCheck: 0,
 	latestVersion: "",
+	excludeList: [],
 };

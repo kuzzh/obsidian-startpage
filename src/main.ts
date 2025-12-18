@@ -100,6 +100,7 @@ export default class StartPagePlugin extends Plugin {
 				showStatBar: typeof savedData.showStatBar === "boolean" ? savedData.showStatBar : true,
 				lastVersionCheck: typeof savedData.lastVersionCheck === "number" ? savedData.lastVersionCheck : 0,
 				latestVersion: typeof savedData.latestVersion === "string" ? savedData.latestVersion : "",
+				excludeList: Array.isArray(savedData.excludeList) ? savedData.excludeList : [],
 			};
 		} else {
 			// First installation or data corruption, use default settings

@@ -72,5 +72,13 @@
     "show_stat_bar": "显示统计栏",
     "show_stat_bar_desc": "在启动首页中显示统计栏",
     "new_version_available": "有新版本可用",
-    "update_to_version": "更新到 v{version}"
+    "update_to_version": "更新到 v{version}",
+    "search_settings_heading": "搜索",
+    "search_exclude_list": "排除列表",
+    "search_exclude_list_desc": "从搜索结果中排除的文件和文件夹",
+    "search_exclude_list_add_button": "添加文件或文件夹",
+    "search_exclude_list_remove": "从排除列表移除",
+    "current_search_exclude_list": "当前排除列表",
+    "search_exclude_settings": "排除设置",
+    "search_exclude_settings_tooltip": "已排除: {list}"
   }
