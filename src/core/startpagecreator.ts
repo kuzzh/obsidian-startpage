@@ -182,8 +182,13 @@ export default class StartPageCreator {
 			return null;
 		}
 
+		const styleSettings = isPinned ? this.plugin.settings.pinnedNotesStyle : this.plugin.settings.recentNotesStyle;
+
 		const noteItem = this.createElement("div", `note-item${isPinned ? " pinned" : ""}`);
 		noteItem.setAttribute("data-note-path", note.path);
+		
+		if (styleSettings.itemPadding) noteItem.style.padding = styleSettings.itemPadding;
+		if (styleSettings.itemMargin) noteItem.style.margin = styleSettings.itemMargin;
 
 		noteItem.addEventListener("click", async () => {
 			const existingLeaf = this.app.workspace.getLeavesOfType("markdown").find((leaf) => {
@@ -226,6 +231,10 @@ export default class StartPageCreator {
 
 		const noteContent = this.createElement("div", "note-content");
 		const noteTitle = this.createElement("div", "note-title", note.basename);
+		
+		if (styleSettings.noteTitleFontSize) noteTitle.style.fontSize = styleSettings.noteTitleFontSize;
+		if (styleSettings.noteTitleMargin) noteTitle.style.margin = styleSettings.noteTitleMargin;
+		if (styleSettings.noteTitlePadding) noteTitle.style.padding = styleSettings.noteTitlePadding;
 
 		const noteMeta = this.createElement("div", "note-meta", "");
 
@@ -234,10 +243,17 @@ export default class StartPageCreator {
 		if (!folderPath.startsWith("/")) {
 			folderPath = "/" + folderPath;
 		}
-		noteMeta.appendChild(this.createElement("div", "note-date", noteDate));
+		const noteDateEl = this.createElement("div", "note-date", noteDate);
+		if (styleSettings.noteDateFontSize) noteDateEl.style.fontSize = styleSettings.noteDateFontSize;
+		
+		noteMeta.appendChild(noteDateEl);
 		const folderIcon = SvgUtil.createFolderIcon();
 		noteMeta.appendChild(folderIcon);
-		noteMeta.appendChild(this.createElement("div", "note-folder", MyUtil.truncateMiddle(folderPath)));
+		
+		const noteFolderEl = this.createElement("div", "note-folder", MyUtil.truncateMiddle(folderPath));
+		if (styleSettings.noteFolderFontSize) noteFolderEl.style.fontSize = styleSettings.noteFolderFontSize;
+
+		noteMeta.appendChild(noteFolderEl);
 
 		noteTitle.setAttribute("title", note.basename);
 		noteContent.appendChild(noteTitle);
@@ -257,12 +273,22 @@ export default class StartPageCreator {
 	}
 
 	private createNotesSection(title: string, notes: TFile[] | null, isPinned: boolean = false, icon: SVGSVGElement): HTMLElement {
+		const styleSettings = isPinned ? this.plugin.settings.pinnedNotesStyle : this.plugin.settings.recentNotesStyle;
+
 		const section = this.createElement("section", "section");
+		if (styleSettings.sectionMargin) section.style.margin = styleSettings.sectionMargin;
+		if (styleSettings.sectionPadding) section.style.padding = styleSettings.sectionPadding;
+
 		const sectionHeader = this.createElement("div", "section-header");
+		if (styleSettings.headerMargin) sectionHeader.style.margin = styleSettings.headerMargin;
+		if (styleSettings.headerPadding) sectionHeader.style.padding = styleSettings.headerPadding;
 
 		const sectionTitle = this.createElement("h2", "section-title");
 		sectionTitle.appendChild(icon);
 		sectionTitle.appendChild(document.createTextNode(title));
+		if (styleSettings.titleFontSize) sectionTitle.style.fontSize = styleSettings.titleFontSize;
+		if (styleSettings.titleMargin) sectionTitle.style.margin = styleSettings.titleMargin;
+		if (styleSettings.titlePadding) sectionTitle.style.padding = styleSettings.titlePadding;
 
 		if (isPinned) {
 			const actionBtn = this.createElement("button", "btn btn-text", t("manage"));
@@ -283,6 +309,8 @@ export default class StartPageCreator {
 		}
 
 		const notesList = this.createElement("div", "notes-list");
+		if (styleSettings.listGap) notesList.style.gap = styleSettings.listGap;
+
 		if (notes) {
 			notes.forEach((note) => {
 				const noteItem = this.createNoteItem(note, isPinned);

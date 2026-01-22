@@ -101,6 +101,8 @@ export default class StartPagePlugin extends Plugin {
 				lastVersionCheck: typeof savedData.lastVersionCheck === "number" ? savedData.lastVersionCheck : 0,
 				latestVersion: typeof savedData.latestVersion === "string" ? savedData.latestVersion : "",
 				excludeList: Array.isArray(savedData.excludeList) ? savedData.excludeList : [],
+				pinnedNotesStyle: typeof savedData.pinnedNotesStyle === "object" ? { ...DEFAULT_SETTINGS.pinnedNotesStyle, ...savedData.pinnedNotesStyle } : { ...DEFAULT_SETTINGS.pinnedNotesStyle },
+				recentNotesStyle: typeof savedData.recentNotesStyle === "object" ? { ...DEFAULT_SETTINGS.recentNotesStyle, ...savedData.recentNotesStyle } : { ...DEFAULT_SETTINGS.recentNotesStyle },
 			};
 		} else {
 			// First installation or data corruption, use default settings

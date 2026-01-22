@@ -11,6 +11,57 @@ export const ID_STAT_TOTAL_NOTES = "totalNotes";
 export const ID_STAT_TODAY_EDITED = "todayEdited";
 export const ID_STAT_TOTAL_SIZE = "totalSize";
 
+export interface SectionStyleSettings {
+	// section container
+	sectionMargin: string;
+	sectionPadding: string;
+	
+	// section header
+	headerMargin: string;
+	headerPadding: string;
+	
+	// section title
+	titleFontSize: string;
+	titleMargin: string;
+	titlePadding: string;
+	
+	// notes list
+	listGap: string;
+	
+	// note item
+	itemPadding: string;
+	itemMargin: string;
+	
+	// note title
+	noteTitleFontSize: string;
+	noteTitleMargin: string;
+	noteTitlePadding: string;
+	
+	// note date
+	noteDateFontSize: string;
+	
+	// note folder
+	noteFolderFontSize: string;
+}
+
+export const DEFAULT_SECTION_STYLE: SectionStyleSettings = {
+	sectionMargin: "",
+	sectionPadding: "",
+	headerMargin: "",
+	headerPadding: "",
+	titleFontSize: "",
+	titleMargin: "",
+	titlePadding: "",
+	listGap: "",
+	itemPadding: "",
+	itemMargin: "",
+	noteTitleFontSize: "",
+	noteTitleMargin: "",
+	noteTitlePadding: "",
+	noteDateFontSize: "",
+	noteFolderFontSize: "",
+};
+
 export interface StartPageSettings {
 	includeAllFilesInRecent: boolean;
 	recentNotesLimit: number;
@@ -27,6 +78,8 @@ export interface StartPageSettings {
 	lastVersionCheck: number; // Last time version check was performed
 	latestVersion: string; // Latest version from GitHub
 	excludeList: string[]; // List of files/folders to exclude from search
+	pinnedNotesStyle: SectionStyleSettings;
+	recentNotesStyle: SectionStyleSettings;
 }
 
 export const DEFAULT_SETTINGS: StartPageSettings = {
@@ -45,4 +98,6 @@ export const DEFAULT_SETTINGS: StartPageSettings = {
 	lastVersionCheck: 0,
 	latestVersion: "",
 	excludeList: [],
+	pinnedNotesStyle: { ...DEFAULT_SECTION_STYLE },
+	recentNotesStyle: { ...DEFAULT_SECTION_STYLE },
 };
