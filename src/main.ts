@@ -100,7 +100,8 @@ export default class StartPagePlugin extends Plugin {
 				showStatBar: typeof savedData.showStatBar === "boolean" ? savedData.showStatBar : true,
 				lastVersionCheck: typeof savedData.lastVersionCheck === "number" ? savedData.lastVersionCheck : 0,
 				latestVersion: typeof savedData.latestVersion === "string" ? savedData.latestVersion : "",
-				excludeList: Array.isArray(savedData.excludeList) ? savedData.excludeList : [],
+				searchExcludePaths: Array.isArray(savedData.excludeList) ? savedData.excludeList : [],
+				searchExcludeExtensions: Array.isArray(savedData.excludeExtensions) ? savedData.excludeExtensions : [],
 				pinnedNotesStyle: typeof savedData.pinnedNotesStyle === "object" ? { ...DEFAULT_SETTINGS.pinnedNotesStyle, ...savedData.pinnedNotesStyle } : { ...DEFAULT_SETTINGS.pinnedNotesStyle },
 				recentNotesStyle: typeof savedData.recentNotesStyle === "object" ? { ...DEFAULT_SETTINGS.recentNotesStyle, ...savedData.recentNotesStyle } : { ...DEFAULT_SETTINGS.recentNotesStyle },
 			};

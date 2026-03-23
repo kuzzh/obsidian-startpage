@@ -1,3 +1,8 @@
+/* 修复 hover preview 窗口被 modal 遮挡的问题 */
+.popover.hover-popover {
+	z-index: 1000;
+}
+
 /* 顶级容器撑满页面 */
 .start-page-container {
 	display: flex;
@@ -260,6 +265,18 @@
 	margin-right: 8px;
 	flex-shrink: 0;
 	white-space: nowrap;
+}
+
+.start-page-container .note-ext {
+	margin-right: 8px;
+	flex-shrink: 0;
+	white-space: nowrap;
+	background-color: var(--background-modifier-hover);
+	color: var(--text-muted);
+	border-radius: 4px;
+	padding: 2px 6px;
+	font-size: 0.75em;
+	font-weight: 500;
 }
 
 .start-page-container .note-folder {
@@ -562,7 +579,7 @@
 	flex-shrink: 0;
 }
 
-.my-search-modal .search-result-item-tag {
+.my-search-modal .search-result-item-ext {
 	flex: 1;
 	text-transform: uppercase;
 	background-color: var(--nav-tag-background);
@@ -575,6 +592,7 @@
 	margin-inline-start: auto;
 	padding: 0 var(--size-4-1);
 	align-self: center;
+	margin-right: 8px;
 	min-width: 16px;
 	min-height: 16px;
 }
@@ -620,57 +638,37 @@
 }
 
 /* Exclude List Item Styles */
-.exclude-list-item {
+.extension-tags-container {
 	display: flex;
-	align-items: center;
+	flex-wrap: wrap;
 	gap: 8px;
-	padding: 8px 0;
-	border-bottom: 1px solid var(--background-modifier-border);
-	transition: background-color 0.2s ease;
 }
 
-.exclude-list-item:last-child {
-	border-bottom: none;
+.extension-tags-container .setting-item {
+	border: none !important;
+	padding-top: 0px !important;
+	padding-bottom: 16px !important;
+	flex-direction: row !important;
+	align-items: center !important;
+	margin-inline-end: unset !important;
+	gap: 2px !important;
 }
 
-.exclude-list-item:hover {
-	background-color: var(--background-modifier-hover);
-	border-radius: 4px;
+.exclusion-paths-list .setting-item {
+	flex-direction: row !important;
+	align-items: center !important;
+	margin-inline-end: unset !important;
+	gap: 2px !important;
 }
 
-.exclude-item-icon {
-	flex-shrink: 0;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: var(--text-muted);
+.extension-tags-container .setting-item .setting-item-control,
+.exclusion-paths-list .setting-item .setting-item-control {
+	width: unset !important;
 }
 
-.exclude-item-icon svg {
-	width: 16px;
-	height: 16px;
-}
-
-.exclude-item-path {
-	flex: 1;
-	min-width: 0;
-	overflow: hidden;
-}
-
-.exclude-item-path-text {
-	display: block;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	color: var(--text-normal);
-	font-size: 0.9em;
-}
-
-.exclude-item-actions {
-	flex-shrink: 0;
-	display: flex;
-	align-items: center;
-	gap: 4px;
+.extension-tags-container .setting-item .setting-item-info,
+.exclusion-paths-list .setting-item .setting-item-info {
+	margin-inline-end: unset !important;
 }
 
 /* Update Badge Styles */

@@ -77,7 +77,8 @@ export interface StartPageSettings {
 	showStatBar: boolean;
 	lastVersionCheck: number; // Last time version check was performed
 	latestVersion: string; // Latest version from GitHub
-	excludeList: string[]; // List of files/folders to exclude from search
+	searchExcludePaths: string[]; // List of files/folders to exclude from search
+	searchExcludeExtensions: string[]; // List of file extensions to exclude from search
 	pinnedNotesStyle: SectionStyleSettings;
 	recentNotesStyle: SectionStyleSettings;
 }
@@ -97,7 +98,8 @@ export const DEFAULT_SETTINGS: StartPageSettings = {
 	showStatBar: true,
 	lastVersionCheck: 0,
 	latestVersion: "",
-	excludeList: [],
+	searchExcludePaths: [],
+	searchExcludeExtensions: [],
 	pinnedNotesStyle: { ...DEFAULT_SECTION_STYLE },
 	recentNotesStyle: { ...DEFAULT_SECTION_STYLE },
 };

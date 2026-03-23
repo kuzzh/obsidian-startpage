@@ -1,8 +1,9 @@
 import { MyUtil } from "@/utils/myutil";
 import SvgUtil from "@/utils/svgutil";
 import { t } from "@/i18n";
-import { App, Modal, SearchComponent, Setting, TFile } from "obsidian";
+import { App, Modal, SearchComponent, TFile } from "obsidian";
 import StartPagePlugin from "@/main";
+import { VIEW_TYPE_START_PAGE } from "@/views/startpageview";
 
 export default class SearchModal extends Modal {
 	private searchComponent: SearchComponent;
@@ -189,20 +190,16 @@ export default class SearchModal extends Modal {
 			const aliases = cache?.frontmatter?.aliases || cache?.frontmatter?.alias;
 			const matchedAlias = this.getMatchedAlias(aliases, query);
 			
+			const extEl = document.createElement("span");
+			extEl.addClass("search-result-item-ext");
+			itemEl.appendChild(extEl);
+			extEl.setText(file.extension.toUpperCase());
+
 			if (matchedAlias) {
 				const aliasEl = document.createElement("span");
 				aliasEl.addClass("search-result-item-alias");
 				aliasEl.setText(matchedAlias);
 				itemEl.appendChild(aliasEl);
-			}
-
-			const tagEl = document.createElement("span");
-			tagEl.addClass("search-result-item-tag");
-			itemEl.appendChild(tagEl);
-
-			if (file.extension.toLowerCase() === "canvas" ||
-				file.extension.toLowerCase() === "base") {
-				tagEl.setText(file.extension.toUpperCase());
 			}
 
 			if (file.parent && !file.parent.isRoot()) {
@@ -222,6 +219,18 @@ export default class SearchModal extends Modal {
 			itemEl.onClickEvent(() => {
 				this.onChooseItem(file);
 				this.close();
+			});
+
+			// 添加 hover preview 功能
+			itemEl.addEventListener("mouseenter", (event) => {
+				this.app.workspace.trigger("hover-link", {
+					event: event as MouseEvent,
+					source: VIEW_TYPE_START_PAGE,
+					hoverParent: itemEl,
+					targetEl: itemEl,
+					linktext: file.path,
+					sourcePath: "",
+				});
 			});
 		}
 
@@ -322,11 +331,7 @@ export default class SearchModal extends Modal {
 	}
 
 	private isFileExcluded(file: TFile): boolean {
-		const excludeList = this.plugin.settings.excludeList;
-		if (excludeList.length === 0) {
-			return false;
-		}
-
+		const excludeList = this.plugin.settings.searchExcludePaths;
 		for (const excludePath of excludeList) {
 			// Check if the file path exactly matches
 			if (file.path === excludePath) {
@@ -339,20 +344,45 @@ export default class SearchModal extends Modal {
 			}
 		}
 
+		// Check if file extension is excluded
+		const excludeExtensions = this.plugin.settings.searchExcludeExtensions;
+		if (excludeExtensions.length > 0) {
+			const fileExt = file.extension.toLowerCase();
+			if (excludeExtensions.includes(fileExt)) {
+				return true;
+			}
+		}
+
 		return false;
 	}
 
 	private getExcludeTooltip(): string {
-		const excludeList = this.plugin.settings.excludeList;
-		if (excludeList.length === 0) {
+		const excludeList = this.plugin.settings.searchExcludePaths;
+		const excludeExtensions = this.plugin.settings.searchExcludeExtensions;
+		
+		if (excludeList.length === 0 && excludeExtensions.length === 0) {
 			return t("search_exclude_settings_tooltip").replace("{list}", t("no_results"));
 		}
 		
-		const displayList = excludeList.length <= 3 
-			? excludeList.join(", ")
-			: excludeList.slice(0, 3).join(", ") + "...";
+		const items: string[] = [];
 		
-		return t("search_exclude_settings_tooltip").replace("{list}", displayList);
+		// Add file/folder exclusions
+		if (excludeList.length > 0) {
+			const displayList = excludeList.length <= 2
+				? excludeList.join(", ")
+				: excludeList.slice(0, 2).join(", ") + "...";
+			items.push(displayList);
+		}
+		
+		// Add extension exclusions
+		if (excludeExtensions.length > 0) {
+			const extDisplay = excludeExtensions.length <= 2
+				? excludeExtensions.map(ext => `.${ext}`).join(", ")
+				: excludeExtensions.slice(0, 2).map(ext => `.${ext}`).join(", ") + "...";
+			items.push(extDisplay);
+		}
+		
+		return t("search_exclude_settings_tooltip").replace("{list}", items.join(" | "));
 	}
 
 	private openExcludeSettings() {
