@@ -633,108 +633,37 @@
 }
 
 /* Exclude List Item Styles */
-.exclude-list-item {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	padding: 8px 0;
-	border-bottom: 1px solid var(--background-modifier-border);
-	transition: background-color 0.2s ease;
-}
-
-.exclude-list-item:last-child {
-	border-bottom: none;
-}
-
-.exclude-list-item:hover {
-	background-color: var(--background-modifier-hover);
-	border-radius: 4px;
-}
-
-.exclude-item-icon {
-	flex-shrink: 0;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: var(--text-muted);
-}
-
-.exclude-item-icon svg {
-	width: 16px;
-	height: 16px;
-}
-
-.exclude-item-path {
-	flex: 1;
-	min-width: 0;
-	overflow: hidden;
-}
-
-.exclude-item-path-text {
-	display: block;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	color: var(--text-normal);
-	font-size: 0.9em;
-}
-
-.exclude-item-actions {
-	flex-shrink: 0;
-	display: flex;
-	align-items: center;
-	gap: 4px;
-}
-
-.settings-section-summary {
-	font-weight: bold;
-	cursor: pointer;
-	margin-bottom: 10px;
-}
-
-.extension-input-container {
-	display: flex;
-	gap: 8px;
-	margin-bottom: 12px;
-	margin-left: 24px;
-}
-
-.extension-input-container .text-input {
-	flex: 1;
-}
-
-.current-extensions-container {
-	margin-left: 24px;
-	margin-bottom: 16px;
-}
-
-.extensions-heading {
-	margin-bottom: 8px;
-}
-
 .extension-tags-container {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 8px;
 }
 
-.extension-tag {
-	display: inline-flex;
-	align-items: center;
-	gap: 4px;
-	padding: 2px 8px;
-	background-color: var(--background-modifier-hover);
-	border-radius: 4px;
-	font-size: 0.85em;
+.extension-tags-container .setting-item {
+	border: none !important;
+	padding-top: 0px !important;
+	padding-bottom: 16px !important;
+	flex-direction: row !important;
+	align-items: center !important;
+	margin-inline-end: unset !important;
+	gap: 2px !important;
 }
 
-.extension-tag-remove-btn {
-	border: none;
-	background: none;
-	cursor: pointer;
-	padding: 0 2px;
-	font-size: 1.1em;
-	line-height: 1;
+.exclusion-paths-list .setting-item {
+	flex-direction: row !important;
+	align-items: center !important;
+	margin-inline-end: unset !important;
+	gap: 2px !important;
+}
+
+.extension-tags-container .setting-item .setting-item-control,
+.exclusion-paths-list .setting-item .setting-item-control {
+	width: unset !important;
+}
+
+.extension-tags-container .setting-item .setting-item-info,
+.exclusion-paths-list .setting-item .setting-item-info {
+	margin-inline-end: unset !important;
 }
 
 /* Update Badge Styles */

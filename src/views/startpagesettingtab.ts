@@ -3,8 +3,8 @@ import StartPagePlugin from "@/main";
 import { VIEW_TYPE_START_PAGE, StartPageView } from "@/views/startpageview";
 import { t } from "@/i18n";
 import NoteSuggestModal from "@/views/notesuggestmodal";
-import FileFolderSuggestModal from "@/views/filefoldersuggestmodal";
 import StyleSettingsModal from "@/views/stylesettingsmodal";
+import SearchExclusionModal from "@/views/searchexclusionmodal";
 import SvgUtil from "@/utils/svgutil";
 import { MyUtil } from "@/utils/myutil";
 
@@ -236,160 +236,22 @@ export class StartPageSettingTab extends PluginSettingTab {
             .setName(t("search_settings_heading"))
             .setHeading();
 
+        const pathCount = this.plugin.settings.searchExcludePaths.length;
+        const extCount = this.plugin.settings.searchExcludeExtensions.length;
+        const totalCount = pathCount + extCount;
+
         new Setting(containerEl)
-            .setName(t("search_exclude_list"))
-            .setDesc(t("search_exclude_list_desc"))
+            .setName(t("search_exclusion_settings"))
+            .setDesc(t("search_exclusion_settings_desc", totalCount.toString()))
             .addButton((button) => {
-                button.setButtonText(t("search_exclude_list_add_button")).onClick(() => {
-                    new FileFolderSuggestModal(this.app, async (item) => {
-                        if (!this.plugin.settings.searchExcludePaths.includes(item.path)) {
-                            this.plugin.settings.searchExcludePaths.push(item.path);
-                            await this.plugin.saveSettings();
+                button.setButtonText(t("search_exclusion_settings_button"))
+                    .setCta()
+                    .onClick(() => {
+                        new SearchExclusionModal(this.app, this.plugin, () => {
                             this.display();
-                        }
-                    }).open();
-                });
+                        }).open();
+                    });
             });
-
-        this.displayCurrentExcludeList(containerEl);
-
-        // Extension exclude settings
-        new Setting(containerEl)
-            .setName(t("search_exclude_extensions"))
-            .setDesc(t("search_exclude_extensions_desc"));
-
-        this.createExtensionInput(containerEl);
-        this.displayCurrentExcludeExtensions(containerEl);
-    }
-
-    private createExtensionInput(containerEl: HTMLElement) {
-        const inputContainer = containerEl.createDiv({ cls: "extension-input-container" });
-
-        const textComponent = new TextComponent(inputContainer);
-        textComponent.setPlaceholder(t("search_exclude_extensions_placeholder"));
-        textComponent.inputEl.addClass("text-input");
-
-        const addButton = new ButtonComponent(inputContainer);
-        addButton.setButtonText(t("search_exclude_extensions_add"));
-        addButton.onClick(async () => {
-            const value = textComponent.getValue().trim().toLowerCase();
-            if (value) {
-                // Remove leading dot if present
-                const extension = value.startsWith(".") ? value.slice(1) : value;
-                // Remove any spaces or commas (in case user enters multiple)
-                const extensions = extension.split(/[,\s]+/).filter(ext => ext.length > 0);
-                
-                let added = false;
-                for (const ext of extensions) {
-                    if (!this.plugin.settings.searchExcludeExtensions.includes(ext)) {
-                        this.plugin.settings.searchExcludeExtensions.push(ext);
-                        added = true;
-                    }
-                }
-                
-                if (added) {
-                    await this.plugin.saveSettings();
-                    textComponent.setValue("");
-                    this.display();
-                }
-            }
-        });
-
-        // Allow Enter key to add extension
-        textComponent.inputEl.addEventListener("keydown", (e: KeyboardEvent) => {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                addButton.buttonEl.click();
-            }
-        });
-    }
-
-    private displayCurrentExcludeExtensions(containerEl: HTMLElement) {
-        if (this.plugin.settings.searchExcludeExtensions.length === 0) {
-            return;
-        }
-
-        const extensionsContainer = containerEl.createDiv({ cls: "current-extensions-container" });
-
-        const heading = extensionsContainer.createEl("div", {
-            text: t("search_exclude_extensions_current") + ":",
-            cls: "setting-item-description extensions-heading"
-        });
-
-        const tagsContainer = extensionsContainer.createDiv({ cls: "extension-tags-container" });
-
-        this.plugin.settings.searchExcludeExtensions.forEach((ext, index) => {
-            this.createExtensionTag(tagsContainer, ext, index);
-        });
-    }
-
-    private createExtensionTag(container: HTMLElement, ext: string, index: number) {
-        const tag = container.createSpan({ cls: "extension-tag" });
-
-        const extText = tag.createSpan({ text: `.${ext}` });
-
-        const removeBtn = tag.createEl("button", {
-            cls: "extension-tag-remove-btn",
-            attr: { "aria-label": "Remove" }
-        });
-        removeBtn.textContent = "×";
-
-        removeBtn.addEventListener("click", async () => {
-            this.plugin.settings.searchExcludeExtensions.splice(index, 1);
-            await this.plugin.saveSettings();
-            this.display();
-        });
-    }
-
-    private displayCurrentExcludeList(containerEl: HTMLElement) {
-        if (this.plugin.settings.searchExcludePaths.length === 0) {
-            return;
-        }
-
-        new Setting(containerEl)
-            .setName(t("current_search_exclude_list"))
-            .setHeading();
-
-        const excludeList = containerEl.createEl("ul", {
-            cls: "pinned-note-list",
-        });
-
-        this.plugin.settings.searchExcludePaths.forEach((path, index) => {
-            this.createExcludeListItem(excludeList, path, index);
-        });
-    }
-
-    private createExcludeListItem(excludeList: HTMLElement, path: string, index: number) {
-        const li = excludeList.createEl("li", { cls: "exclude-list-item" });
-        const item = this.app.vault.getAbstractFileByPath(path);
-        const isFolder = item instanceof TFolder;
-
-        // Icon container
-        const iconWrap = li.createSpan({ cls: "exclude-item-icon" });
-        const icon = isFolder ? SvgUtil.createFolderIcon() : SvgUtil.createFileIcon("md");
-        iconWrap.appendChild(icon);
-
-        // Path container with ellipsis
-        const pathContainer = li.createEl("div", { cls: "exclude-item-path" });
-        const pathText = pathContainer.createEl("span", { cls: "exclude-item-path-text", text: path });
-        pathText.setAttr("title", path);
-
-        // Actions container
-        const actionsEl = li.createEl("div", { cls: "exclude-item-actions" });
-        this.createExcludeListRemoveButton(actionsEl, path);
-    }
-
-    private createExcludeListRemoveButton(container: HTMLElement, path: string) {
-        const btn = container.createEl("button", { cls: "mod-warning remove-button control-button icon-button" });
-        btn.setAttr("aria-label", t("search_exclude_list_remove"));
-        btn.setAttr("title", t("search_exclude_list_remove"));
-        const svg = SvgUtil.createRemoveIcon();
-        btn.appendChild(svg);
-        btn.onclick = async () => {
-            this.plugin.settings.searchExcludePaths = this.plugin.settings.searchExcludePaths.filter((p) => p !== path);
-            await this.plugin.saveSettings();
-            this.display();
-        };
     }
 
     private createFooterSettings(containerEl: HTMLElement) {
