@@ -189,20 +189,16 @@ export default class SearchModal extends Modal {
 			const aliases = cache?.frontmatter?.aliases || cache?.frontmatter?.alias;
 			const matchedAlias = this.getMatchedAlias(aliases, query);
 			
+			const extEl = document.createElement("span");
+			extEl.addClass("search-result-item-ext");
+			itemEl.appendChild(extEl);
+			extEl.setText(file.extension.toUpperCase());
+
 			if (matchedAlias) {
 				const aliasEl = document.createElement("span");
 				aliasEl.addClass("search-result-item-alias");
 				aliasEl.setText(matchedAlias);
 				itemEl.appendChild(aliasEl);
-			}
-
-			const tagEl = document.createElement("span");
-			tagEl.addClass("search-result-item-tag");
-			itemEl.appendChild(tagEl);
-
-			if (file.extension.toLowerCase() === "canvas" ||
-				file.extension.toLowerCase() === "base") {
-				tagEl.setText(file.extension.toUpperCase());
 			}
 
 			if (file.parent && !file.parent.isRoot()) {

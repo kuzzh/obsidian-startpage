@@ -247,6 +247,10 @@ export default class StartPageCreator {
 		if (styleSettings.noteDateFontSize) noteDateEl.style.fontSize = styleSettings.noteDateFontSize;
 		
 		noteMeta.appendChild(noteDateEl);
+
+		const noteExtEl = this.createElement("div", "note-ext", "." + note.extension);
+		noteMeta.appendChild(noteExtEl);
+
 		const folderIcon = SvgUtil.createFolderIcon();
 		noteMeta.appendChild(folderIcon);
 		

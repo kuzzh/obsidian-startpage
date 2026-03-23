@@ -262,6 +262,18 @@
 	white-space: nowrap;
 }
 
+.start-page-container .note-ext {
+	margin-right: 8px;
+	flex-shrink: 0;
+	white-space: nowrap;
+	background-color: var(--background-modifier-hover);
+	color: var(--text-muted);
+	border-radius: 4px;
+	padding: 2px 6px;
+	font-size: 0.75em;
+	font-weight: 500;
+}
+
 .start-page-container .note-folder {
 	flex: 1;
 	min-width: 0;
@@ -562,7 +574,7 @@
 	flex-shrink: 0;
 }
 
-.my-search-modal .search-result-item-tag {
+.my-search-modal .search-result-item-ext {
 	flex: 1;
 	text-transform: uppercase;
 	background-color: var(--nav-tag-background);
@@ -575,6 +587,7 @@
 	margin-inline-start: auto;
 	padding: 0 var(--size-4-1);
 	align-self: center;
+	margin-right: 8px;
 	min-width: 16px;
 	min-height: 16px;
 }
