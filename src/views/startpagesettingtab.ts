@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting, Platform, TextComponent, ToggleComponent, Notice, TFolder } from "obsidian";
+import { App, PluginSettingTab, Setting, Platform, TextComponent, ToggleComponent, Notice, TFolder, ButtonComponent } from "obsidian";
 import StartPagePlugin from "@/main";
 import { VIEW_TYPE_START_PAGE, StartPageView } from "@/views/startpageview";
 import { t } from "@/i18n";
@@ -213,9 +213,7 @@ export class StartPageSettingTab extends PluginSettingTab {
         const details = containerEl.createEl("details");
         const summary = details.createEl("summary");
         summary.textContent = title;
-        summary.style.fontWeight = "bold";
-        summary.style.cursor = "pointer";
-        summary.style.marginBottom = "10px";
+        summary.addClass("settings-section-summary");
 
         this.addStyleSetting(details, styleSettings, "sectionMargin", t("style_section_margin"), t("style_section_margin_desc"));
         this.addStyleSetting(details, styleSettings, "sectionPadding", t("style_section_padding"), t("style_section_padding_desc"));
@@ -281,8 +279,8 @@ export class StartPageSettingTab extends PluginSettingTab {
             .addButton((button) => {
                 button.setButtonText(t("search_exclude_list_add_button")).onClick(() => {
                     new FileFolderSuggestModal(this.app, async (item) => {
-                        if (!this.plugin.settings.excludeList.includes(item.path)) {
-                            this.plugin.settings.excludeList.push(item.path);
+                        if (!this.plugin.settings.searchExcludePaths.includes(item.path)) {
+                            this.plugin.settings.searchExcludePaths.push(item.path);
                             await this.plugin.saveSettings();
                             this.display();
                         }
@@ -291,10 +289,97 @@ export class StartPageSettingTab extends PluginSettingTab {
             });
 
         this.displayCurrentExcludeList(containerEl);
+
+        // Extension exclude settings
+        new Setting(containerEl)
+            .setName(t("search_exclude_extensions"))
+            .setDesc(t("search_exclude_extensions_desc"));
+
+        this.createExtensionInput(containerEl);
+        this.displayCurrentExcludeExtensions(containerEl);
+    }
+
+    private createExtensionInput(containerEl: HTMLElement) {
+        const inputContainer = containerEl.createDiv({ cls: "extension-input-container" });
+
+        const textComponent = new TextComponent(inputContainer);
+        textComponent.setPlaceholder(t("search_exclude_extensions_placeholder"));
+        textComponent.inputEl.addClass("text-input");
+
+        const addButton = new ButtonComponent(inputContainer);
+        addButton.setButtonText(t("search_exclude_extensions_add"));
+        addButton.onClick(async () => {
+            const value = textComponent.getValue().trim().toLowerCase();
+            if (value) {
+                // Remove leading dot if present
+                const extension = value.startsWith(".") ? value.slice(1) : value;
+                // Remove any spaces or commas (in case user enters multiple)
+                const extensions = extension.split(/[,\s]+/).filter(ext => ext.length > 0);
+                
+                let added = false;
+                for (const ext of extensions) {
+                    if (!this.plugin.settings.searchExcludeExtensions.includes(ext)) {
+                        this.plugin.settings.searchExcludeExtensions.push(ext);
+                        added = true;
+                    }
+                }
+                
+                if (added) {
+                    await this.plugin.saveSettings();
+                    textComponent.setValue("");
+                    this.display();
+                }
+            }
+        });
+
+        // Allow Enter key to add extension
+        textComponent.inputEl.addEventListener("keydown", (e: KeyboardEvent) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                addButton.buttonEl.click();
+            }
+        });
+    }
+
+    private displayCurrentExcludeExtensions(containerEl: HTMLElement) {
+        if (this.plugin.settings.searchExcludeExtensions.length === 0) {
+            return;
+        }
+
+        const extensionsContainer = containerEl.createDiv({ cls: "current-extensions-container" });
+
+        const heading = extensionsContainer.createEl("div", {
+            text: t("search_exclude_extensions_current") + ":",
+            cls: "setting-item-description extensions-heading"
+        });
+
+        const tagsContainer = extensionsContainer.createDiv({ cls: "extension-tags-container" });
+
+        this.plugin.settings.searchExcludeExtensions.forEach((ext, index) => {
+            this.createExtensionTag(tagsContainer, ext, index);
+        });
+    }
+
+    private createExtensionTag(container: HTMLElement, ext: string, index: number) {
+        const tag = container.createSpan({ cls: "extension-tag" });
+
+        const extText = tag.createSpan({ text: `.${ext}` });
+
+        const removeBtn = tag.createEl("button", {
+            cls: "extension-tag-remove-btn",
+            attr: { "aria-label": "Remove" }
+        });
+        removeBtn.textContent = "×";
+
+        removeBtn.addEventListener("click", async () => {
+            this.plugin.settings.searchExcludeExtensions.splice(index, 1);
+            await this.plugin.saveSettings();
+            this.display();
+        });
     }
 
     private displayCurrentExcludeList(containerEl: HTMLElement) {
-        if (this.plugin.settings.excludeList.length === 0) {
+        if (this.plugin.settings.searchExcludePaths.length === 0) {
             return;
         }
 
@@ -306,7 +391,7 @@ export class StartPageSettingTab extends PluginSettingTab {
             cls: "pinned-note-list",
         });
 
-        this.plugin.settings.excludeList.forEach((path, index) => {
+        this.plugin.settings.searchExcludePaths.forEach((path, index) => {
             this.createExcludeListItem(excludeList, path, index);
         });
     }
@@ -338,7 +423,7 @@ export class StartPageSettingTab extends PluginSettingTab {
         const svg = SvgUtil.createRemoveIcon();
         btn.appendChild(svg);
         btn.onclick = async () => {
-            this.plugin.settings.excludeList = this.plugin.settings.excludeList.filter((p) => p !== path);
+            this.plugin.settings.searchExcludePaths = this.plugin.settings.searchExcludePaths.filter((p) => p !== path);
             await this.plugin.saveSettings();
             this.display();
         };
