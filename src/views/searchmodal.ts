@@ -3,6 +3,7 @@ import SvgUtil from "@/utils/svgutil";
 import { t } from "@/i18n";
 import { App, Modal, SearchComponent, TFile } from "obsidian";
 import StartPagePlugin from "@/main";
+import { VIEW_TYPE_START_PAGE } from "@/views/startpageview";
 
 export default class SearchModal extends Modal {
 	private searchComponent: SearchComponent;
@@ -218,6 +219,18 @@ export default class SearchModal extends Modal {
 			itemEl.onClickEvent(() => {
 				this.onChooseItem(file);
 				this.close();
+			});
+
+			// 添加 hover preview 功能
+			itemEl.addEventListener("mouseenter", (event) => {
+				this.app.workspace.trigger("hover-link", {
+					event: event as MouseEvent,
+					source: VIEW_TYPE_START_PAGE,
+					hoverParent: itemEl,
+					targetEl: itemEl,
+					linktext: file.path,
+					sourcePath: "",
+				});
 			});
 		}
 

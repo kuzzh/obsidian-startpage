@@ -203,6 +203,18 @@ export default class StartPageCreator {
 			}
 		});
 
+		// 添加 hover preview 功能
+		noteItem.addEventListener("mouseenter", (event) => {
+			this.app.workspace.trigger("hover-link", {
+				event: event as MouseEvent,
+				source: VIEW_TYPE_START_PAGE,
+				hoverParent: noteItem,
+				targetEl: noteItem,
+				linktext: note.path,
+				sourcePath: "",
+			});
+		});
+
 		if (isPinned) {
 			noteItem.addEventListener("contextmenu", (event) => {
 				event.preventDefault();

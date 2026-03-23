@@ -1,3 +1,8 @@
+/* 修复 hover preview 窗口被 modal 遮挡的问题 */
+.popover.hover-popover {
+	z-index: 1000;
+}
+
 /* 顶级容器撑满页面 */
 .start-page-container {
 	display: flex;
