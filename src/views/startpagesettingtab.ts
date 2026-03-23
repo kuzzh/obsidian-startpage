@@ -4,9 +4,9 @@ import { VIEW_TYPE_START_PAGE, StartPageView } from "@/views/startpageview";
 import { t } from "@/i18n";
 import NoteSuggestModal from "@/views/notesuggestmodal";
 import FileFolderSuggestModal from "@/views/filefoldersuggestmodal";
+import StyleSettingsModal from "@/views/stylesettingsmodal";
 import SvgUtil from "@/utils/svgutil";
 import { MyUtil } from "@/utils/myutil";
-import { SectionStyleSettings } from "@/types";
 
 export class StartPageSettingTab extends PluginSettingTab {
 	plugin: StartPagePlugin;
@@ -203,53 +203,16 @@ export class StartPageSettingTab extends PluginSettingTab {
     private createStyleSettings(containerEl: HTMLElement) {
         new Setting(containerEl)
             .setName(t("style_settings_heading"))
-            .setHeading();
-
-        this.createSectionStyleSettings(containerEl, t("style_settings_pinned_notes"), this.plugin.settings.pinnedNotesStyle);
-        this.createSectionStyleSettings(containerEl, t("style_settings_recent_notes"), this.plugin.settings.recentNotesStyle);
-    }
-
-    private createSectionStyleSettings(containerEl: HTMLElement, title: string, styleSettings: SectionStyleSettings) {
-        const details = containerEl.createEl("details");
-        const summary = details.createEl("summary");
-        summary.textContent = title;
-        summary.addClass("settings-section-summary");
-
-        this.addStyleSetting(details, styleSettings, "sectionMargin", t("style_section_margin"), t("style_section_margin_desc"));
-        this.addStyleSetting(details, styleSettings, "sectionPadding", t("style_section_padding"), t("style_section_padding_desc"));
-
-        this.addStyleSetting(details, styleSettings, "headerMargin", t("style_header_margin"), t("style_header_margin_desc"));
-        this.addStyleSetting(details, styleSettings, "headerPadding", t("style_header_padding"), t("style_header_padding_desc"));
-
-        this.addStyleSetting(details, styleSettings, "titleFontSize", t("style_title_font_size"), t("style_title_font_size_desc"));
-        this.addStyleSetting(details, styleSettings, "titleMargin", t("style_title_margin"), t("style_title_margin_desc"));
-        this.addStyleSetting(details, styleSettings, "titlePadding", t("style_title_padding"), t("style_title_padding_desc"));
-
-        this.addStyleSetting(details, styleSettings, "listGap", t("style_list_gap"), t("style_list_gap_desc"));
-
-        this.addStyleSetting(details, styleSettings, "itemPadding", t("style_item_padding"), t("style_item_padding_desc"));
-        this.addStyleSetting(details, styleSettings, "itemMargin", t("style_item_margin"), t("style_item_margin_desc"));
-
-        this.addStyleSetting(details, styleSettings, "noteTitleFontSize", t("style_note_title_font_size"), t("style_note_title_font_size_desc"));
-        this.addStyleSetting(details, styleSettings, "noteTitleMargin", t("style_note_title_margin"), t("style_note_title_margin_desc"));
-        this.addStyleSetting(details, styleSettings, "noteTitlePadding", t("style_note_title_padding"), t("style_note_title_padding_desc"));
-
-        this.addStyleSetting(details, styleSettings, "noteDateFontSize", t("style_note_date_font_size"), t("style_note_date_font_size_desc"));
-
-        this.addStyleSetting(details, styleSettings, "noteFolderFontSize", t("style_note_folder_font_size"), t("style_note_folder_font_size_desc"));
-    }
-
-    private addStyleSetting(container: HTMLElement, settings: SectionStyleSettings, key: keyof SectionStyleSettings, name: string, desc: string) {
-        new Setting(container)
-            .setName(name)
-            .setDesc(desc)
-            .addText(text => text
-                .setValue(settings[key])
-                .onChange(async (value) => {
-                    settings[key] = value;
-                    await this.plugin.saveSettings();
-                    this.refreshStartPage();
-                }));
+            .setDesc(t("style_settings_desc"))
+            .addButton(button => {
+                button
+                    .setButtonText(t("style_settings_open_button"))
+                    .onClick(() => {
+                        new StyleSettingsModal(this.app, this.plugin, () => {
+                            this.refreshStartPage();
+                        }).open();
+                    });
+            });
     }
 
     private createNewTabSettings(containerEl: HTMLElement) {
