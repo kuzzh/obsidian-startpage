@@ -138,5 +138,8 @@
     "style_note_title_margin_desc": "设置笔记标题的外边距",
     "style_note_title_padding_desc": "设置笔记标题的内边距",
     "style_note_date_font_size_desc": "设置笔记日期的字体大小",
-    "style_note_folder_font_size_desc": "设置文件夹路径文字的字体大小"
+    "style_note_folder_font_size_desc": "设置文件夹路径文字的字体大小",
+    "backup_settings_heading": "备份设置",
+    "backup_max_files": "最大备份文件数量",
+    "backup_max_files_desc": "设置保留的备份文件最大数量，超过此数量的旧备份将被自动删除"
   }

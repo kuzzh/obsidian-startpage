@@ -5,6 +5,7 @@ import { t } from "@/i18n";
 import StyleSettingsModal from "@/views/stylesettingsmodal";
 import SearchExclusionModal from "@/views/searchexclusionmodal";
 import PinnedNotesModal from "@/views/pinnednotesmodal";
+import { MyUtil } from "@/utils/myutil";
 
 export class StartPageSettingTab extends PluginSettingTab {
 	plugin: StartPagePlugin;
@@ -14,15 +15,6 @@ export class StartPageSettingTab extends PluginSettingTab {
 	constructor(app: App, plugin: StartPagePlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
-	}
-
-	private refreshStartPage() {
-		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_START_PAGE);
-		leaves.forEach((leaf) => {
-			if (leaf.view instanceof StartPageView) {
-				leaf.view.renderContent();
-			}
-		});
 	}
 
 	private updateTitleNavigationBar() {
@@ -59,6 +51,7 @@ export class StartPageSettingTab extends PluginSettingTab {
         this.createStyleSettings(containerEl);
         this.createNewTabSettings(containerEl);
         this.createSearchSettings(containerEl);
+        this.createBackupSettings(containerEl);
         this.createPinnedNotesSettings(containerEl);
         this.createFooterSettings(containerEl);
 
@@ -79,7 +72,7 @@ export class StartPageSettingTab extends PluginSettingTab {
 				toggle.onChange(async (value) => {
 					this.plugin.settings.includeAllFilesInRecent = value;
 					await this.plugin.saveSettings();
-					this.refreshStartPage();
+					MyUtil.refreshStartPage(this.app);
 				});
 			});
 
@@ -94,7 +87,7 @@ export class StartPageSettingTab extends PluginSettingTab {
 				dropdown.onChange(async (value) => {
 					this.plugin.settings.recentNotesLimit = parseInt(value);
 					await this.plugin.saveSettings();
-					this.refreshStartPage();
+					MyUtil.refreshStartPage(this.app);
 				});
 			});
     }
@@ -125,7 +118,7 @@ export class StartPageSettingTab extends PluginSettingTab {
 				toggle.onChange(async (value) => {
 					this.plugin.settings.showStatBar = value;
 					await this.plugin.saveSettings();
-					this.refreshStartPage();
+					MyUtil.refreshStartPage(this.app);
 				});
 			});
     }
@@ -139,7 +132,7 @@ export class StartPageSettingTab extends PluginSettingTab {
                     .setButtonText(t("style_settings_open_button"))
                     .onClick(() => {
                         new StyleSettingsModal(this.app, this.plugin, () => {
-                            this.refreshStartPage();
+                            MyUtil.refreshStartPage(this.app);
                         }).open();
                     });
             });
@@ -179,8 +172,29 @@ export class StartPageSettingTab extends PluginSettingTab {
                     .onClick(() => {
                         new SearchExclusionModal(this.app, this.plugin, () => {
                             this.display();
+							MyUtil.refreshStartPage(this.app);
                         }).open();
                     });
+            });
+    }
+
+    private createBackupSettings(containerEl: HTMLElement) {
+        new Setting(containerEl)
+            .setName(t("backup_settings_heading"))
+            .setHeading();
+
+        new Setting(containerEl)
+            .setName(t("backup_max_files"))
+            .setDesc(t("backup_max_files_desc"))
+            .addDropdown((dropdown) => {
+                for (let i = 1; i <= 20; i++) {
+                    dropdown.addOption(i.toString(), i.toString());
+                }
+                dropdown.setValue(this.plugin.settings.backupMaxFiles.toString());
+                dropdown.onChange(async (value) => {
+                    this.plugin.settings.backupMaxFiles = parseInt(value);
+                    await this.plugin.saveSettings();
+                });
             });
     }
 
@@ -202,7 +216,7 @@ export class StartPageSettingTab extends PluginSettingTab {
 					}
 					await this.plugin.saveSettings();
 					this.updateFootComponentDisabledState();
-					this.refreshStartPage();
+					MyUtil.refreshStartPage(this.app);
 				});
 			});
 
@@ -216,7 +230,7 @@ export class StartPageSettingTab extends PluginSettingTab {
 					this.plugin.settings.useRandomFooterText = value;
 					await this.plugin.saveSettings();
 					this.updateFootComponentDisabledState();
-					this.refreshStartPage();
+					MyUtil.refreshStartPage(this.app);
 				});
 			});
 
@@ -230,7 +244,7 @@ export class StartPageSettingTab extends PluginSettingTab {
 					this.plugin.settings.customFooterText = value;
 					await this.plugin.saveSettings();
 					this.updateFootComponentDisabledState();
-					this.refreshStartPage();
+					MyUtil.refreshStartPage(this.app);
 				});
 			});
     }
@@ -258,7 +272,7 @@ export class StartPageSettingTab extends PluginSettingTab {
                     .setCta()
                     .onClick(() => {
                         new PinnedNotesModal(this.app, this.plugin, () => {
-                            this.refreshStartPage();
+                            MyUtil.refreshStartPage(this.app);
                             this.display();
                         }).open();
                     });

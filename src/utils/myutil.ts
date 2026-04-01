@@ -1,41 +1,43 @@
-
 import { t } from "../i18n";
+import { StartPageSettings } from "@/types";
+import { App, TFile } from "obsidian";
+import { StartPageView, VIEW_TYPE_START_PAGE } from "@/views/startpageview";
 
 export class MyUtil {
-    /**
-     * 将路径字符串进行中间省略，保留头尾以提升可读性
-     */
-    static truncateMiddle(str: string, head: number = 24, tail: number = 16): string {
-        if (!str) return str;
-        const len = str.length;
-        if (len <= head + tail + 3) return str;
-        const start = str.slice(0, head);
-        const end = str.slice(-tail);
-        return `${start}...${end}`;
-    }
+	/**
+	 * 将路径字符串进行中间省略，保留头尾以提升可读性
+	 */
+	static truncateMiddle(str: string, head: number = 24, tail: number = 16): string {
+		if (!str) return str;
+		const len = str.length;
+		if (len <= head + tail + 3) return str;
+		const start = str.slice(0, head);
+		const end = str.slice(-tail);
+		return `${start}...${end}`;
+	}
 
-    /**
-     * 获取笔记所属目录路径；根目录返回 "/"
-     */
-    static getDirPath(p: string): string {
-        if (!p) return "/";
-        const idx = p.lastIndexOf("/");
-        if (idx === -1) return "/";
-        const dir = p.slice(0, idx);
-        return "/" + dir;
-    }
+	/**
+	 * 获取笔记所属目录路径；根目录返回 "/"
+	 */
+	static getDirPath(p: string): string {
+		if (!p) return "/";
+		const idx = p.lastIndexOf("/");
+		if (idx === -1) return "/";
+		const dir = p.slice(0, idx);
+		return "/" + dir;
+	}
 
-    /**
-     * 获取文件名（不包括扩展名）
-     */
+	/**
+	 * 获取文件名（不包括扩展名）
+	 */
 	static getFileNameWithoutExtension(fileName: string): string {
 		return fileName.slice(0, fileName.lastIndexOf("."));
 	}
 
-    /**
-     * 格式化时间戳为相对时间
-     */
-    static formatDate(timestamp: number): string {
+	/**
+	 * 格式化时间戳为相对时间
+	 */
+	static formatDate(timestamp: number): string {
 		const date = new Date(timestamp);
 		const now = new Date();
 		const diff = now.getTime() - date.getTime();
@@ -67,9 +69,9 @@ export class MyUtil {
 		});
 	}
 
-    /**
-     * 格式化文件大小
-     */
+	/**
+	 * 格式化文件大小
+	 */
 	static formatSize(size: number): string {
 		if (size < 1024) {
 			return size + "B";
@@ -80,5 +82,40 @@ export class MyUtil {
 		} else {
 			return (size / (1024 * 1024 * 1024)).toFixed(0) + "GB";
 		}
+	}
+
+	static isFileExcluded(settings: StartPageSettings, file: TFile): boolean {
+		const excludeList = settings.searchExcludePaths;
+		for (const excludePath of excludeList) {
+			// Check if the file path exactly matches
+			if (file.path === excludePath) {
+				return true;
+			}
+
+			// Check if the file is in an excluded folder
+			if (file.path.startsWith(excludePath + "/")) {
+				return true;
+			}
+		}
+
+		// Check if file extension is excluded
+		const excludeExtensions = settings.searchExcludeExtensions;
+		if (excludeExtensions.length > 0) {
+			const fileExt = file.extension.toLowerCase();
+			if (excludeExtensions.includes(fileExt)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	static refreshStartPage(app: App) {
+		const leaves = app.workspace.getLeavesOfType(VIEW_TYPE_START_PAGE);
+		leaves.forEach((leaf) => {
+			if (leaf.view instanceof StartPageView) {
+				leaf.view.renderContent();
+			}
+		});
 	}
 }
