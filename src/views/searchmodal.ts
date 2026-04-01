@@ -105,7 +105,7 @@ export default class SearchModal extends Modal {
 			if (this.caseSensitive) {
 				this.filteredResults = this.allFiles.filter((file) => {
 					// Check if file is excluded
-					if (this.isFileExcluded(file)) {
+					if (MyUtil.isFileExcluded(this.plugin.settings, file)) {
 						return false;
 					}
 					
@@ -130,7 +130,7 @@ export default class SearchModal extends Modal {
 				const lowerCaseQuery = query.toLowerCase();
 				this.filteredResults = this.allFiles.filter((file) => {
 					// Check if file is excluded
-					if (this.isFileExcluded(file)) {
+					if (MyUtil.isFileExcluded(this.plugin.settings, file)) {
 						return false;
 					}
 					
@@ -328,32 +328,6 @@ export default class SearchModal extends Modal {
 		}
 		
 		return null;
-	}
-
-	private isFileExcluded(file: TFile): boolean {
-		const excludeList = this.plugin.settings.searchExcludePaths;
-		for (const excludePath of excludeList) {
-			// Check if the file path exactly matches
-			if (file.path === excludePath) {
-				return true;
-			}
-
-			// Check if the file is in an excluded folder
-			if (file.path.startsWith(excludePath + "/")) {
-				return true;
-			}
-		}
-
-		// Check if file extension is excluded
-		const excludeExtensions = this.plugin.settings.searchExcludeExtensions;
-		if (excludeExtensions.length > 0) {
-			const fileExt = file.extension.toLowerCase();
-			if (excludeExtensions.includes(fileExt)) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	private getExcludeTooltip(): string {

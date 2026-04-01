@@ -2,6 +2,7 @@ import { App, ItemView, TFile, Menu, EventRef, Platform, debounce } from "obsidi
 import StartPagePlugin from "@/main";
 import { t } from "@/i18n";
 import StartPageCreator from "@/core/startpagecreator";
+import { MyUtil } from "@/utils/myutil";
 
 export const VIEW_TYPE_START_PAGE = "start-page-view";
 
@@ -216,7 +217,9 @@ export class StartPageView extends ItemView {
 	getRecentNotes(limit: number): TFile[] {
 		const recentlyOpenedPaths = this.app.workspace.getLastOpenFiles();
 
-		const allFiles = this.plugin.settings.includeAllFilesInRecent ? this.app.vault.getFiles() : this.app.vault.getMarkdownFiles();
+		const allFiles = (this.plugin.settings.includeAllFilesInRecent ? this.app.vault.getFiles() : this.app.vault.getMarkdownFiles()).filter(
+			(file) => !MyUtil.isFileExcluded(this.plugin.settings, file),
+		);
 
 		if (allFiles.length === 0) {
 			return [];
