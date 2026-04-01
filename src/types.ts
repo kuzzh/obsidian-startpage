@@ -81,6 +81,7 @@ export interface StartPageSettings {
 	searchExcludeExtensions: string[]; // List of file extensions to exclude from search
 	pinnedNotesStyle: SectionStyleSettings;
 	recentNotesStyle: SectionStyleSettings;
+	backupMaxFiles: number; // Maximum number of backup files to keep
 }
 
 export const DEFAULT_SETTINGS: StartPageSettings = {
@@ -102,4 +103,5 @@ export const DEFAULT_SETTINGS: StartPageSettings = {
 	searchExcludeExtensions: [],
 	pinnedNotesStyle: { ...DEFAULT_SECTION_STYLE },
 	recentNotesStyle: { ...DEFAULT_SECTION_STYLE },
+	backupMaxFiles: 5,
 };

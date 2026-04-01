@@ -59,6 +59,7 @@ export class StartPageSettingTab extends PluginSettingTab {
         this.createStyleSettings(containerEl);
         this.createNewTabSettings(containerEl);
         this.createSearchSettings(containerEl);
+        this.createBackupSettings(containerEl);
         this.createPinnedNotesSettings(containerEl);
         this.createFooterSettings(containerEl);
 
@@ -181,6 +182,26 @@ export class StartPageSettingTab extends PluginSettingTab {
                             this.display();
                         }).open();
                     });
+            });
+    }
+
+    private createBackupSettings(containerEl: HTMLElement) {
+        new Setting(containerEl)
+            .setName(t("backup_settings_heading"))
+            .setHeading();
+
+        new Setting(containerEl)
+            .setName(t("backup_max_files"))
+            .setDesc(t("backup_max_files_desc"))
+            .addDropdown((dropdown) => {
+                for (let i = 1; i <= 20; i++) {
+                    dropdown.addOption(i.toString(), i.toString());
+                }
+                dropdown.setValue(this.plugin.settings.backupMaxFiles.toString());
+                dropdown.onChange(async (value) => {
+                    this.plugin.settings.backupMaxFiles = parseInt(value);
+                    await this.plugin.saveSettings();
+                });
             });
     }
 
