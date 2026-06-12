@@ -244,11 +244,9 @@ export default class SvgUtil {
         ],
         "canvas": [
             { tagName: "rect", attributes: { x: "4", y: "3", width: "16", height: "20", rx: "2", stroke: "currentColor", "stroke-width": "2", fill: "none" } },
-            // Three bold nodes, spread out inside the rect
             { tagName: "circle", attributes: { cx: "8", cy: "9", r: "2", fill: "currentColor" } },
             { tagName: "circle", attributes: { cx: "16", cy: "9", r: "2", fill: "currentColor" } },
             { tagName: "circle", attributes: { cx: "12", cy: "17", r: "2", fill: "currentColor" } },
-            // Connecting lines
             { tagName: "path", attributes: { d: "M10 9L14 9", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } },
             { tagName: "path", attributes: { d: "M9.4 10.6L12 15", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } },
             { tagName: "path", attributes: { d: "M14.6 10.6L12 15", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } }

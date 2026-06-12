@@ -103,21 +103,18 @@ export default class StyleSettingsModal extends Modal {
 
         const trimmedValue = value.trim();
 
-        // 检查是否已有单位 (px, em, rem, %, vw, vh, pt, cm, mm, in, ex, ch, vmin, vmax)
         const hasUnit = /^(\d+\.?\d*)\s*(px|em|rem|%|vw|vh|pt|cm|mm|in|ex|ch|vmin|vmax)$/i.test(trimmedValue);
 
         if (hasUnit) {
             return trimmedValue;
         }
 
-        // 检查是否为纯数字（包括小数）
         const isNumber = /^\d+\.?\d*$/.test(trimmedValue);
 
         if (isNumber) {
             return trimmedValue + "px";
         }
 
-        // 其他情况（如 auto, inherit, initial, unset, 0 等）原样返回
         return trimmedValue;
     }
 

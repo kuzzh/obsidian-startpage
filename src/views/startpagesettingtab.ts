@@ -26,7 +26,7 @@ export class StartPageSettingTab extends PluginSettingTab {
 					view.showTitleNavigationBar(true);
 				} else if (this.plugin.settings.showTitleNavigationBar === "hide") {
 					view.showTitleNavigationBar(false);
-				} else { // default
+				} else { 
 					view.showTitleNavigationBar(!Platform.isDesktop);
 				}
 			}

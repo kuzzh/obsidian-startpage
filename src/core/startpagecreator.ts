@@ -22,7 +22,7 @@ export default class StartPageCreator {
 	private plugin: StartPagePlugin;
 	private container: Element;
 	private searchBox: HTMLInputElement;
-	private globalKeyHandler: (e: KeyboardEvent) => void;
+	private keyHandler: (e: KeyboardEvent) => void;
 	private initialQuery: string = "";
 	private stats = [
 		{
@@ -76,11 +76,17 @@ export default class StartPageCreator {
 		this.container.appendChild(mainContent);
 		this.container.appendChild(footer);
 
-		this.setupGlobalKeyListener();
+		this.setupKeyListener();
+
+		(this.container as HTMLElement).tabIndex = -1;
+	}
+
+	public focusContainer(): void {
+		(this.container as HTMLElement).focus();
 	}
 
 	public destroy(): void {
-		this.removeGlobalKeyListener();
+		this.removeKeyListener();
 	}
 
 	private initData(pinnedNotes: TFile[] | null, recentNotes: TFile[] | null): void {
@@ -111,7 +117,6 @@ export default class StartPageCreator {
 	private createHeader(): HTMLElement {
 		const header = this.createElement("header", "header");
 
-		// Logo
 		const logo = this.createElement("div", "logo");
 		const logoIcon = SvgUtil.createLogoIcon();
 		const logoText = this.createElement("span", "logo-text", "Start Page for Obsidian");
@@ -134,10 +139,8 @@ export default class StartPageCreator {
 		logo.appendChild(logoText);
 		logo.appendChild(searchBoxContainer);
 
-		// Header actions (Update badge if available)
 		const headerActions = this.createElement("div", "header-actions");
 
-		// Check if there's a new version available
 		if (this.hasUpdate()) {
 			const updateBadge = this.createUpdateBadge();
 			headerActions.appendChild(updateBadge);
@@ -169,7 +172,6 @@ export default class StartPageCreator {
 			statsSection.appendChild(statCard);
 
 			statCard.addEventListener("click", () => {
-				// open search modal
 				this.showSearchModal();
 			});
 		});
@@ -203,7 +205,6 @@ export default class StartPageCreator {
 			}
 		});
 
-		// 添加 hover preview 功能
 		noteItem.addEventListener("mouseenter", (event) => {
 			this.app.workspace.trigger("hover-link", {
 				event: event as MouseEvent,
@@ -482,26 +483,23 @@ export default class StartPageCreator {
 		return totalSize;
 	}
 
-	private setupGlobalKeyListener(): void {
-		this.globalKeyHandler = (e: KeyboardEvent) => {
-			// 检查当前活动视图是否是 start page
-			const activeView = this.app.workspace.getActiveViewOfType(StartPageView);
-			if (!activeView) {
-				return;
-			}
-
-			// 排除功能键和组合键
+	private setupKeyListener(): void {
+		this.keyHandler = (e: KeyboardEvent) => {
 			if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) {
 				return;
 			}
 
-			// 只处理可打印字符（字母、数字等）
 			if (e.key.length !== 1) {
 				return;
 			}
 
-			// 排除在输入框中输入的情况
-			if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+			const target = e.target as Node;
+			if (
+				target instanceof HTMLInputElement ||
+				target instanceof HTMLTextAreaElement ||
+				target instanceof HTMLSelectElement ||
+				(target instanceof HTMLElement && target.isContentEditable)
+			) {
 				return;
 			}
 
@@ -510,21 +508,15 @@ export default class StartPageCreator {
 			}
 
 			this.initialQuery = e.key;
-
 			this.showSearchModal();
-
 			e.preventDefault();
 			e.stopPropagation();
 		};
 
-		document.addEventListener("keydown", this.globalKeyHandler, true);
+		(this.container as HTMLElement).addEventListener("keydown", this.keyHandler);
 	}
 
 	private showSearchModal(): void {
-		if (document.querySelector('.modal-container')) {
-			return;
-		}
-
 		const modal = new SearchModal(
 			this.app,
 			this.plugin,
@@ -537,15 +529,12 @@ export default class StartPageCreator {
 		this.initialQuery = "";
 	}
 
-	private removeGlobalKeyListener(): void {
-		if (this.globalKeyHandler) {
-			document.removeEventListener("keydown", this.globalKeyHandler, true);
+	private removeKeyListener(): void {
+		if (this.keyHandler) {
+			(this.container as HTMLElement).removeEventListener("keydown", this.keyHandler);
 		}
 	}
 
-	/**
-	 * Check if there's a new version available
-	 */
 	private hasUpdate(): boolean {
 		const currentVersion = this.plugin.manifest.version;
 		const latestVersion = this.plugin.settings.latestVersion;
@@ -554,7 +543,6 @@ export default class StartPageCreator {
 			return false;
 		}
 
-		// Simple version comparison
 		const current = currentVersion.split(".").map(Number);
 		const latest = latestVersion.split(".").map(Number);
 
@@ -568,9 +556,6 @@ export default class StartPageCreator {
 		return false;
 	}
 
-	/**
-	 * Create update badge element
-	 */
 	private createUpdateBadge(): HTMLElement {
 		const badge = this.createElement("div", "update-badge");
 		badge.setAttribute("title", t("new_version_available"));

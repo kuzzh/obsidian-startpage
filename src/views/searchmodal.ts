@@ -38,7 +38,6 @@ export default class SearchModal extends Modal {
 			this.performSearch(value);
 		});
 
-		// Exclude settings button
 		const excludeSettingsBtn = searchContainer.createEl("button", {
 			cls: "search-exclude-settings-btn",
 			attr: {
@@ -53,7 +52,6 @@ export default class SearchModal extends Modal {
 			this.openExcludeSettings();
 		});
 
-		// Case sensitivity toggle button
 		const caseSensitiveBtn = searchContainer.createEl("button", {
 			cls: "search-case-sensitive-btn",
 			attr: {
@@ -104,17 +102,14 @@ export default class SearchModal extends Modal {
 		} else {
 			if (this.caseSensitive) {
 				this.filteredResults = this.allFiles.filter((file) => {
-					// Check if file is excluded
 					if (MyUtil.isFileExcluded(this.plugin.settings, file)) {
 						return false;
 					}
 					
-					// Search in file name
 					if (file.name.includes(query)) {
 						return true;
 					}
 					
-					// Search in aliases
 					const cache = this.app.metadataCache.getFileCache(file);
 					const aliases = cache?.frontmatter?.aliases || cache?.frontmatter?.alias;
 					if (aliases) {
@@ -129,17 +124,14 @@ export default class SearchModal extends Modal {
 			} else {
 				const lowerCaseQuery = query.toLowerCase();
 				this.filteredResults = this.allFiles.filter((file) => {
-					// Check if file is excluded
 					if (MyUtil.isFileExcluded(this.plugin.settings, file)) {
 						return false;
 					}
 					
-					// Search in file name
 					if (file.name.toLowerCase().includes(lowerCaseQuery)) {
 						return true;
 					}
 					
-					// Search in aliases
 					const cache = this.app.metadataCache.getFileCache(file);
 					const aliases = cache?.frontmatter?.aliases || cache?.frontmatter?.alias;
 					if (aliases) {
@@ -184,7 +176,6 @@ export default class SearchModal extends Modal {
 			itemEl.setAttribute("title", fileNameWithoutExt);
 			itemEl.appendChild(fileNameEl);
 
-			// Check if file has matching aliases
 			const query = this.searchComponent.getValue();
 			const cache = this.app.metadataCache.getFileCache(file);
 			const aliases = cache?.frontmatter?.aliases || cache?.frontmatter?.alias;
@@ -221,7 +212,6 @@ export default class SearchModal extends Modal {
 				this.close();
 			});
 
-			// 添加 hover preview 功能
 			itemEl.addEventListener("mouseenter", (event) => {
 				this.app.workspace.trigger("hover-link", {
 					event: event as MouseEvent,
@@ -234,7 +224,6 @@ export default class SearchModal extends Modal {
 			});
 		}
 
-		// Set first item as active by default
 		if (this.filteredResults.length > 0) {
 			this.setActiveIndex(0);
 		}
@@ -246,7 +235,6 @@ export default class SearchModal extends Modal {
 				e.preventDefault();
 
 				if (this.filteredResults.length === 0) {
-					// Create a new note when no results
 					const query = this.searchComponent.getValue().trim();
 					if (query) {
 						this.createNewNote(query);
@@ -275,29 +263,23 @@ export default class SearchModal extends Modal {
 	setActiveIndex(index: number) {
 		const items = this.resultsContainer.querySelectorAll('.search-result-item');
 
-		// Remove active class from all items
 		items.forEach(item => item.removeClass('is-active'));
 
-		// Add active class to selected item
 		if (index >= 0 && index < items.length) {
 			this.selectedIndex = index;
 			items[index].addClass('is-active');
 
-			// Scroll item into view if needed
 			items[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 		}
 	}
 
 	async createNewNote(noteName: string) {
 		try {
-			// Sanitize the filename to remove invalid characters
 			const sanitizedName = noteName.replace(/[\\/:*?"<>|]/g, '');
 			const fileName = `${sanitizedName}.md`;
 
-			// Check if file already exists
 			const existingFile = this.app.vault.getAbstractFileByPath(fileName);
 			if (existingFile) {
-				// If file exists, just open it
 				if (existingFile instanceof TFile) {
 					await this.app.workspace.getLeaf().openFile(existingFile);
 				}
@@ -340,7 +322,6 @@ export default class SearchModal extends Modal {
 		
 		const items: string[] = [];
 		
-		// Add file/folder exclusions
 		if (excludeList.length > 0) {
 			const displayList = excludeList.length <= 2
 				? excludeList.join(", ")
@@ -348,7 +329,6 @@ export default class SearchModal extends Modal {
 			items.push(displayList);
 		}
 		
-		// Add extension exclusions
 		if (excludeExtensions.length > 0) {
 			const extDisplay = excludeExtensions.length <= 2
 				? excludeExtensions.map(ext => `.${ext}`).join(", ")
@@ -361,7 +341,6 @@ export default class SearchModal extends Modal {
 
 	private openExcludeSettings() {
 		this.close();
-		// Open settings tab and navigate to search section
 		(this.app as any).setting.open();
 		(this.app as any).setting.openTabById(this.plugin.manifest.id);
 	}
