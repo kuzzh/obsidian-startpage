@@ -17,7 +17,6 @@ export default class SearchExclusionModal extends Modal {
     onOpen() {
         const { contentEl } = this;
 
-        // 排除路径设置
         new Setting(contentEl)
             .setName(t("search_exclude_list"))
             .setDesc(t("search_exclude_list_desc"))
@@ -37,7 +36,6 @@ export default class SearchExclusionModal extends Modal {
 
         this.renderPathsList(contentEl);
 
-        // 排除扩展名设置
         new Setting(contentEl)
             .setName(t("search_exclude_extensions"))
             .setDesc(t("search_exclude_extensions_desc"))

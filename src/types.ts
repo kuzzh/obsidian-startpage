@@ -12,35 +12,27 @@ export const ID_STAT_TODAY_EDITED = "todayEdited";
 export const ID_STAT_TOTAL_SIZE = "totalSize";
 
 export interface SectionStyleSettings {
-	// section container
 	sectionMargin: string;
 	sectionPadding: string;
 	
-	// section header
 	headerMargin: string;
 	headerPadding: string;
 	
-	// section title
 	titleFontSize: string;
 	titleMargin: string;
 	titlePadding: string;
 	
-	// notes list
 	listGap: string;
 	
-	// note item
 	itemPadding: string;
 	itemMargin: string;
 	
-	// note title
 	noteTitleFontSize: string;
 	noteTitleMargin: string;
 	noteTitlePadding: string;
 	
-	// note date
 	noteDateFontSize: string;
 	
-	// note folder
 	noteFolderFontSize: string;
 }
 
@@ -70,18 +62,18 @@ export interface StartPageSettings {
 	showTitleNavigationBar: "default" | "show" | "hide";
 	showCustomFooterText: boolean;
 	useRandomFooterText: boolean;
-	todayRandomEnFooterText: string; // 今日英文随机脚本文字,格式:2025118|I think,there for I am.
-	todayRandomZhFooterText: string; // 今日中文随机脚本文字,格式:2025118|百日依山尽,黄河入海流
+	todayRandomEnFooterText: string; 
+	todayRandomZhFooterText: string; 
 	customFooterText: string;
-	scrollPosition: number; // Scroll position for start page
+	scrollPosition: number; 
 	showStatBar: boolean;
-	lastVersionCheck: number; // Last time version check was performed
-	latestVersion: string; // Latest version from GitHub
-	searchExcludePaths: string[]; // List of files/folders to exclude from search
-	searchExcludeExtensions: string[]; // List of file extensions to exclude from search
+	lastVersionCheck: number; 
+	latestVersion: string;
+	searchExcludePaths: string[]; 
+	searchExcludeExtensions: string[];
 	pinnedNotesStyle: SectionStyleSettings;
 	recentNotesStyle: SectionStyleSettings;
-	backupMaxFiles: number; // Maximum number of backup files to keep
+	backupMaxFiles: number;
 }
 
 export const DEFAULT_SETTINGS: StartPageSettings = {

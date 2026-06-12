@@ -13,7 +13,7 @@ export class StartPageView extends ItemView {
 	private fileDeleteEventRef: EventRef;
 	private fileRenameEventRef: EventRef;
 	private refreshTimer: number | null = null;
-	private readonly REFRESH_INTERVAL = 60000; // Refresh every 1 minute
+	private readonly REFRESH_INTERVAL = 60000;
 	private startPageCreator: StartPageCreator;
 	private isScrollEventRegistered = false;
 	private debouncedSaveScrollPosition: () => void;
@@ -27,7 +27,6 @@ export class StartPageView extends ItemView {
 		this.icon = "home";
 		this.contentEl.addClass("start-page-view");
 
-		// Create debounced function once during initialization
 		this.debouncedSaveScrollPosition = debounce(() => {
 			this.saveScrollPosition();
 		}, 300);
@@ -37,7 +36,6 @@ export class StartPageView extends ItemView {
 		} else if (this.plugin.settings.showTitleNavigationBar === "hide") {
 			this.showTitleNavigationBar(false);
 		} else {
-			// default
 			if (Platform.isDesktop) {
 				this.showTitleNavigationBar(false);
 			} else {
@@ -67,22 +65,42 @@ export class StartPageView extends ItemView {
 
 		this.restoreScrollPosition();
 
-		// Register file change events
+		this.startPageCreator?.focusContainer();
+
+		this.registerEvent(
+			this.app.workspace.on("active-leaf-change", (leaf) => {
+				if (leaf?.view instanceof StartPageView) {
+					this.startPageCreator?.focusContainer();
+				}
+			}),
+		);
+
 		this.fileChangeEventRef = this.app.vault.on("modify", () => {
 			this.renderContent();
+			if (this.app.workspace.getActiveViewOfType(StartPageView) === this) {
+				this.startPageCreator?.focusContainer();
+			}
 		});
 
-		// Add event listeners for file creation, deletion, and rename
 		this.fileCreateEventRef = this.app.vault.on("create", () => {
 			this.renderContent();
+			if (this.app.workspace.getActiveViewOfType(StartPageView) === this) {
+				this.startPageCreator?.focusContainer();
+			}
 		});
 
 		this.fileDeleteEventRef = this.app.vault.on("delete", () => {
 			this.renderContent();
+			if (this.app.workspace.getActiveViewOfType(StartPageView) === this) {
+				this.startPageCreator?.focusContainer();
+			}
 		});
 
 		this.fileRenameEventRef = this.app.vault.on("rename", () => {
 			this.renderContent();
+			if (this.app.workspace.getActiveViewOfType(StartPageView) === this) {
+				this.startPageCreator?.focusContainer();
+			}
 		});
 
 		this.registerDomEvent(this.containerEl, "contextmenu", (evt: MouseEvent) => {
@@ -100,7 +118,6 @@ export class StartPageView extends ItemView {
 		if (this.startPageCreator) {
 			this.startPageCreator.destroy();
 		}
-		// Clean up event listeners and timer when view is closed
 		if (this.fileChangeEventRef) {
 			this.app.vault.offref(this.fileChangeEventRef);
 		}
@@ -126,10 +143,9 @@ export class StartPageView extends ItemView {
 	private startRefreshTimerIfNeeded(pinnedNotes: TFile[], recentNotes: TFile[]) {
 		this.clearRefreshTimer();
 
-		// Check if there are any files that need to be refreshed every 24 hours
 		const needsRefresh = pinnedNotes.concat(recentNotes).some((file) => {
 			const diff = Date.now() - file.stat.mtime;
-			return diff < 24 * 60 * 60 * 1000; // Files modified within 24 hours need periodic refresh
+			return diff < 24 * 60 * 60 * 1000;
 		});
 
 		if (needsRefresh) {
@@ -189,7 +205,6 @@ export class StartPageView extends ItemView {
 	private restoreScrollPosition() {
 		const container = document.querySelector(".start-page-container") as HTMLElement;
 		if (container && this.plugin.settings.scrollPosition > 0) {
-			// Use a small delay to ensure the content is fully rendered
 			setTimeout(() => {
 				container.scrollTop = this.plugin.settings.scrollPosition;
 			}, 0);
@@ -225,25 +240,19 @@ export class StartPageView extends ItemView {
 			return [];
 		}
 
-		// Calculate the most recent time for each file (the maximum of modification time or access time)
 		const filesWithTime = allFiles.map((file) => {
 			let lastAccessTime = 0;
 
-			// Calculate access time based on position in the list of recently opened files
 			const openIndex = recentlyOpenedPaths.indexOf(file.path);
 			if (openIndex !== -1) {
-				// Convert the index to a timestamp, the earlier the file, the newer the time
-				// Use the current time minus the index minutes to simulate the access time
 				lastAccessTime = Date.now() - openIndex * 60 * 1000;
 			}
 
-			// Take the maximum value of modification time and access time
 			const lastTime = Math.max(file.stat.mtime, lastAccessTime);
 
 			return { file, lastTime };
 		});
 
-		// Sort by most recent time and return a specified number of files
 		return filesWithTime
 			.sort((a, b) => b.lastTime - a.lastTime)
 			.slice(0, limit)

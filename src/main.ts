@@ -16,24 +16,19 @@ export default class StartPagePlugin extends Plugin {
 		this.settings.scrollPosition = 0;
 		this.saveSettings();
 
-		// Use Obsidian's built-in language setting
 		const obsidianLang = getLanguage() || "en";
 		setLocale(obsidianLang);
 
 		this.registerView(VIEW_TYPE_START_PAGE, (leaf) => new StartPageView(leaf, this.app, this));
 
-		// Check for updates in background
 		this.checkForUpdates();
 
-		// Add ribbon button
 		this.addRibbonIcon("home", "Open start page", () => {
 			this.activateStartPage();
 		});
 
-		// Add settings tab
 		this.addSettingTab(new StartPageSettingTab(this.app, this));
 
-		// Add commands
 		this.addCommand({
 			id: "open-start-page",
 			name: t("open_start_page"),
@@ -55,7 +50,6 @@ export default class StartPagePlugin extends Plugin {
 				if (this.settings.replaceNewTab) {
 					if (leaf && !leaf.view.getViewType().startsWith(VIEW_TYPE_START_PAGE)) {
 						const state = leaf.getViewState();
-						// If new empty tab, replace it with StartPage
 						if (state.type === "empty" && !state.state?.file) {
 							this.replaceWithStartPage(leaf);
 						}
@@ -64,7 +58,6 @@ export default class StartPagePlugin extends Plugin {
 			}),
 		);
 
-		// Register file menu event for right-click context menu
 		this.registerEvent(
 			this.app.workspace.on("file-menu", (menu: Menu, file: TFile) => {
 				if (file instanceof TFile) {
@@ -149,7 +142,6 @@ export default class StartPagePlugin extends Plugin {
 
 			const fileDatePairs = backupFiles
 				.map((file) => {
-					// Extract filename from path (works with both / and \ separators)
 					const lastSlashIndex = Math.max(file.lastIndexOf("/"), file.lastIndexOf("\\"));
 					const fileName = lastSlashIndex >= 0 ? file.substring(lastSlashIndex + 1) : file;
 					const dateStr = fileName.replace("data-", "").replace(".json", "");
@@ -161,10 +153,8 @@ export default class StartPagePlugin extends Plugin {
 				})
 				.filter((pair) => !isNaN(pair.timestamp));
 
-			// Sort by date (oldest first for deletion)
 			fileDatePairs.sort((a, b) => a.timestamp - b.timestamp);
 
-			// Delete oldest files beyond max limit
 			if (fileDatePairs.length > this.settings.backupMaxFiles) {
 				const filesToDelete = fileDatePairs.slice(0, fileDatePairs.length - this.settings.backupMaxFiles);
 
@@ -241,15 +231,12 @@ export default class StartPagePlugin extends Plugin {
 				.setIcon(isPinned ? "pin-off" : "pin")
 				.onClick(async () => {
 					if (isPinned) {
-						// Remove from pinned notes
 						this.settings.pinnedNotes = this.settings.pinnedNotes.filter((path) => path !== file.path);
 					} else {
-						// Add to pinned notes
 						this.settings.pinnedNotes.push(file.path);
 					}
 					await this.saveSettings();
 
-					// Refresh start page if it's open
 					const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_START_PAGE);
 					leaves.forEach((leaf) => {
 						if (leaf.view instanceof StartPageView) {
@@ -264,14 +251,10 @@ export default class StartPagePlugin extends Plugin {
 		this.app.workspace.getLeavesOfType(VIEW_TYPE_START_PAGE).forEach((leaf) => leaf.detach());
 	}
 
-	/**
-	 * Check for plugin updates in background
-	 */
 	async checkForUpdates() {
 		const now = Date.now();
-		const ONE_DAY = 24 * 60 * 60 * 1000; // 24 hours
+		const ONE_DAY = 24 * 60 * 60 * 1000;
 
-		// Check once per day
 		if (now - this.settings.lastVersionCheck < ONE_DAY) {
 			return;
 		}
@@ -284,7 +267,6 @@ export default class StartPagePlugin extends Plugin {
 				this.settings.lastVersionCheck = now;
 				await this.saveSettings();
 
-				// Refresh start page views to show the update badge
 				const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_START_PAGE);
 				leaves.forEach((leaf) => {
 					if (leaf.view instanceof StartPageView) {
@@ -292,7 +274,6 @@ export default class StartPagePlugin extends Plugin {
 					}
 				});
 			} else {
-				// No update, just update the check timestamp
 				this.settings.lastVersionCheck = now;
 				await this.saveSettings();
 			}

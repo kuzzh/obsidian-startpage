@@ -230,7 +230,6 @@ export default class PinnedNotesModal extends Modal {
 
 	private refreshDisplay() {
 		const { contentEl } = this;
-		// 保留标题，清空其他内容
 		const modalContent = contentEl.querySelector(".modal-content");
 		if (modalContent) {
 			modalContent.empty();
