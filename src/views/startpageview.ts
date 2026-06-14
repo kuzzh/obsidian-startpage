@@ -244,7 +244,7 @@ export class StartPageView extends ItemView {
 			let lastAccessTime = 0;
 
 			const openIndex = recentlyOpenedPaths.indexOf(file.path);
-			if (openIndex !== -1) {
+			if (openIndex !== -1 && this.plugin.settings.showRecentAccessedNotes) {
 				lastAccessTime = Date.now() - openIndex * 60 * 1000;
 			}
 
