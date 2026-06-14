@@ -77,6 +77,18 @@ export class StartPageSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
+			.setName(t("show_recent_accessed_notes"))
+			.setDesc(t("show_recent_accessed_notes_desc"))
+			.addToggle((toggle) => {
+				toggle.setValue(this.plugin.settings.showRecentAccessedNotes);
+				toggle.onChange(async (value) => {
+					this.plugin.settings.showRecentAccessedNotes = value;
+					await this.plugin.saveSettings();
+					MyUtil.refreshStartPage(this.app);
+				});
+			});
+
+		new Setting(containerEl)
 			.setName(t("recent_notes_limit"))
 			.setDesc(t("recent_notes_limit_desc"))
 			.addDropdown((dropdown) => {

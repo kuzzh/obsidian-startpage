@@ -57,6 +57,7 @@ export const DEFAULT_SECTION_STYLE: SectionStyleSettings = {
 export interface StartPageSettings {
 	includeAllFilesInRecent: boolean;
 	recentNotesLimit: number;
+	showRecentAccessedNotes: boolean;
 	pinnedNotes: string[];
 	replaceNewTab: boolean;
 	showTitleNavigationBar: "default" | "show" | "hide";
@@ -79,6 +80,7 @@ export interface StartPageSettings {
 export const DEFAULT_SETTINGS: StartPageSettings = {
 	includeAllFilesInRecent: true,
 	recentNotesLimit: 10,
+	showRecentAccessedNotes: true,
 	pinnedNotes: [],
 	replaceNewTab: true,
 	showTitleNavigationBar: "default",

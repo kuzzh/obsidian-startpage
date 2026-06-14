@@ -55,6 +55,8 @@
     "open_start_page_new_tab_desc": "在新标签页中打开启动首页",
     "include_all_files_in_recent": "在最近修改笔记中包含所有文件",
     "include_all_files_in_recent_desc": "在最近修改笔记中包含所有类型的文件，而不仅仅是Markdown文件",
+    "show_recent_accessed_notes": "显示最近访问的笔记",
+    "show_recent_accessed_notes_desc": "在最近笔记列表中包含最近访问过的笔记，按访问时间排序",
     "show_title_navigation_bar": "显示标题导航栏",
     "show_title_navigation_bar_desc": "在启动首页中显示标题导航栏",
     "show_title_navigation_bar_default": "默认",
