@@ -80,6 +80,7 @@ export default class StartPagePlugin extends Plugin {
 				recentNotesLimit: typeof savedData.recentNotesLimit === "number" ? savedData.recentNotesLimit : 10,
 				includeAllFilesInRecent: typeof savedData.includeAllFilesInRecent === "boolean" ? savedData.includeAllFilesInRecent : true,
 				replaceNewTab: typeof savedData.replaceNewTab === "boolean" ? savedData.replaceNewTab : true,
+				openNotesInNewTab: typeof savedData.openNotesInNewTab === "boolean" ? savedData.openNotesInNewTab : false,
 				showTitleNavigationBar: ["default", "show", "hide"].includes(savedData.showTitleNavigationBar) ? savedData.showTitleNavigationBar : "default",
 				showCustomFooterText: typeof savedData.showCustomFooterText === "boolean" ? savedData.showCustomFooterText : false,
 				useRandomFooterText: typeof savedData.useRandomFooterText === "boolean" ? savedData.useRandomFooterText : false,

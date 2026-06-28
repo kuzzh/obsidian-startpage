@@ -154,17 +154,28 @@ export class StartPageSettingTab extends PluginSettingTab {
         new Setting(containerEl)
             .setName(t("new_tab_settings_heading"))
             .setHeading();
-        new Setting(containerEl)
-			.setName(t("replace_new_tab"))
-			.setDesc(t("replace_new_tab_desc"))
-			.addToggle((toggle) => {
-				toggle.setValue(this.plugin.settings.replaceNewTab);
-				toggle.onChange(async (value) => {
-					this.plugin.settings.replaceNewTab = value;
-					await this.plugin.saveSettings();
+		new Setting(containerEl)
+				.setName(t("replace_new_tab"))
+				.setDesc(t("replace_new_tab_desc"))
+				.addToggle((toggle) => {
+					toggle.setValue(this.plugin.settings.replaceNewTab);
+					toggle.onChange(async (value) => {
+						this.plugin.settings.replaceNewTab = value;
+						await this.plugin.saveSettings();
+					});
 				});
-			});
-    }
+
+			new Setting(containerEl)
+				.setName(t("open_notes_in_new_tab"))
+				.setDesc(t("open_notes_in_new_tab_desc"))
+				.addToggle((toggle) => {
+					toggle.setValue(this.plugin.settings.openNotesInNewTab);
+					toggle.onChange(async (value) => {
+						this.plugin.settings.openNotesInNewTab = value;
+						await this.plugin.saveSettings();
+					});
+				});
+	    }
 
     private createSearchSettings(containerEl: HTMLElement) {
         new Setting(containerEl)

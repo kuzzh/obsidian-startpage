@@ -60,6 +60,7 @@ export interface StartPageSettings {
 	showRecentAccessedNotes: boolean;
 	pinnedNotes: string[];
 	replaceNewTab: boolean;
+	openNotesInNewTab: boolean;
 	showTitleNavigationBar: "default" | "show" | "hide";
 	showCustomFooterText: boolean;
 	useRandomFooterText: boolean;
@@ -82,8 +83,9 @@ export const DEFAULT_SETTINGS: StartPageSettings = {
 	recentNotesLimit: 10,
 	showRecentAccessedNotes: true,
 	pinnedNotes: [],
-	replaceNewTab: true,
-	showTitleNavigationBar: "default",
+		replaceNewTab: true,
+		openNotesInNewTab: false,
+		showTitleNavigationBar: "default",
 	showCustomFooterText: false,
 	useRandomFooterText: false,
 	todayRandomEnFooterText: "",
