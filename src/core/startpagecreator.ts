@@ -1,5 +1,5 @@
 import { ID_STAT_TOTAL_NOTES, ID_STAT_TODAY_EDITED, ID_STAT_TOTAL_SIZE } from "@/types";
-import { App, TFolder, TFile, Menu, Platform } from "obsidian";
+import { App, TFolder, TFile, Menu, Platform, Keymap } from "obsidian";
 import StartPagePlugin from "@/main";
 import { t } from "@/i18n";
 import { VIEW_TYPE_START_PAGE, StartPageView } from "@/views/startpageview";
@@ -192,18 +192,41 @@ export default class StartPageCreator {
 		if (styleSettings.itemPadding) noteItem.style.padding = styleSettings.itemPadding;
 		if (styleSettings.itemMargin) noteItem.style.margin = styleSettings.itemMargin;
 
-		noteItem.addEventListener("click", async () => {
-			const existingLeaf = this.app.workspace.getLeavesOfType("markdown").find((leaf) => {
-				const state = leaf.view.getState();
-				return state["file"] === note.path;
+		noteItem.addEventListener("click", async (event: MouseEvent) => {
+				const modResult = Keymap.isModEvent(event);
+
+				const newLeaf = modResult || (this.plugin.settings.openNotesInNewTab ? "tab" : false);
+
+				if (newLeaf) {
+					this.app.workspace.openLinkText(note.path, "", newLeaf);
+				} else {
+					const existingLeaf = this.app.workspace.getLeavesOfType("markdown").find((leaf) => {
+						const state = leaf.view.getState();
+						return state["file"] === note.path;
+					});
+
+					if (existingLeaf) {
+						await this.app.workspace.revealLeaf(existingLeaf);
+					} else {
+						this.app.workspace.openLinkText(note.path, "", false);
+					}
+				}
 			});
 
-			if (existingLeaf) {
-				await this.app.workspace.revealLeaf(existingLeaf);
-			} else {
-				this.app.workspace.openLinkText(note.path, "", false);
-			}
-		});
+			noteItem.addEventListener("mousedown", (event: MouseEvent) => {
+				if (event.button === 1) {
+					event.preventDefault();
+					event.stopPropagation();
+				}
+			});
+
+			noteItem.addEventListener("mouseup", (event: MouseEvent) => {
+				if (event.button === 1) {
+					event.preventDefault();
+					event.stopPropagation();
+					this.app.workspace.openLinkText(note.path, "", "tab");
+				}
+			});
 
 		noteItem.addEventListener("mouseenter", (event) => {
 			this.app.workspace.trigger("hover-link", {
@@ -516,15 +539,16 @@ export default class StartPageCreator {
 		(this.container as HTMLElement).addEventListener("keydown", this.keyHandler);
 	}
 
-	private showSearchModal(): void {
-		const modal = new SearchModal(
-			this.app,
-			this.plugin,
-			(item: TFile) => {
-				this.app.workspace.openLinkText(item.path, "", false);
-			},
-			this.initialQuery
-		);
+		private showSearchModal(): void {
+			const modal = new SearchModal(
+				this.app,
+				this.plugin,
+				(item: TFile) => {
+					const newLeaf = this.plugin.settings.openNotesInNewTab ? "tab" : false;
+					this.app.workspace.openLinkText(item.path, "", newLeaf);
+				},
+				this.initialQuery
+			);
 		modal.open();
 		this.initialQuery = "";
 	}

@@ -45,6 +45,8 @@
     "manage": "Manage",
     "replace_new_tab": "Replace new tab",
     "replace_new_tab_desc": "When opening a new tab, replace it with Start Page",
+    "open_notes_in_new_tab": "Open notes in new tab",
+    "open_notes_in_new_tab_desc": "Left-click on pinned/recent notes will open them in a new tab instead of replacing the start page. You can always use Ctrl/Cmd+Click or middle-click to open in a new tab regardless of this setting.",
     "remove_from_pinned_notes": "Remove from pinned notes",
     "add_to_pinned_notes": "Add to pinned notes",
     "move_up": "Move up",
