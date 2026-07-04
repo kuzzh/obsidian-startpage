@@ -73,10 +73,12 @@ export interface StartPageSettings {
 	latestVersion: string;
 	searchExcludePaths: string[]; 
 	searchExcludeExtensions: string[];
-	pinnedNotesStyle: SectionStyleSettings;
-	recentNotesStyle: SectionStyleSettings;
-	backupMaxFiles: number;
-}
+		pinnedNotesStyle: SectionStyleSettings;
+		recentNotesStyle: SectionStyleSettings;
+		backupMaxFiles: number;
+		tabFolderPaths: string[];
+		tabFolderRecursive: boolean;
+	}
 
 export const DEFAULT_SETTINGS: StartPageSettings = {
 	includeAllFilesInRecent: true,
@@ -97,7 +99,9 @@ export const DEFAULT_SETTINGS: StartPageSettings = {
 	latestVersion: "",
 	searchExcludePaths: [],
 	searchExcludeExtensions: [],
-	pinnedNotesStyle: { ...DEFAULT_SECTION_STYLE },
-	recentNotesStyle: { ...DEFAULT_SECTION_STYLE },
-	backupMaxFiles: 5,
-};
+		pinnedNotesStyle: { ...DEFAULT_SECTION_STYLE },
+		recentNotesStyle: { ...DEFAULT_SECTION_STYLE },
+		backupMaxFiles: 5,
+		tabFolderPaths: [],
+		tabFolderRecursive: true,
+	};

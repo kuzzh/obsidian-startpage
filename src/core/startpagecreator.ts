@@ -53,17 +53,22 @@ export default class StartPageCreator {
 			},
 		},
 	];
-	private pinnedNotes: TFile[] | null = null;
-	private recentNotes: TFile[] | null = null;
+		private pinnedNotes: TFile[] | null = null;
+		private recentNotes: TFile[] | null = null;
+		private tabFolderItems: { folderPath: string; folderName: string; files: TFile[] }[] | null = null;
 
-	constructor(app: App, plugin: StartPagePlugin, container: Element) {
+		constructor(app: App, plugin: StartPagePlugin, container: Element) {
 		this.app = app;
 		this.plugin = plugin;
 		this.container = container;
 	}
 
-	public async createStartPage(pinnedNotes: TFile[] | null, recentNotes: TFile[] | null): Promise<void> {
-		this.initData(pinnedNotes, recentNotes);
+		public async createStartPage(
+			pinnedNotes: TFile[] | null, 
+			recentNotes: TFile[] | null,
+			tabFolderItems?: { folderPath: string; folderName: string; files: TFile[] }[] | null
+		): Promise<void> {
+			this.initData(pinnedNotes, recentNotes, tabFolderItems || null);
 
 		this.container.empty();
 		this.container.addClass("start-page-container");
@@ -75,6 +80,9 @@ export default class StartPageCreator {
 		this.container.appendChild(header);
 		this.container.appendChild(mainContent);
 		this.container.appendChild(footer);
+
+		const newNoteBtn = this.createNewNoteButton();
+		this.container.appendChild(newNoteBtn);
 
 		this.setupKeyListener();
 
@@ -89,9 +97,14 @@ export default class StartPageCreator {
 		this.removeKeyListener();
 	}
 
-	private initData(pinnedNotes: TFile[] | null, recentNotes: TFile[] | null): void {
-		this.pinnedNotes = pinnedNotes;
-		this.recentNotes = recentNotes;
+		private initData(
+			pinnedNotes: TFile[] | null, 
+			recentNotes: TFile[] | null,
+			tabFolderItems: { folderPath: string; folderName: string; files: TFile[] }[] | null = null
+		): void {
+			this.pinnedNotes = pinnedNotes;
+			this.recentNotes = recentNotes;
+			this.tabFolderItems = tabFolderItems;
 
 		this.stats.forEach((stat) => {
 			if (stat.id === ID_STAT_TOTAL_NOTES) {
@@ -141,7 +154,20 @@ export default class StartPageCreator {
 
 		const headerActions = this.createElement("div", "header-actions");
 
-		if (this.hasUpdate()) {
+			const manageBtn = this.createElement("button", "manage-btn");
+			manageBtn.setAttribute("title", t("manage"));
+			manageBtn.appendChild(SvgUtil.createSettingsIcon());
+			manageBtn.addEventListener("click", () => {
+				const setting = this.app.setting;
+				setting.open();
+
+				setTimeout(() => {
+					setting.openTabById(this.plugin.manifest.id);
+				}, 100);
+			});
+			headerActions.appendChild(manageBtn);
+
+			if (this.hasUpdate()) {
 			const updateBadge = this.createUpdateBadge();
 			headerActions.appendChild(updateBadge);
 		}
@@ -323,26 +349,20 @@ export default class StartPageCreator {
 		if (styleSettings.headerMargin) sectionHeader.style.margin = styleSettings.headerMargin;
 		if (styleSettings.headerPadding) sectionHeader.style.padding = styleSettings.headerPadding;
 
-		const sectionTitle = this.createElement("h2", "section-title");
-		sectionTitle.appendChild(icon);
-		sectionTitle.appendChild(document.createTextNode(title));
-		if (styleSettings.titleFontSize) sectionTitle.style.fontSize = styleSettings.titleFontSize;
-		if (styleSettings.titleMargin) sectionTitle.style.margin = styleSettings.titleMargin;
-		if (styleSettings.titlePadding) sectionTitle.style.padding = styleSettings.titlePadding;
+			const sectionTitle = this.createElement("h2", "section-title");
+			sectionTitle.appendChild(icon);
+			sectionTitle.appendChild(document.createTextNode(title));
+			if (isPinned && notes) {
+				const countBadge = this.createElement("span", "note-count-badge", `${notes.length}`);
+				sectionTitle.appendChild(countBadge);
+			}
+			if (styleSettings.titleFontSize) sectionTitle.style.fontSize = styleSettings.titleFontSize;
+			if (styleSettings.titleMargin) sectionTitle.style.margin = styleSettings.titleMargin;
+			if (styleSettings.titlePadding) sectionTitle.style.padding = styleSettings.titlePadding;
 
-		if (isPinned) {
-			const actionBtn = this.createElement("button", "btn btn-text", t("manage"));
-			actionBtn.addEventListener("click", () => {
-				const setting = this.app.setting;
-				setting.open();
-
-				setTimeout(() => {
-					setting.openTabById(this.plugin.manifest.id);
-				}, 100);
-			});
-			sectionHeader.appendChild(sectionTitle);
-			sectionHeader.appendChild(actionBtn);
-		} else {
+			if (isPinned) {
+				sectionHeader.appendChild(sectionTitle);
+			} else {
 			const dropdownDiv = this.createRecentNotesLimitDropdown();
 			sectionHeader.appendChild(sectionTitle);
 			sectionHeader.appendChild(dropdownDiv);
@@ -366,22 +386,191 @@ export default class StartPageCreator {
 		return section;
 	}
 
-	private createContentGrid(): HTMLElement {
-		const contentGrid = this.createElement("div", "content-grid");
+		private createContentGrid(): HTMLElement {
+			const contentGrid = this.createElement("div", "content-grid");
 
-		const pinnedSection = this.createNotesSection(t("pinned_notes"), this.pinnedNotes, true, SvgUtil.createPinnedNoteIcon());
-		pinnedSection.classList.add("pinned-notes");
+			const tabContainer = this.createTabContainer();
+			tabContainer.classList.add("pinned-notes");
 
-		const recentSection = this.createNotesSection(t("recent_notes"), this.recentNotes, false, SvgUtil.createRecentNoteIcon());
-		recentSection.classList.add("recent-notes");
+			const recentSection = this.createNotesSection(t("recent_notes"), this.recentNotes, false, SvgUtil.createRecentNoteIcon());
+			recentSection.classList.add("recent-notes");
 
-		contentGrid.appendChild(pinnedSection);
-		contentGrid.appendChild(recentSection);
+			contentGrid.appendChild(tabContainer);
+			contentGrid.appendChild(recentSection);
 
-		return contentGrid;
-	}
+			return contentGrid;
+		}
 
-	private createMainContent(): HTMLElement {
+		private createTabContainer(): HTMLElement {
+			const tabs = this.buildTabItems();
+			const container = this.createElement("div", "tab-container");
+
+			// Tab bar
+			const bar = this.createElement("div", "tab-bar");
+
+			const scrollLeft = this.createElement("button", "tab-scroll-btn");
+			scrollLeft.appendChild(SvgUtil.createChevronLeftIcon());
+			bar.appendChild(scrollLeft);
+
+			const tabList = this.createElement("div", "tab-list");
+			tabs.forEach((tab, i) => {
+				const tabItem = this.createElement("div", `tab-item${i === 0 ? " active" : ""}`);
+				tabItem.dataset.tabIndex = i.toString();
+
+				const label = this.createElement("span", "tab-item-label", tab.label);
+				tabItem.appendChild(label);
+
+				if (tab.closable) {
+					const closeBtn = this.createElement("button", "tab-close-btn");
+					closeBtn.appendChild(SvgUtil.createCloseIcon());
+					closeBtn.addEventListener("click", (e) => {
+						e.stopPropagation();
+						if (tab.folderPath) {
+							this.plugin.settings.tabFolderPaths =
+								this.plugin.settings.tabFolderPaths.filter((p) => p !== tab.folderPath);
+							this.plugin.saveSettings();
+							this.refreshStartPage();
+						}
+					});
+					tabItem.appendChild(closeBtn);
+				}
+
+				tabItem.addEventListener("click", () => {
+					this.switchTab(i);
+				});
+
+				tabList.appendChild(tabItem);
+			});
+			bar.appendChild(tabList);
+
+			const scrollRight = this.createElement("button", "tab-scroll-btn");
+			scrollRight.appendChild(SvgUtil.createChevronRightIcon());
+			bar.appendChild(scrollRight);
+
+			container.appendChild(bar);
+
+			// Content panels
+			const contentWrapper = this.createElement("div", "tab-content-wrapper");
+			tabs.forEach((tab, i) => {
+				const panel = this.createElement("div", `tab-panel${i === 0 ? " active" : ""}`);
+				panel.dataset.tabIndex = i.toString();
+				if (i === 0) {
+					// Pinned notes tab — reuse createNotesSection with isPinned=true for the "Manage" button
+					const section = this.createNotesSection(t("pinned_notes"), this.pinnedNotes, true, SvgUtil.createPinnedNoteIcon());
+					panel.appendChild(section);
+				} else {
+					// Folder tab — use folder-specific panel
+					const section = this.createFolderTabPanel(tab.label, tab.notes);
+					panel.appendChild(section);
+				}
+				contentWrapper.appendChild(panel);
+			});
+			container.appendChild(contentWrapper);
+
+			// Set up scroll button visibility
+			const updateButtons = () => {
+				this.updateScrollButtons(tabList, scrollLeft, scrollRight);
+			};
+
+			const resizeObserver = new ResizeObserver(updateButtons);
+			resizeObserver.observe(tabList);
+
+			tabList.addEventListener("scroll", updateButtons);
+			scrollLeft.addEventListener("click", () => {
+				tabList.scrollBy({ left: -150, behavior: "smooth" });
+			});
+			scrollRight.addEventListener("click", () => {
+				tabList.scrollBy({ left: 150, behavior: "smooth" });
+			});
+
+			return container;
+		}
+
+		private buildTabItems(): { id: string; label: string; notes: TFile[]; closable: boolean; folderPath?: string }[] {
+			const tabs: { id: string; label: string; notes: TFile[]; closable: boolean; folderPath?: string }[] = [
+				{
+					id: "pinned",
+					label: t("tab_pinned"),
+					notes: this.pinnedNotes || [],
+					closable: false,
+				},
+			];
+
+			if (this.tabFolderItems) {
+				for (const item of this.tabFolderItems) {
+					tabs.push({
+						id: `folder-${item.folderPath}`,
+						label: item.folderName,
+						notes: item.files,
+						closable: true,
+						folderPath: item.folderPath,
+					});
+				}
+			}
+
+			return tabs;
+		}
+
+		private createFolderTabPanel(title: string, notes: TFile[]): HTMLElement {
+			const styleSettings = this.plugin.settings.pinnedNotesStyle;
+
+			const section = this.createElement("section", "section");
+			if (styleSettings.sectionMargin) section.style.margin = styleSettings.sectionMargin;
+			if (styleSettings.sectionPadding) section.style.padding = styleSettings.sectionPadding;
+
+			const sectionHeader = this.createElement("div", "section-header");
+			if (styleSettings.headerMargin) sectionHeader.style.margin = styleSettings.headerMargin;
+			if (styleSettings.headerPadding) sectionHeader.style.padding = styleSettings.headerPadding;
+
+			const sectionTitle = this.createElement("h2", "section-title");
+				const folderIcon = SvgUtil.createFolderIcon();
+				sectionTitle.appendChild(folderIcon);
+				sectionTitle.appendChild(document.createTextNode(title));
+				if (notes) {
+					const countBadge = this.createElement("span", "note-count-badge", `${notes.length}`);
+					sectionTitle.appendChild(countBadge);
+				}
+
+			sectionHeader.appendChild(sectionTitle);
+
+			const notesList = this.createElement("div", "notes-list");
+			if (styleSettings.listGap) notesList.style.gap = styleSettings.listGap;
+
+			if (notes) {
+				for (const note of notes) {
+					const noteItem = this.createNoteItem(note, false);
+					if (noteItem) {
+						notesList.appendChild(noteItem);
+					}
+				}
+			}
+
+			section.appendChild(sectionHeader);
+			section.appendChild(notesList);
+
+			return section;
+		}
+
+		private switchTab(index: number) {
+			const tabContainer = this.container.querySelector(".tab-container");
+			if (!tabContainer) return;
+
+			tabContainer.querySelectorAll(".tab-item").forEach((el, i) => {
+				el.classList.toggle("active", i === index);
+			});
+
+			tabContainer.querySelectorAll(".tab-panel").forEach((el, i) => {
+				el.classList.toggle("active", i === index);
+			});
+		}
+
+		private updateScrollButtons(tabList: HTMLElement, scrollLeft: HTMLElement, scrollRight: HTMLElement) {
+			const hasOverflow = tabList.scrollWidth > tabList.clientWidth + 2;
+			scrollLeft.classList.toggle("hidden", !hasOverflow || tabList.scrollLeft <= 1);
+			scrollRight.classList.toggle("hidden", !hasOverflow || tabList.scrollLeft >= tabList.scrollWidth - tabList.clientWidth - 2);
+		}
+
+		private createMainContent(): HTMLElement {
 		const mainContent = this.createElement("main", "main-content");
 
 		if (this.plugin.settings.showStatBar) {
@@ -427,6 +616,40 @@ export default class StartPageCreator {
 			}
 		} catch (error) {
 			console.error("Failed to load footer text:", error);
+		}
+	}
+
+	private createNewNoteButton(): HTMLElement {
+		const btn = this.createElement("button", "start-page-new-note-btn");
+		btn.setAttribute("title", t("new_note"));
+		btn.setAttribute("aria-label", t("new_note"));
+
+		const icon = SvgUtil.createNewNoteIcon();
+		btn.appendChild(icon);
+
+		btn.addEventListener("click", async () => {
+			await this.createNewNote();
+		});
+
+		return btn;
+	}
+
+	private async createNewNote(): Promise<void> {
+		try {
+			const folder = this.app.vault.getRoot();
+			let index = 0;
+			let fileName = "Untitled.md";
+
+			while (this.app.vault.getAbstractFileByPath(fileName)) {
+				index++;
+				fileName = `Untitled ${index}.md`;
+			}
+
+			const newFile = await this.app.vault.create(fileName, "");
+			const leaf = this.app.workspace.getLeaf("tab");
+			await leaf.openFile(newFile);
+		} catch (error) {
+			console.error("Failed to create new note:", error);
 		}
 	}
 

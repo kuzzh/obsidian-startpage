@@ -1,4 +1,4 @@
-import { Plugin, WorkspaceLeaf, TFile, Menu, getLanguage } from "obsidian";
+import { Plugin, WorkspaceLeaf, TFile, Menu, TFolder, TAbstractFile, getLanguage } from "obsidian";
 import { StartPageView, VIEW_TYPE_START_PAGE } from "@/views/startpageview";
 import { StartPageSettingTab } from "@/views/startpagesettingtab";
 import { StartPageSettings, DEFAULT_SETTINGS } from "@/types";
@@ -65,6 +65,14 @@ export default class StartPagePlugin extends Plugin {
 				}
 			}),
 		);
+
+		this.registerEvent(
+			this.app.workspace.on("file-menu", (menu: Menu, file: TAbstractFile) => {
+				if (file instanceof TFolder) {
+					this.addTabFolderMenuItem(menu, file);
+				}
+			}),
+		);
 	}
 
 	async loadSettings() {
@@ -106,6 +114,8 @@ export default class StartPagePlugin extends Plugin {
 						? { ...DEFAULT_SETTINGS.recentNotesStyle, ...savedData.recentNotesStyle }
 						: { ...DEFAULT_SETTINGS.recentNotesStyle },
 				backupMaxFiles: typeof savedData.backupMaxFiles === "number" ? savedData.backupMaxFiles : DEFAULT_SETTINGS.backupMaxFiles,
+					tabFolderPaths: Array.isArray(savedData.tabFolderPaths) ? savedData.tabFolderPaths : [],
+					tabFolderRecursive: typeof savedData.tabFolderRecursive === "boolean" ? savedData.tabFolderRecursive : true,
 			};
 		} else {
 			this.settings = { ...DEFAULT_SETTINGS };
@@ -239,6 +249,30 @@ export default class StartPagePlugin extends Plugin {
 						this.settings.pinnedNotes = this.settings.pinnedNotes.filter((path) => path !== file.path);
 					} else {
 						this.settings.pinnedNotes.push(file.path);
+					}
+					await this.saveSettings();
+
+					const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_START_PAGE);
+					leaves.forEach((leaf) => {
+						if (leaf.view instanceof StartPageView) {
+							leaf.view.renderContent();
+						}
+					});
+				});
+		});
+	}
+
+	addTabFolderMenuItem(menu: Menu, folder: TFolder) {
+		const isInTabs = this.settings.tabFolderPaths.includes(folder.path);
+
+		menu.addItem((item) => {
+			item.setTitle(isInTabs ? t("remove_from_tab_folders") : t("add_to_tab_folders"))
+				.setIcon(isInTabs ? "trash-2" : "folder-plus")
+				.onClick(async () => {
+					if (isInTabs) {
+						this.settings.tabFolderPaths = this.settings.tabFolderPaths.filter((p) => p !== folder.path);
+					} else {
+						this.settings.tabFolderPaths.push(folder.path);
 					}
 					await this.saveSettings();
 

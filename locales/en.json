@@ -145,5 +145,17 @@
     "style_note_folder_font_size_desc": "Set the font size for the folder path text",
     "backup_settings_heading": "Backup Settings",
     "backup_max_files": "Maximum backup files",
-    "backup_max_files_desc": "Set the maximum number of backup files to keep, older backups beyond this limit will be automatically deleted"
-}
+    "backup_max_files_desc": "Set the maximum number of backup files to keep, older backups beyond this limit will be automatically deleted",
+    "folder_tabs_settings_heading": "Folder tabs",
+    "folder_tabs_settings": "Folder tabs",
+    "folder_tabs_settings_desc": "Configure folders to display as tabs on the start page",
+    "manage_folder_tabs_button": "Manage folders",
+    "current_folder_tabs_desc": "Configured: {0} folder(s)",
+    "add_folder": "Add folder",
+    "remove_from_tab_folders": "Remove from start page tabs",
+    "no_tab_folders": "No folders configured",
+    "tab_folder_recursive": "Include subfolder files",
+    "tab_folder_recursive_desc": "Recursively include files from all subfolders",
+    "add_to_tab_folders": "Show in start page tabs",
+    "tab_pinned": "Pinned"
+  }
