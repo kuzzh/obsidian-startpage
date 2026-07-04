@@ -87,6 +87,42 @@
 	height: 16px;
 }
 
+/* 悬浮新建笔记按钮 */
+.start-page-new-note-btn {
+	position: fixed;
+	bottom: 32px;
+	right: 32px;
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	background: var(--color-accent);
+	border: none;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.3s ease;
+	z-index: 100;
+	color: var(--text-on-accent, #fff);
+	padding: 0;
+}
+
+.start-page-new-note-btn:hover {
+	transform: scale(1.1);
+	box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+	background: var(--color-accent-hover, var(--color-accent));
+}
+
+.start-page-new-note-btn:active {
+	transform: scale(0.95);
+}
+
+.start-page-new-note-btn svg {
+	width: 28px;
+	height: 28px;
+}
+
 /* 统计卡片 */
 .start-page-container .stats-section {
 	display: grid;

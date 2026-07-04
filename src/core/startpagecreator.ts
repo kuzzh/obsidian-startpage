@@ -76,6 +76,9 @@ export default class StartPageCreator {
 		this.container.appendChild(mainContent);
 		this.container.appendChild(footer);
 
+		const newNoteBtn = this.createNewNoteButton();
+		this.container.appendChild(newNoteBtn);
+
 		this.setupKeyListener();
 
 		(this.container as HTMLElement).tabIndex = -1;
@@ -427,6 +430,40 @@ export default class StartPageCreator {
 			}
 		} catch (error) {
 			console.error("Failed to load footer text:", error);
+		}
+	}
+
+	private createNewNoteButton(): HTMLElement {
+		const btn = this.createElement("button", "start-page-new-note-btn");
+		btn.setAttribute("title", t("new_note"));
+		btn.setAttribute("aria-label", t("new_note"));
+
+		const icon = SvgUtil.createNewNoteIcon();
+		btn.appendChild(icon);
+
+		btn.addEventListener("click", async () => {
+			await this.createNewNote();
+		});
+
+		return btn;
+	}
+
+	private async createNewNote(): Promise<void> {
+		try {
+			const folder = this.app.vault.getRoot();
+			let index = 0;
+			let fileName = "Untitled.md";
+
+			while (this.app.vault.getAbstractFileByPath(fileName)) {
+				index++;
+				fileName = `Untitled ${index}.md`;
+			}
+
+			const newFile = await this.app.vault.create(fileName, "");
+			const leaf = this.app.workspace.getLeaf("tab");
+			await leaf.openFile(newFile);
+		} catch (error) {
+			console.error("Failed to create new note:", error);
 		}
 	}
 
