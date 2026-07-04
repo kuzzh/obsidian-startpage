@@ -1,4 +1,4 @@
-import { App, ItemView, TFile, Menu, EventRef, Platform, debounce } from "obsidian";
+import { App, ItemView, TFile, TFolder, Menu, EventRef, Platform, debounce } from "obsidian";
 import StartPagePlugin from "@/main";
 import { t } from "@/i18n";
 import StartPageCreator from "@/core/startpagecreator";
@@ -189,7 +189,8 @@ export class StartPageView extends ItemView {
 		}
 		const pinnedNotes = this.getTFiles(this.plugin.settings.pinnedNotes);
 		const recentNotes = this.getRecentNotes(this.plugin.settings.recentNotesLimit);
-		await this.startPageCreator.createStartPage(pinnedNotes, recentNotes);
+		const tabFolderItems = this.getTabFolderItems();
+		await this.startPageCreator.createStartPage(pinnedNotes, recentNotes, tabFolderItems);
 
 		this.startRefreshTimerIfNeeded(pinnedNotes, recentNotes);
 	}
@@ -264,5 +265,47 @@ export class StartPageView extends ItemView {
 		if (viewHeader) {
 			(viewHeader as HTMLElement).style.display = show ? "" : "none";
 		}
+	}
+
+	getTabFolderItems(): { folderPath: string; folderName: string; files: TFile[] }[] {
+		return this.plugin.settings.tabFolderPaths
+			.map((path) => {
+				const folder = this.app.vault.getAbstractFileByPath(path);
+				if (folder instanceof TFolder) {
+					const files = this.getFilesFromFolder(folder, this.plugin.settings.tabFolderRecursive);
+					return { folderPath: path, folderName: folder.name, files };
+				}
+				return null;
+			})
+			.filter((item): item is { folderPath: string; folderName: string; files: TFile[] } => item !== null);
+	}
+
+	getFilesFromFolder(folder: TFolder, recursive: boolean): TFile[] {
+		const files: TFile[] = [];
+		const allFiles = recursive
+			? this.app.vault.getFiles()
+			: (folder.children.filter((child): child is TFile => child instanceof TFile));
+
+		if (recursive) {
+			for (const file of allFiles) {
+				if (file instanceof TFile && file.path.startsWith(folder.path + "/")) {
+					if (this.plugin.settings.includeAllFilesInRecent || file.extension === "md") {
+						if (!MyUtil.isFileExcluded(this.plugin.settings, file)) {
+							files.push(file);
+						}
+					}
+				}
+			}
+		} else {
+			for (const file of allFiles) {
+				if (this.plugin.settings.includeAllFilesInRecent || file.extension === "md") {
+					if (!MyUtil.isFileExcluded(this.plugin.settings, file)) {
+						files.push(file);
+					}
+				}
+			}
+		}
+
+		return files;
 	}
 }

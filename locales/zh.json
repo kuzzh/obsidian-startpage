@@ -145,5 +145,17 @@
     "style_note_folder_font_size_desc": "设置文件夹路径文字的字体大小",
     "backup_settings_heading": "备份设置",
     "backup_max_files": "最大备份文件数量",
-    "backup_max_files_desc": "设置保留的备份文件最大数量，超过此数量的旧备份将被自动删除"
+    "backup_max_files_desc": "设置保留的备份文件最大数量，超过此数量的旧备份将被自动删除",
+    "folder_tabs_settings_heading": "文件夹标签页",
+    "folder_tabs_settings": "文件夹标签页",
+    "folder_tabs_settings_desc": "配置需要以标签页形式显示在启动首页的文件夹",
+    "manage_folder_tabs_button": "管理文件夹",
+    "current_folder_tabs_desc": "已配置: {0} 个文件夹",
+    "add_folder": "添加文件夹",
+    "remove_from_tab_folders": "从启动首页标签页移除",
+    "no_tab_folders": "暂无已配置的文件夹",
+    "tab_folder_recursive": "包含子文件夹文件",
+    "tab_folder_recursive_desc": "递归包含所有子文件夹中的文件",
+    "add_to_tab_folders": "显示在启动首页标签页",
+    "tab_pinned": "置顶"
   }

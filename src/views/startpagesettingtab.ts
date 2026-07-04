@@ -2,10 +2,11 @@ import { App, PluginSettingTab, Setting, Platform, TextComponent, ToggleComponen
 import StartPagePlugin from "@/main";
 import { VIEW_TYPE_START_PAGE, StartPageView } from "@/views/startpageview";
 import { t } from "@/i18n";
-import StyleSettingsModal from "@/views/stylesettingsmodal";
-import SearchExclusionModal from "@/views/searchexclusionmodal";
-import PinnedNotesModal from "@/views/pinnednotesmodal";
-import { MyUtil } from "@/utils/myutil";
+	import StyleSettingsModal from "@/views/stylesettingsmodal";
+	import SearchExclusionModal from "@/views/searchexclusionmodal";
+	import PinnedNotesModal from "@/views/pinnednotesmodal";
+	import TabFoldersModal from "@/views/tabfoldersmodal";
+	import { MyUtil } from "@/utils/myutil";
 
 export class StartPageSettingTab extends PluginSettingTab {
 	plugin: StartPagePlugin;
@@ -52,8 +53,9 @@ export class StartPageSettingTab extends PluginSettingTab {
         this.createNewTabSettings(containerEl);
         this.createSearchSettings(containerEl);
         this.createBackupSettings(containerEl);
-        this.createPinnedNotesSettings(containerEl);
-        this.createFooterSettings(containerEl);
+		this.createPinnedNotesSettings(containerEl);
+		this.createFolderTabsSettings(containerEl);
+		this.createFooterSettings(containerEl);
 
 		setTimeout(() => {
 			this.updateFootComponentDisabledState();
@@ -283,22 +285,56 @@ export class StartPageSettingTab extends PluginSettingTab {
             .setHeading();
     }
 
-    private createManagePinnedNotesButton(containerEl: HTMLElement) {
-        const pinnedCount = this.plugin.settings.pinnedNotes.length;
+	private createManagePinnedNotesButton(containerEl: HTMLElement) {
+		const pinnedCount = this.plugin.settings.pinnedNotes.length;
 
-        new Setting(containerEl)
-            .setName(t("pinned_notes_settings"))
-            .setDesc(t("current_pinned_notes_desc", pinnedCount.toString()))
-            .addButton((button) => {
-                button
-                    .setButtonText(t("manage_pinned_notes_button"))
-                    .setCta()
-                    .onClick(() => {
-                        new PinnedNotesModal(this.app, this.plugin, () => {
-                            MyUtil.refreshStartPage(this.app);
-                            this.display();
-                        }).open();
-                    });
-            });
-    }
+		new Setting(containerEl)
+			.setName(t("pinned_notes_settings"))
+			.setDesc(t("current_pinned_notes_desc", pinnedCount.toString()))
+			.addButton((button) => {
+				button
+					.setButtonText(t("manage_pinned_notes_button"))
+					.setCta()
+					.onClick(() => {
+						new PinnedNotesModal(this.app, this.plugin, () => {
+							MyUtil.refreshStartPage(this.app);
+							this.display();
+						}).open();
+					});
+			});
+	}
+
+	private createFolderTabsSettings(containerEl: HTMLElement) {
+		new Setting(containerEl)
+			.setName(t("folder_tabs_settings_heading"))
+			.setHeading();
+
+		new Setting(containerEl)
+			.setName(t("tab_folder_recursive"))
+			.setDesc(t("tab_folder_recursive_desc"))
+			.addToggle((toggle) => {
+				toggle.setValue(this.plugin.settings.tabFolderRecursive);
+				toggle.onChange(async (value) => {
+					this.plugin.settings.tabFolderRecursive = value;
+					await this.plugin.saveSettings();
+					MyUtil.refreshStartPage(this.app);
+				});
+			});
+
+		const folderCount = this.plugin.settings.tabFolderPaths.length;
+		new Setting(containerEl)
+			.setName(t("folder_tabs_settings"))
+			.setDesc(t("folder_tabs_settings_desc"))
+			.addButton((button) => {
+				button
+					.setButtonText(t("manage_folder_tabs_button"))
+					.setCta()
+					.onClick(() => {
+						new TabFoldersModal(this.app, this.plugin, () => {
+							MyUtil.refreshStartPage(this.app);
+							this.display();
+						}).open();
+					});
+			});
+	}
 }
