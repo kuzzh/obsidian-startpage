@@ -1090,14 +1090,18 @@
 	}
 
 	.pinned-note-item .note-actions {
-		justify-content: flex-start;
-	}
+			justify-content: flex-start;
+		}
 
-	.pinned-note-item .control-button,
-	.pinned-note-item .remove-button {
-		height: 24px;
-		padding: 2px 4px;
-	}
+		.pinned-note-item .control-button,
+		.pinned-note-item .remove-button {
+			height: 24px;
+			padding: 2px 4px;
+		}
+
+		.start-page-new-note-btn {
+			bottom: 72px;
+		}
 }
 
 @media (max-width: 480px) {
