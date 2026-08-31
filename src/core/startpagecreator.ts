@@ -161,7 +161,7 @@ export default class StartPageCreator {
 				const setting = this.app.setting;
 				setting.open();
 
-				setTimeout(() => {
+				window.setTimeout(() => {
 					setting.openTabById(this.plugin.manifest.id);
 				}, 100);
 			});
@@ -818,7 +818,7 @@ export default class StartPageCreator {
 			const setting = this.app.setting;
 			setting.open();
 
-			setTimeout(() => {
+			window.setTimeout(() => {
 				setting.openTabById("community-plugins");
 			}, 100);
 		});

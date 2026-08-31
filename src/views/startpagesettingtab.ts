@@ -57,7 +57,7 @@ export class StartPageSettingTab extends PluginSettingTab {
 		this.createFolderTabsSettings(containerEl);
 		this.createFooterSettings(containerEl);
 
-		setTimeout(() => {
+		window.setTimeout(() => {
 			this.updateFootComponentDisabledState();
 		}, 0);
 	}
