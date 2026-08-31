@@ -256,7 +256,7 @@ export default class StartPageCreator {
 
 		noteItem.addEventListener("mouseenter", (event) => {
 			this.app.workspace.trigger("hover-link", {
-				event: event as MouseEvent,
+				event: event,
 				source: VIEW_TYPE_START_PAGE,
 				hoverParent: noteItem,
 				targetEl: noteItem,

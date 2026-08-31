@@ -22,7 +22,7 @@ export class StartPageSettingTab extends PluginSettingTab {
 		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_START_PAGE);
 		leaves.forEach((leaf) => {
 			if (leaf.view instanceof StartPageView) {
-				const view = leaf.view as StartPageView;
+				const view = leaf.view;
 				if (this.plugin.settings.showTitleNavigationBar === "show") {
 					view.showTitleNavigationBar(true);
 				} else if (this.plugin.settings.showTitleNavigationBar === "hide") {

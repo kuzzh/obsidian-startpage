@@ -220,7 +220,7 @@ export default class SearchModal extends Modal {
 
 			itemEl.addEventListener("mouseenter", (event) => {
 				this.app.workspace.trigger("hover-link", {
-					event: event as MouseEvent,
+					event: event,
 					source: VIEW_TYPE_START_PAGE,
 					hoverParent: itemEl,
 					targetEl: itemEl,
