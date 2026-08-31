@@ -206,7 +206,7 @@ export class StartPageView extends ItemView {
 	private restoreScrollPosition() {
 		const container = document.querySelector(".start-page-container") as HTMLElement;
 		if (container && this.plugin.settings.scrollPosition > 0) {
-			setTimeout(() => {
+			window.setTimeout(() => {
 				container.scrollTop = this.plugin.settings.scrollPosition;
 			}, 0);
 		}

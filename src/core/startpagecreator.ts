@@ -161,7 +161,7 @@ export default class StartPageCreator {
 				const setting = this.app.setting;
 				setting.open();
 
-				setTimeout(() => {
+				window.setTimeout(() => {
 					setting.openTabById(this.plugin.manifest.id);
 				}, 100);
 			});
@@ -256,7 +256,7 @@ export default class StartPageCreator {
 
 		noteItem.addEventListener("mouseenter", (event) => {
 			this.app.workspace.trigger("hover-link", {
-				event: event as MouseEvent,
+				event: event,
 				source: VIEW_TYPE_START_PAGE,
 				hoverParent: noteItem,
 				targetEl: noteItem,
@@ -741,10 +741,10 @@ export default class StartPageCreator {
 
 			const target = e.target as Node;
 			if (
-				target instanceof HTMLInputElement ||
-				target instanceof HTMLTextAreaElement ||
-				target instanceof HTMLSelectElement ||
-				(target instanceof HTMLElement && target.isContentEditable)
+				target.instanceOf(HTMLInputElement) ||
+				target.instanceOf(HTMLTextAreaElement) ||
+				target.instanceOf(HTMLSelectElement) ||
+				(target.instanceOf(HTMLElement) && target.isContentEditable)
 			) {
 				return;
 			}
@@ -818,7 +818,7 @@ export default class StartPageCreator {
 			const setting = this.app.setting;
 			setting.open();
 
-			setTimeout(() => {
+			window.setTimeout(() => {
 				setting.openTabById("community-plugins");
 			}, 100);
 		});

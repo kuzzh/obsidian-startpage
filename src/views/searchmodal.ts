@@ -157,7 +157,13 @@ export default class SearchModal extends Modal {
 			const emptyEl = this.resultsContainer.createDiv("search-empty-state");
 			const query = this.searchComponent.getValue();
 			if (query) {
-				emptyEl.innerHTML = t("no_results_press_enter").replace("{query}", query);
+				const [beforeEnter, rest] = t("no_results_press_enter").split("{enter}");
+				const [beforeQuery, afterQuery] = rest.split("{query}");
+				emptyEl.appendText(beforeEnter);
+				emptyEl.createEl("b", { text: t("enter_key") });
+				emptyEl.appendText(beforeQuery);
+				emptyEl.createEl("b", { text: query });
+				emptyEl.appendText(afterQuery);
 			} else {
 				emptyEl.setText(t("no_results"));
 			}
@@ -214,7 +220,7 @@ export default class SearchModal extends Modal {
 
 			itemEl.addEventListener("mouseenter", (event) => {
 				this.app.workspace.trigger("hover-link", {
-					event: event as MouseEvent,
+					event: event,
 					source: VIEW_TYPE_START_PAGE,
 					hoverParent: itemEl,
 					targetEl: itemEl,
