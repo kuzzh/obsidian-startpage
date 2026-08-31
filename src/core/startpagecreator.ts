@@ -741,10 +741,10 @@ export default class StartPageCreator {
 
 			const target = e.target as Node;
 			if (
-				target instanceof HTMLInputElement ||
-				target instanceof HTMLTextAreaElement ||
-				target instanceof HTMLSelectElement ||
-				(target instanceof HTMLElement && target.isContentEditable)
+				target.instanceOf(HTMLInputElement) ||
+				target.instanceOf(HTMLTextAreaElement) ||
+				target.instanceOf(HTMLSelectElement) ||
+				(target.instanceOf(HTMLElement) && target.isContentEditable)
 			) {
 				return;
 			}
