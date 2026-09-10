@@ -1,11 +1,12 @@
 import { ID_STAT_TOTAL_NOTES, ID_STAT_TODAY_EDITED, ID_STAT_TOTAL_SIZE } from "@/types";
-import { App, TFolder, TFile, Menu, Platform, Keymap } from "obsidian";
+import { App, TFolder, TFile, Menu, Platform, Keymap, WorkspaceLeaf } from "obsidian";
 import StartPagePlugin from "@/main";
 import { t } from "@/i18n";
 import { VIEW_TYPE_START_PAGE, StartPageView } from "@/views/startpageview";
 import FooterTextUtil from "@/utils/footertextutil";
 import SvgUtil from "@/utils/svgutil";
 import { MyUtil } from "@/utils/myutil";
+import { NewNoteUtil } from "@/utils/newnoteutil";
 import SearchModal from "@/views/searchmodal";
 
 declare module "obsidian" {
@@ -226,10 +227,7 @@ export default class StartPageCreator {
 				if (newLeaf) {
 					this.app.workspace.openLinkText(note.path, "", newLeaf);
 				} else {
-					const existingLeaf = this.app.workspace.getLeavesOfType("markdown").find((leaf) => {
-						const state = leaf.view.getState();
-						return state["file"] === note.path;
-					});
+					const existingLeaf = this.findOpenLeaf(note.path);
 
 					if (existingLeaf) {
 						await this.app.workspace.revealLeaf(existingLeaf);
@@ -636,21 +634,31 @@ export default class StartPageCreator {
 
 	private async createNewNote(): Promise<void> {
 		try {
-			const folder = this.app.vault.getRoot();
-			let index = 0;
-			let fileName = "Untitled.md";
-
-			while (this.app.vault.getAbstractFileByPath(fileName)) {
-				index++;
-				fileName = `Untitled ${index}.md`;
+			const newFile = await NewNoteUtil.createNote(this.app, this.plugin);
+			if (!newFile) {
+				return;
 			}
 
-			const newFile = await this.app.vault.create(fileName, "");
+			const existingLeaf = this.findOpenLeaf(newFile.path);
+			if (existingLeaf) {
+				await this.app.workspace.revealLeaf(existingLeaf);
+				return;
+			}
+
 			const leaf = this.app.workspace.getLeaf("tab");
 			await leaf.openFile(newFile);
 		} catch (error) {
 			console.error("Failed to create new note:", error);
 		}
+	}
+
+	private findOpenLeaf(filePath: string): WorkspaceLeaf | null {
+		const leaf = this.app.workspace.getLeavesOfType("markdown").find((candidate) => {
+			const state = candidate.view.getState();
+			return state["file"] === filePath;
+		});
+
+		return leaf || null;
 	}
 
 	private createElement(tag: string, className: string = "", textContent: string = ""): HTMLElement {

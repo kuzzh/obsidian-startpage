@@ -150,6 +150,15 @@
 	height: 28px;
 }
 
+/* 新建笔记标题模板预览 */
+.new-note-template-preview {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller, 12px);
+	margin: -8px 0 12px;
+	padding-left: 2px;
+	word-break: break-all;
+}
+
 /* 统计卡片 */
 .start-page-container .stats-section {
 	display: grid;

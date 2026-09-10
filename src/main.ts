@@ -116,6 +116,9 @@ export default class StartPagePlugin extends Plugin {
 				backupMaxFiles: typeof savedData.backupMaxFiles === "number" ? savedData.backupMaxFiles : DEFAULT_SETTINGS.backupMaxFiles,
 					tabFolderPaths: Array.isArray(savedData.tabFolderPaths) ? savedData.tabFolderPaths : [],
 					tabFolderRecursive: typeof savedData.tabFolderRecursive === "boolean" ? savedData.tabFolderRecursive : true,
+					newNoteTitleTemplate: typeof savedData.newNoteTitleTemplate === "string" ? savedData.newNoteTitleTemplate : DEFAULT_SETTINGS.newNoteTitleTemplate,
+					newNoteFolderPath: typeof savedData.newNoteFolderPath === "string" ? savedData.newNoteFolderPath : DEFAULT_SETTINGS.newNoteFolderPath,
+					newNoteConflict: ["duplicate", "open"].includes(savedData.newNoteConflict) ? savedData.newNoteConflict : DEFAULT_SETTINGS.newNoteConflict,
 			};
 		} else {
 			this.settings = { ...DEFAULT_SETTINGS };

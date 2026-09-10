@@ -158,5 +158,20 @@
     "tab_folder_recursive": "Include subfolder files",
     "tab_folder_recursive_desc": "Recursively include files from all subfolders",
     "add_to_tab_folders": "Show in start page tabs",
-    "tab_pinned": "Pinned"
+    "tab_pinned": "Pinned",
+    "new_note_settings_heading": "New note",
+    "new_note_title_template": "Title template",
+    "new_note_title_template_desc": "Template for the new note title. Supports {{date}}, {{date:FORMAT}}, {{time}}, {{time:FORMAT}} and {{datetime:FORMAT}}, where FORMAT uses moment.js tokens (e.g. {{date:YYYYMMDD}}). Characters that are invalid in file names (/ \\ : * ? \" < > |) are replaced with \"-\".",
+    "new_note_title_template_placeholder": "e.g. {{date:YYYY-MM-DD}} Note",
+    "new_note_title_template_preview": "Preview: {title}",
+    "new_note_folder": "Target folder",
+    "new_note_folder_desc": "Folder where new notes are created. Leave empty to use the vault root; missing folders are created automatically.",
+    "new_note_folder_placeholder": "Leave empty for vault root",
+    "new_note_folder_select": "Select folder",
+    "new_note_folder_clear": "Clear",
+    "new_note_conflict": "When a note with the same name exists",
+    "new_note_conflict_desc": "Behavior when the generated title matches an existing note",
+    "new_note_conflict_duplicate": "Create a new note with a number suffix",
+    "new_note_conflict_open": "Open the existing note",
+    "new_note_invalid_folder": "Cannot create note: the target folder path is invalid or points to a file."
   }

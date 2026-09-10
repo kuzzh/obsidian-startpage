@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### ✨ New Features
+
+- **Configurable New Note Creation**: The floating "New Note" button in the bottom right corner now creates notes based on your settings:
+  - **Title Template**: Supports date/time placeholders with custom moment.js formats — `{{date}}`, `{{date:FORMAT}}`, `{{time}}`, `{{time:FORMAT}}` and `{{datetime:FORMAT}}`
+  - **Target Folder**: Choose any folder in the vault, or leave empty for the vault root; missing folders are created automatically
+  - **Conflict Behavior**: When the generated title already exists, either create a numbered copy or open the existing note
+  - Characters that are illegal in file names (`/ \ : * ? " < > |`) are automatically replaced with `-`
+  - Live title preview in the settings page as you edit the template
+
+### 🐛 Bug Fixes
+
+- **Duplicated Start Page Content**: Deleting a folder duplicated the entire start page once per file it contained. Concurrent vault events triggered overlapping renders that interleaved around an internal `await`; renders are now serialized and coalesced
+- **Duplicate Tab**: With the "open existing note" conflict behavior, clicking the new note button now activates the already-open tab instead of opening the same file in a second tab
+- **Settings Scroll Position**: Using the target folder "Select folder" or "Clear" buttons no longer scrolls the settings page back to the top
+
+---
+
 ## [0.3.0] - 2025-11-20
 
 ### ✨ New Features

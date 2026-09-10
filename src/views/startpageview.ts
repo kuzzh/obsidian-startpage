@@ -17,6 +17,8 @@ export class StartPageView extends ItemView {
 	private startPageCreator: StartPageCreator;
 	private isScrollEventRegistered = false;
 	private debouncedSaveScrollPosition: () => void;
+	private isRendering = false;
+	private renderPending = false;
 
 	constructor(leaf: any, app: App, plugin: StartPagePlugin) {
 		super(leaf);
@@ -173,7 +175,26 @@ export class StartPageView extends ItemView {
 		}
 	}
 
-	public async renderContent() {
+	public async renderContent(): Promise<void> {
+		// Vault events fire once per affected file, so concurrent calls would interleave
+		// around the awaits in createStartPage and append the page multiple times.
+		if (this.isRendering) {
+			this.renderPending = true;
+			return;
+		}
+
+		this.isRendering = true;
+		try {
+			do {
+				this.renderPending = false;
+				await this.renderContentInternal();
+			} while (this.renderPending);
+		} finally {
+			this.isRendering = false;
+		}
+	}
+
+	private async renderContentInternal(): Promise<void> {
 		const container = this.containerEl.children[1] as HTMLElement;
 
 		if (!this.isScrollEventRegistered) {

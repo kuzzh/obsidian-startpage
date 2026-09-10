@@ -22,6 +22,7 @@ A modern startup homepage plugin for Obsidian that provides a beautiful dashboar
 - **Context Menu**: Support adding/removing pinned notes via right-click context menu in file explorer and on pinned notes
 - **Import from Bookmarks**: Easily import pinned notes from Obsidian's built-in bookmarks feature
 - **Reorder Pinned Notes**: Move pinned notes up or down in the settings to customize the display order
+- **Configurable New Note**: Create notes from the homepage with a customizable title template (date/time placeholders) and a target folder
 
 ### User Experience
 - **Smart Time Display**: Automatically shows relative time (minutes ago, hours ago, days ago) for recent notes
@@ -102,7 +103,7 @@ A modern startup homepage plugin for Obsidian that provides a beautiful dashboar
    - Clicking the homepage icon in the left toolbar.
    - If "Replace new tab" is enabled, it will automatically display when opening new tabs.
 2. **View Statistics**: The top of the homepage displays vault statistics (total notes, today's edits, total storage space).
-3. **Quick Create**: Click the "New Note" button in the top right corner to quickly create a new note.
+3. **Quick Create**: Click the floating "New Note" button in the bottom right corner to create a new note using your configured title template and folder.
 4. **Access Notes**: Click on pinned notes or recent notes to directly open the corresponding notes.
 5. **Context Menu**: Right-click on files in the file explorer to quickly add or remove pinned notes.
 
@@ -130,6 +131,11 @@ A modern startup homepage plugin for Obsidian that provides a beautiful dashboar
 
 #### New Tab Settings
 - **Replace New Tab**: Automatically display the start page when opening new tabs
+
+#### New Note Settings
+- **Title Template**: Template for the new note title, supporting date/time placeholders (see [New Note Creation](#new-note-creation))
+- **Target Folder**: Folder where new notes are created (leave empty for the vault root; missing folders are created automatically)
+- **Conflict Behavior**: When the generated title already exists, either create a numbered copy or open the existing note
 
 #### Footer Settings
 - **Custom Footer Text**: Enable and set custom footer text for the start page
@@ -217,6 +223,24 @@ npm run build
   - Shows file type icon, title, folder path, and modification time
   - Respects "Include All Files" setting (all file types vs. markdown only)
 
+### New Note Creation
+
+The floating button in the bottom right corner of the start page creates a note using your configured title template, target folder, and conflict behavior. If the resulting note is already open in a tab, that tab is activated instead of opening a second one.
+
+**Title template placeholders**
+
+| Placeholder | Description | Example |
+|---|---|---|
+| `{{date}}` | Current date, formatted as `YYYY-MM-DD` | `2026-09-10` |
+| `{{date:FORMAT}}` | Current date with a custom [moment.js](https://momentjs.com/docs/#/displaying/format/) format | `{{date:YYYYMMDD}}` → `20260910` |
+| `{{time}}` | Current time, formatted as `HHmmss` | `143005` |
+| `{{time:FORMAT}}` | Current time with a custom moment.js format | `{{time:HH-mm-ss}}` → `14-30-05` |
+| `{{datetime:FORMAT}}` | Date and time with a custom moment.js format | `{{datetime:YYYY-MM-DD_HHmm}}` → `2026-09-10_1430` |
+
+Characters that are illegal in file names (`/ \ : * ? " < > |`) are automatically replaced with `-`, so using `HH:mm:ss` or `YYYY/MM/DD` in a format is safe. Any text outside `{{...}}` is used literally.
+
+The settings page shows a live preview of the generated title as you edit the template.
+
 ### Smart Refresh Mechanism
 
 - **File Monitoring**: Automatically monitors file modification, creation, deletion, and rename events
@@ -246,6 +270,7 @@ npm run build
 - **Keyboard Support**: Type any character to instantly open search; complete keyboard navigation in search modal
 - **Smart Search**: Click search box or stat cards to open full-featured search modal with fuzzy matching
 - **Create Notes**: Press Enter in empty search results to create a new note with the search query as title
+- **Quick Create Button**: The floating button in the bottom right corner creates a note using your title template and target folder settings, and activates the tab if the note is already open
 - **Accessibility**: Follows accessibility design principles with proper ARIA labels
 
 ## Technical Features
