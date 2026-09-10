@@ -7,6 +7,7 @@ import { t } from "@/i18n";
 	import PinnedNotesModal from "@/views/pinnednotesmodal";
 	import TabFoldersModal from "@/views/tabfoldersmodal";
 	import { MyUtil } from "@/utils/myutil";
+	import { NewNoteUtil } from "@/utils/newnoteutil";
 
 export class StartPageSettingTab extends PluginSettingTab {
 	plugin: StartPagePlugin;
@@ -51,6 +52,7 @@ export class StartPageSettingTab extends PluginSettingTab {
         this.createAppearanceSettings(containerEl);
         this.createStyleSettings(containerEl);
         this.createNewTabSettings(containerEl);
+        this.createNewNoteSettings(containerEl);
         this.createSearchSettings(containerEl);
         this.createBackupSettings(containerEl);
 		this.createPinnedNotesSettings(containerEl);
@@ -178,6 +180,93 @@ export class StartPageSettingTab extends PluginSettingTab {
 					});
 				});
 	    }
+
+    private createNewNoteSettings(containerEl: HTMLElement) {
+        new Setting(containerEl)
+            .setName(t("new_note_settings_heading"))
+            .setHeading();
+
+        const templateSetting = new Setting(containerEl)
+            .setName(t("new_note_title_template"))
+            .setDesc(t("new_note_title_template_desc"));
+
+        let previewEl: HTMLElement;
+
+        templateSetting.addText((text) => {
+            text.setPlaceholder(t("new_note_title_template_placeholder"));
+            text.setValue(this.plugin.settings.newNoteTitleTemplate);
+            text.onChange(async (value) => {
+                this.plugin.settings.newNoteTitleTemplate = value;
+                await this.plugin.saveSettings();
+                this.updateNewNotePreview(previewEl);
+            });
+        });
+
+        previewEl = containerEl.createDiv({ cls: "new-note-template-preview" });
+        this.updateNewNotePreview(previewEl);
+
+        const folderSetting = new Setting(containerEl)
+            .setName(t("new_note_folder"))
+            .setDesc(t("new_note_folder_desc"));
+
+        let folderTextComponent: TextComponent;
+
+        folderSetting.addText((text) => {
+            folderTextComponent = text;
+            text.setPlaceholder(t("new_note_folder_placeholder"));
+            text.setValue(this.plugin.settings.newNoteFolderPath);
+            text.onChange(async (value) => {
+                this.plugin.settings.newNoteFolderPath = value.trim();
+                await this.plugin.saveSettings();
+            });
+        });
+
+        folderSetting.addExtraButton((button) => {
+            button
+                .setIcon("folder-open")
+                .setTooltip(t("new_note_folder_select"))
+                .onClick(() => {
+                    import("@/views/foldersuggestmodal").then((module) => {
+                        const FolderSuggestModal = module.default;
+                        new FolderSuggestModal(this.app, async (folder: TFolder) => {
+                            const folderPath = folder.isRoot() ? "" : folder.path;
+                            this.plugin.settings.newNoteFolderPath = folderPath;
+                            await this.plugin.saveSettings();
+                            folderTextComponent.setValue(folderPath);
+                        }).open();
+                    });
+                });
+        });
+
+        folderSetting.addExtraButton((button) => {
+            button
+                .setIcon("x")
+                .setTooltip(t("new_note_folder_clear"))
+                .onClick(async () => {
+                    this.plugin.settings.newNoteFolderPath = "";
+                    await this.plugin.saveSettings();
+                    folderTextComponent.setValue("");
+                });
+        });
+
+        new Setting(containerEl)
+            .setName(t("new_note_conflict"))
+            .setDesc(t("new_note_conflict_desc"))
+            .addDropdown((dropdown) => {
+                dropdown.addOption("duplicate", t("new_note_conflict_duplicate"));
+                dropdown.addOption("open", t("new_note_conflict_open"));
+                dropdown.setValue(this.plugin.settings.newNoteConflict);
+                dropdown.onChange(async (value: "duplicate" | "open") => {
+                    this.plugin.settings.newNoteConflict = value;
+                    await this.plugin.saveSettings();
+                });
+            });
+    }
+
+    private updateNewNotePreview(previewEl: HTMLElement) {
+        const title = NewNoteUtil.renderTitle(this.plugin.settings.newNoteTitleTemplate);
+        previewEl.setText(t("new_note_title_template_preview").replace("{title}", title));
+    }
 
     private createSearchSettings(containerEl: HTMLElement) {
         new Setting(containerEl)

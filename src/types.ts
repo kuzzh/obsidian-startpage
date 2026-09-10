@@ -78,6 +78,9 @@ export interface StartPageSettings {
 		backupMaxFiles: number;
 		tabFolderPaths: string[];
 		tabFolderRecursive: boolean;
+		newNoteTitleTemplate: string;
+		newNoteFolderPath: string;
+		newNoteConflict: "duplicate" | "open";
 	}
 
 export const DEFAULT_SETTINGS: StartPageSettings = {
@@ -104,4 +107,7 @@ export const DEFAULT_SETTINGS: StartPageSettings = {
 		backupMaxFiles: 5,
 		tabFolderPaths: [],
 		tabFolderRecursive: true,
+		newNoteTitleTemplate: "Untitled",
+		newNoteFolderPath: "",
+		newNoteConflict: "duplicate",
 	};

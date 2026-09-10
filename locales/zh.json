@@ -158,5 +158,20 @@
     "tab_folder_recursive": "包含子文件夹文件",
     "tab_folder_recursive_desc": "递归包含所有子文件夹中的文件",
     "add_to_tab_folders": "显示在启动首页标签页",
-    "tab_pinned": "置顶"
+    "tab_pinned": "置顶",
+    "new_note_settings_heading": "新建笔记",
+    "new_note_title_template": "标题模板",
+    "new_note_title_template_desc": "新建笔记的标题模板，支持 {{date}}、{{date:格式}}、{{time}}、{{time:格式}} 和 {{datetime:格式}}，其中“格式”使用 moment.js 占位符（如 {{date:YYYYMMDD}}）。文件名非法字符（/ \\ : * ? \" < > |）会被替换为“-”。",
+    "new_note_title_template_placeholder": "例如：{{date:YYYY-MM-DD}} 笔记",
+    "new_note_title_template_preview": "预览：{title}",
+    "new_note_folder": "目标目录",
+    "new_note_folder_desc": "新建笔记存放的目录。留空则使用笔记库根目录；目录不存在时会自动创建。",
+    "new_note_folder_placeholder": "留空则使用笔记库根目录",
+    "new_note_folder_select": "选择目录",
+    "new_note_folder_clear": "清除",
+    "new_note_conflict": "同名笔记已存在时",
+    "new_note_conflict_desc": "当生成的标题与已有笔记同名时的处理方式",
+    "new_note_conflict_duplicate": "新建笔记并自动编号",
+    "new_note_conflict_open": "打开已有笔记",
+    "new_note_invalid_folder": "无法创建笔记：目标目录路径无效或指向了一个文件。"
   }
