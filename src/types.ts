@@ -67,7 +67,8 @@ export interface StartPageSettings {
 	todayRandomEnFooterText: string; 
 	todayRandomZhFooterText: string; 
 	customFooterText: string;
-	scrollPosition: number; 
+	scrollPosition: number;
+	scrollPositionKey: string;
 	showStatBar: boolean;
 	lastVersionCheck: number; 
 	latestVersion: string;
@@ -97,6 +98,7 @@ export const DEFAULT_SETTINGS: StartPageSettings = {
 	todayRandomZhFooterText: "",
 	customFooterText: "",
 	scrollPosition: 0,
+	scrollPositionKey: "",
 	showStatBar: true,
 	lastVersionCheck: 0,
 	latestVersion: "",

@@ -13,9 +13,6 @@ export default class StartPagePlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
-		this.settings.scrollPosition = 0;
-		this.saveSettings();
-
 		const obsidianLang = getLanguage() || "en";
 		setLocale(obsidianLang);
 
@@ -96,6 +93,7 @@ export default class StartPagePlugin extends Plugin {
 				todayRandomZhFooterText: typeof savedData.todayRandomZhFooterText === "string" ? savedData.todayRandomZhFooterText : "",
 				customFooterText: typeof savedData.customFooterText === "string" ? savedData.customFooterText : "",
 				scrollPosition: typeof savedData.scrollPosition === "number" ? savedData.scrollPosition : 0,
+				scrollPositionKey: typeof savedData.scrollPositionKey === "string" ? savedData.scrollPositionKey : "",
 				showStatBar: typeof savedData.showStatBar === "boolean" ? savedData.showStatBar : true,
 				lastVersionCheck: typeof savedData.lastVersionCheck === "number" ? savedData.lastVersionCheck : 0,
 				latestVersion: typeof savedData.latestVersion === "string" ? savedData.latestVersion : "",

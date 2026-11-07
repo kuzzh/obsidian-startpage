@@ -1,10 +1,27 @@
-import { App, ItemView, TFile, TFolder, Menu, EventRef, Platform, debounce } from "obsidian";
+import { App, ItemView, TFile, TFolder, Menu, EventRef, Platform } from "obsidian";
 import StartPagePlugin from "@/main";
 import { t } from "@/i18n";
 import StartPageCreator from "@/core/startpagecreator";
 import { MyUtil } from "@/utils/myutil";
 
 export const VIEW_TYPE_START_PAGE = "start-page-view";
+
+// 外层容器 overflow:hidden 不滚动，实际滚动的是内部 .notes-list；
+// scroll 事件不冒泡，需以 key 标识滚动区域才能在重渲染后恢复到正确位置
+function scrollerKey(el: HTMLElement): string {
+	if (el.closest(".recent-notes")) return "recent";
+	const panel = el.closest(".tab-panel") as HTMLElement | null;
+	if (panel && panel.dataset.tabIndex !== undefined) return `tab:${panel.dataset.tabIndex}`;
+	return "container";
+}
+
+function findScroller(container: HTMLElement, key: string): HTMLElement | null {
+	if (key === "recent") return container.querySelector<HTMLElement>(".recent-notes .notes-list");
+	if (key.startsWith("tab:")) {
+		return container.querySelector<HTMLElement>(`.tab-panel[data-tab-index="${key.slice(4)}"] .notes-list`);
+	}
+	return container;
+}
 
 export class StartPageView extends ItemView {
 	plugin: StartPagePlugin;
@@ -16,9 +33,9 @@ export class StartPageView extends ItemView {
 	private readonly REFRESH_INTERVAL = 60000;
 	private startPageCreator: StartPageCreator;
 	private isScrollEventRegistered = false;
-	private debouncedSaveScrollPosition: () => void;
 	private isRendering = false;
 	private renderPending = false;
+	private lastScroll: { key: string; top: number } | null = null;
 
 	constructor(leaf: any, app: App, plugin: StartPagePlugin) {
 		super(leaf);
@@ -28,10 +45,6 @@ export class StartPageView extends ItemView {
 		this.navigation = true;
 		this.icon = "home";
 		this.contentEl.addClass("start-page-view");
-
-		this.debouncedSaveScrollPosition = debounce(() => {
-			this.saveScrollPosition();
-		}, 300);
 
 		if (this.plugin.settings.showTitleNavigationBar === "show") {
 			this.showTitleNavigationBar(true);
@@ -117,6 +130,12 @@ export class StartPageView extends ItemView {
 	}
 
 	async onClose() {
+		// 关闭视图时一次性落盘滚动位置，而非每次滚动都写 data.json
+		if (this.lastScroll) {
+			this.plugin.settings.scrollPosition = this.lastScroll.top;
+			this.plugin.settings.scrollPositionKey = this.lastScroll.key;
+			await this.plugin.saveSettings();
+		}
 		if (this.startPageCreator) {
 			this.startPageCreator.destroy();
 		}
@@ -198,9 +217,10 @@ export class StartPageView extends ItemView {
 		const container = this.containerEl.children[1] as HTMLElement;
 
 		if (!this.isScrollEventRegistered) {
-			this.registerDomEvent(container, "scroll", () => {
-				this.debouncedSaveScrollPosition();
-			});
+			// capture 阶段才能收到内部 .notes-list 的 scroll 事件（scroll 不冒泡）
+			this.registerDomEvent(container, "scroll", (e: Event) => {
+				this.handleScrollEvent(e);
+			}, { capture: true });
 
 			this.isScrollEventRegistered = true;
 		}
@@ -216,19 +236,21 @@ export class StartPageView extends ItemView {
 		this.startRefreshTimerIfNeeded(pinnedNotes, recentNotes);
 	}
 
-	private saveScrollPosition() {
-		const container = document.querySelector(".start-page-container") as HTMLElement;
-		if (container) {
-			this.plugin.settings.scrollPosition = container.scrollTop;
-			this.plugin.saveSettings();
-		}
+	private handleScrollEvent(e: Event) {
+		const target = e.target;
+		if (!(target instanceof HTMLElement)) return;
+		// 外层容器永不滚动，只关心内部滚动区域
+		if (target === this.containerEl.children[1]) return;
+		// 仅记录内存，onClose 时统一持久化
+		this.lastScroll = { key: scrollerKey(target), top: target.scrollTop };
 	}
 
 	private restoreScrollPosition() {
 		const container = document.querySelector(".start-page-container") as HTMLElement;
 		if (container && this.plugin.settings.scrollPosition > 0) {
 			window.setTimeout(() => {
-				container.scrollTop = this.plugin.settings.scrollPosition;
+				const scroller = findScroller(container, this.plugin.settings.scrollPositionKey);
+				if (scroller) scroller.scrollTop = this.plugin.settings.scrollPosition;
 			}, 0);
 		}
 	}
