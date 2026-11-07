@@ -106,6 +106,22 @@ export class StartPageSettingTab extends PluginSettingTab {
 					MyUtil.refreshStartPage(this.app);
 				});
 			});
+
+		new Setting(containerEl)
+			.setName(t("check_for_updates"))
+			.setDesc(t("check_for_updates_desc"))
+			.addToggle((toggle) => {
+				toggle.setValue(this.plugin.settings.checkForUpdates);
+				toggle.onChange(async (value) => {
+					this.plugin.settings.checkForUpdates = value;
+					if (!value) {
+						// 关闭时清掉残留数据，避免徽标滞留
+						this.plugin.settings.latestVersion = "";
+					}
+					await this.plugin.saveSettings();
+					MyUtil.refreshStartPage(this.app);
+				});
+			});
     }
 
     private createAppearanceSettings(containerEl: HTMLElement) {

@@ -97,6 +97,7 @@ export default class StartPagePlugin extends Plugin {
 				showStatBar: typeof savedData.showStatBar === "boolean" ? savedData.showStatBar : true,
 				lastVersionCheck: typeof savedData.lastVersionCheck === "number" ? savedData.lastVersionCheck : 0,
 				latestVersion: typeof savedData.latestVersion === "string" ? savedData.latestVersion : "",
+				checkForUpdates: typeof savedData.checkForUpdates === "boolean" ? savedData.checkForUpdates : DEFAULT_SETTINGS.checkForUpdates,
 				searchExcludePaths: Array.isArray(savedData.searchExcludePaths)
 						? savedData.searchExcludePaths
 						: (Array.isArray(savedData.excludeList) ? savedData.excludeList : []),
@@ -282,6 +283,15 @@ export default class StartPagePlugin extends Plugin {
 	}
 
 	async checkForUpdates() {
+		// 关闭检查更新时不发起任何网络请求，同时清掉残留的更新徽标数据
+		if (!this.settings.checkForUpdates) {
+			if (this.settings.latestVersion) {
+				this.settings.latestVersion = "";
+				await this.saveSettings();
+			}
+			return;
+		}
+
 		const now = Date.now();
 		const ONE_DAY = 24 * 60 * 60 * 1000;
 

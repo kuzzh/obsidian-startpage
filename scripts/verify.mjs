@@ -73,9 +73,13 @@ async function ensureCdpInstance() {
 }
 
 async function getAppPage(browser) {
-	for (const ctx of browser.contexts()) {
-		const page = ctx.pages().find((p) => p.url().startsWith("app://obsidian.md/index.html"));
-		if (page) return page;
+	// connectOverCDP 后 pages 列表可能尚未就绪，短暂重试
+	for (let i = 0; i < 20; i++) {
+		for (const ctx of browser.contexts()) {
+			const page = ctx.pages().find((p) => p.url().startsWith("app://obsidian.md/index.html"));
+			if (page) return page;
+		}
+		await sleep(500);
 	}
 	return null;
 }

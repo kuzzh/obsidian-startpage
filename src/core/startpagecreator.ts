@@ -799,6 +799,10 @@ export default class StartPageCreator {
 	}
 
 	private hasUpdate(): boolean {
+		// 关闭检查更新时即使残留了 latestVersion 也不展示徽标
+		if (!this.plugin.settings.checkForUpdates) {
+			return false;
+		}
 		const latestVersion = this.plugin.settings.latestVersion;
 		if (!latestVersion) {
 			return false;

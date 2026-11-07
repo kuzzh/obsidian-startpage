@@ -86,6 +86,8 @@
     "enter_key": "Enter",
     "show_stat_bar": "Show stat. bar",
     "show_stat_bar_desc": "Show stat. bar on the start page",
+    "check_for_updates": "Check for updates",
+    "check_for_updates_desc": "Check GitHub daily for new plugin versions and show an update badge on the start page. When disabled, the plugin makes no network requests (the daily quote only requests when random footer text is enabled).",
     "new_version_available": "New version available",
     "update_to_version": "Update to v{version}",
     "search_settings_heading": "Search",

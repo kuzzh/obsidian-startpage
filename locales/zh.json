@@ -86,6 +86,8 @@
     "enter_key": "Enter",
     "show_stat_bar": "显示统计栏",
     "show_stat_bar_desc": "在启动首页中显示统计栏",
+    "check_for_updates": "检查更新",
+    "check_for_updates_desc": "每天自动检查 GitHub 上的新版本并在启动首页显示更新徽标。关闭后插件不会发起任何网络请求（每日一言亦仅在启用随机页脚文本时请求）。",
     "new_version_available": "有新版本可用",
     "update_to_version": "更新到 v{version}",
     "search_settings_heading": "搜索",

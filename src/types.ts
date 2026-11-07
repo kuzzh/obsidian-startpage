@@ -70,8 +70,9 @@ export interface StartPageSettings {
 	scrollPosition: number;
 	scrollPositionKey: string;
 	showStatBar: boolean;
-	lastVersionCheck: number; 
+	lastVersionCheck: number;
 	latestVersion: string;
+	checkForUpdates: boolean;
 	searchExcludePaths: string[]; 
 	searchExcludeExtensions: string[];
 		pinnedNotesStyle: SectionStyleSettings;
@@ -102,6 +103,7 @@ export const DEFAULT_SETTINGS: StartPageSettings = {
 	showStatBar: true,
 	lastVersionCheck: 0,
 	latestVersion: "",
+	checkForUpdates: false,
 	searchExcludePaths: [],
 	searchExcludeExtensions: [],
 		pinnedNotesStyle: { ...DEFAULT_SECTION_STYLE },
