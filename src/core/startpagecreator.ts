@@ -59,6 +59,7 @@ export default class StartPageCreator {
 		private recentNotes: TFile[] | null = null;
 		private tabFolderItems: { folderPath: string; folderName: string; files: TFile[] }[] | null = null;
 	private resizeObserver: ResizeObserver | null = null;
+	private draggingPinnedPath: string | null = null;
 	private resizeHandler: (() => void) | null = null;
 
 		constructor(app: App, plugin: StartPagePlugin, container: Element) {
@@ -273,6 +274,25 @@ export default class StartPageCreator {
 		});
 
 		if (isPinned) {
+			// HTML5 拖拽排序：拖放目标即插入位置，drop 后写回数组顺序
+			noteItem.draggable = true;
+			noteItem.addEventListener("dragstart", () => {
+				this.draggingPinnedPath = note.path;
+				noteItem.addClass("dragging");
+			});
+			noteItem.addEventListener("dragend", () => {
+				this.draggingPinnedPath = null;
+				noteItem.removeClass("dragging");
+			});
+			noteItem.addEventListener("dragover", (e) => e.preventDefault());
+			noteItem.addEventListener("drop", (e) => {
+				e.preventDefault();
+				if (this.draggingPinnedPath && this.draggingPinnedPath !== note.path) {
+					this.reorderPinnedNote(this.draggingPinnedPath, note.path);
+				}
+				this.draggingPinnedPath = null;
+			});
+
 			noteItem.addEventListener("contextmenu", (event) => {
 				event.preventDefault();
 				event.stopPropagation();
@@ -393,6 +413,19 @@ export default class StartPageCreator {
 		section.appendChild(notesList);
 
 		return section;
+	}
+
+	private reorderPinnedNote(srcPath: string, targetPath: string): void {
+		const list = this.plugin.settings.pinnedNotes;
+		const from = list.indexOf(srcPath);
+		const to = list.indexOf(targetPath);
+		if (from === -1 || to === -1) {
+			return;
+		}
+		list.splice(from, 1);
+		list.splice(to, 0, srcPath);
+		void this.plugin.saveSettings();
+		MyUtil.refreshStartPage(this.app);
 	}
 
 	private createPinnedEmptyState(): HTMLElement {

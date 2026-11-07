@@ -329,6 +329,10 @@
 	max-width: 100%;
 }
 
+.start-page-container .note-item.dragging {
+	opacity: 0.4;
+}
+
 .start-page-container .note-item:hover {
 	background: var(--tag-background-hover);
 	transform: translateX(4px);
