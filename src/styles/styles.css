@@ -229,6 +229,13 @@
 	grid-template-columns: 1fr;
 }
 
+.start-page-container .footer-shortcut-hints {
+	margin-top: 4px;
+	font-size: 0.8em;
+	color: var(--text-faint);
+	opacity: 0.85;
+}
+
 /* 区块样式 */
 .start-page-container .section {
 	display: flex;

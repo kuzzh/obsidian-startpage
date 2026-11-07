@@ -357,6 +357,18 @@ export class StartPageSettingTab extends PluginSettingTab {
 			.setHeading();
 
 		new Setting(containerEl)
+			.setName(t("show_shortcut_hints"))
+			.setDesc(t("show_shortcut_hints_desc"))
+			.addToggle((toggle) => {
+				toggle.setValue(this.plugin.settings.showShortcutHints);
+				toggle.onChange(async (value) => {
+					this.plugin.settings.showShortcutHints = value;
+					await this.plugin.saveSettings();
+					MyUtil.refreshStartPage(this.app);
+				});
+			});
+
+		new Setting(containerEl)
 			.setName(t("show_custom_footer_text"))
 			.setDesc(t("show_custom_footer_text_desc"))
 			.addToggle((toggle) => {

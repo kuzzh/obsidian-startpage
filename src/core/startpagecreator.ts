@@ -621,6 +621,11 @@ export default class StartPageCreator {
 
 		this.updateFooterTextAsync(love);
 
+		// 快捷键原本完全不可发现，页脚提示用于提升可发现性
+		if (this.plugin.settings.showShortcutHints) {
+			footer.appendChild(this.createElement("div", "footer-shortcut-hints", t("footer_shortcut_hints")));
+		}
+
 		return footer;
 	}
 

@@ -65,6 +65,7 @@ export interface StartPageSettings {
 	openNotesInNewTab: boolean;
 	showTitleNavigationBar: "default" | "show" | "hide";
 	showCustomFooterText: boolean;
+	showShortcutHints: boolean;
 	useRandomFooterText: boolean;
 	todayRandomEnFooterText: string; 
 	todayRandomZhFooterText: string; 
@@ -98,6 +99,7 @@ export const DEFAULT_SETTINGS: StartPageSettings = {
 		openNotesInNewTab: false,
 		showTitleNavigationBar: "default",
 	showCustomFooterText: false,
+	showShortcutHints: true,
 	useRandomFooterText: false,
 	todayRandomEnFooterText: "",
 	todayRandomZhFooterText: "",
