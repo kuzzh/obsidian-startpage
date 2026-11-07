@@ -1,7 +1,7 @@
 import { MyUtil } from "@/utils/myutil";
 import SvgUtil from "@/utils/svgutil";
 import { t } from "@/i18n";
-import { App, Modal, SearchComponent, TFile } from "obsidian";
+import { App, Modal, prepareFuzzySearch, SearchComponent, TFile } from "obsidian";
 import StartPagePlugin from "@/main";
 import { NewNoteUtil } from "@/utils/newnoteutil";
 import { VIEW_TYPE_START_PAGE } from "@/views/startpageview";
@@ -100,54 +100,50 @@ export default class SearchModal extends Modal {
 	performSearch(query: string) {
 		if (query === "") {
 			this.filteredResults = [];
+		} else if (this.caseSensitive) {
+			// 区分大小写保持原有子串语义
+			this.filteredResults = this.allFiles.filter((file) => {
+				if (MyUtil.isFileExcluded(this.plugin.settings, file)) {
+					return false;
+				}
+				if (file.name.includes(query)) {
+					return true;
+				}
+				return this.getAliases(file).some((alias) => alias.includes(query));
+			});
 		} else {
-			if (this.caseSensitive) {
-				this.filteredResults = this.allFiles.filter((file) => {
-					if (MyUtil.isFileExcluded(this.plugin.settings, file)) {
-						return false;
+			// 模糊匹配 + 按相关度排序，对齐核心 Quick Switcher 体验
+			const fuzzy = prepareFuzzySearch(query);
+			const scored: { file: TFile; score: number }[] = [];
+			for (const file of this.allFiles) {
+				if (MyUtil.isFileExcluded(this.plugin.settings, file)) {
+					continue;
+				}
+				let match = fuzzy(file.name);
+				if (!match) {
+					for (const alias of this.getAliases(file)) {
+						match = fuzzy(alias);
+						if (match) break;
 					}
-					
-					if (file.name.includes(query)) {
-						return true;
-					}
-					
-					const cache = this.app.metadataCache.getFileCache(file);
-					const aliases = cache?.frontmatter?.aliases || cache?.frontmatter?.alias;
-					if (aliases) {
-						const aliasArray = Array.isArray(aliases) ? aliases : [aliases];
-						return aliasArray.some((alias: string) => 
-							typeof alias === 'string' && alias.includes(query)
-						);
-					}
-					
-					return false;
-				});
-			} else {
-				const lowerCaseQuery = query.toLowerCase();
-				this.filteredResults = this.allFiles.filter((file) => {
-					if (MyUtil.isFileExcluded(this.plugin.settings, file)) {
-						return false;
-					}
-					
-					if (file.name.toLowerCase().includes(lowerCaseQuery)) {
-						return true;
-					}
-					
-					const cache = this.app.metadataCache.getFileCache(file);
-					const aliases = cache?.frontmatter?.aliases || cache?.frontmatter?.alias;
-					if (aliases) {
-						const aliasArray = Array.isArray(aliases) ? aliases : [aliases];
-						return aliasArray.some((alias: string) => 
-							typeof alias === 'string' && alias.toLowerCase().includes(lowerCaseQuery)
-						);
-					}
-					
-					return false;
-				});
+				}
+				if (match) {
+					scored.push({ file, score: match.score });
+				}
 			}
+			scored.sort((a, b) => b.score - a.score);
+			this.filteredResults = scored.map((s) => s.file);
 		}
 
 		this.renderResults();
+	}
+
+	private getAliases(file: TFile): string[] {
+		const cache = this.app.metadataCache.getFileCache(file);
+		const aliases = cache?.frontmatter?.aliases || cache?.frontmatter?.alias;
+		if (!aliases) {
+			return [];
+		}
+		return (Array.isArray(aliases) ? aliases : [aliases]).filter((a): a is string => typeof a === "string");
 	}
 
 	renderResults() {
