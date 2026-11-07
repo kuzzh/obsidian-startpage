@@ -14,6 +14,15 @@ const PLACEHOLDER_REGEX = /\{\{(date|time|datetime)(?::([^}]*))?\}\}/g;
 const createMoment = moment as unknown as (input?: Date) => { format(format?: string): string };
 
 export class NewNoteUtil {
+	static sanitizeTitle(raw: string): string {
+		const sanitized = raw
+			.replace(ILLEGAL_FILENAME_CHARS, "-")
+			.replace(/\s+/g, " ")
+			.replace(/^[\s.]+/, "")
+			.replace(/[\s.]+$/, "");
+		return sanitized;
+	}
+
 	static renderTitle(template: string, now: Date = new Date()): string {
 		const source = template && template.trim() ? template : FALLBACK_TITLE;
 
@@ -32,13 +41,7 @@ export class NewNoteUtil {
 			return createMoment(now).format(DEFAULT_DATE_FORMAT);
 		});
 
-		const sanitized = rendered
-			.replace(ILLEGAL_FILENAME_CHARS, "-")
-			.replace(/\s+/g, " ")
-			.replace(/^[\s.]+/, "")
-			.replace(/[\s.]+$/, "");
-
-		return sanitized || FALLBACK_TITLE;
+		return NewNoteUtil.sanitizeTitle(rendered) || FALLBACK_TITLE;
 	}
 
 	static async ensureFolder(app: App, folderPath: string): Promise<TFolder | null> {
@@ -75,8 +78,11 @@ export class NewNoteUtil {
 		return currentFolder;
 	}
 
-	static async createNote(app: App, plugin: StartPagePlugin): Promise<TFile | null> {
-		const baseName = NewNoteUtil.renderTitle(plugin.settings.newNoteTitleTemplate);
+	static async createNote(app: App, plugin: StartPagePlugin, titleOverride?: string): Promise<TFile | null> {
+		// 搜索弹窗等入口会传入明确标题；清洗为空时回退到标题模板，保持与新建按钮一致
+		const baseName = titleOverride
+			? NewNoteUtil.sanitizeTitle(titleOverride) || NewNoteUtil.renderTitle(plugin.settings.newNoteTitleTemplate)
+			: NewNoteUtil.renderTitle(plugin.settings.newNoteTitleTemplate);
 
 		const folder = await NewNoteUtil.ensureFolder(app, plugin.settings.newNoteFolderPath);
 		if (!folder) {

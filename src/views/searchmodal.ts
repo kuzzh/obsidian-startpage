@@ -3,6 +3,7 @@ import SvgUtil from "@/utils/svgutil";
 import { t } from "@/i18n";
 import { App, Modal, SearchComponent, TFile } from "obsidian";
 import StartPagePlugin from "@/main";
+import { NewNoteUtil } from "@/utils/newnoteutil";
 import { VIEW_TYPE_START_PAGE } from "@/views/startpageview";
 
 export default class SearchModal extends Modal {
@@ -281,19 +282,12 @@ export default class SearchModal extends Modal {
 
 	async createNewNote(noteName: string) {
 		try {
-			const sanitizedName = noteName.replace(/[\\/:*?"<>|]/g, '');
-			const fileName = `${sanitizedName}.md`;
-
-			const existingFile = this.app.vault.getAbstractFileByPath(fileName);
-			if (existingFile) {
-				if (existingFile instanceof TFile) {
-					await this.app.workspace.getLeaf().openFile(existingFile);
-				}
-			} else {
-				const newFile = await this.app.vault.create(fileName, '');
-				await this.app.workspace.getLeaf().openFile(newFile);
+			// 复用新建笔记工具，尊重标题模板/目标目录/重名策略设置，与主页新建按钮行为一致
+			const file = await NewNoteUtil.createNote(this.app, this.plugin, noteName);
+			if (!file) {
+				return;
 			}
-
+			await this.app.workspace.getLeaf().openFile(file);
 			this.close();
 		} catch (error) {
 			console.error('Failed to create new note:', error);
