@@ -18,7 +18,7 @@ export default class NoteSuggestModal extends SuggestModal<TFile> {
 		el.setText(file.path);
 	}
 
-	onChooseSuggestion(item: TFile, evt: MouseEvent | KeyboardEvent) {
+	onChooseSuggestion(item: TFile, _evt: MouseEvent | KeyboardEvent) {
 		this.onChooseItem(item);
 	}
 }

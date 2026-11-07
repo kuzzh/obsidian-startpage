@@ -33,11 +33,11 @@ export default class FooterTextUtil {
         }
 
         try {
-            let response = await requestUrl(QUOTE_API_URL_ZH,);
+            const response = await requestUrl(QUOTE_API_URL_ZH,);
 
             if (response.status === 200) {
-                let result = await response.json;
-                let text = `${result.data.content} - ${result.data.origin.author}`;
+                const result = await response.json;
+                const text = `${result.data.content} - ${result.data.origin.author}`;
                 settings.todayRandomZhFooterText = `${today}|${text}`;
                 plugin.saveSettings();
                 return text;
@@ -57,11 +57,11 @@ export default class FooterTextUtil {
             return settings.todayRandomEnFooterText.split("|")[1];
         }
         try {
-            let response = await requestUrl(QUOTE_API_URL_EN);
+            const response = await requestUrl(QUOTE_API_URL_EN);
 
             if (response.status === 200) {
-                let result = await response.json;
-                let text = `${result[0].q} - ${result[0].a}`;
+                const result = await response.json;
+                const text = `${result[0].q} - ${result[0].a}`;
                 settings.todayRandomEnFooterText = `${today}|${text}`;
                 plugin.saveSettings();
                 return text;

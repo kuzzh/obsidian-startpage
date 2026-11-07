@@ -19,7 +19,7 @@ export default class FolderSuggestModal extends SuggestModal<TFolder> {
 		el.setText(folder.path || "/");
 	}
 
-	onChooseSuggestion(item: TFolder, evt: MouseEvent | KeyboardEvent) {
+	onChooseSuggestion(item: TFolder, _evt: MouseEvent | KeyboardEvent) {
 		this.onChooseItem(item);
 	}
 }

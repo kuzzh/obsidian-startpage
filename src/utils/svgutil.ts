@@ -243,11 +243,11 @@ export default class SvgUtil {
                 tag.attributes["stroke-linejoin"] = tag.attributes["stroke-linejoin"] || "round";
             }
 
-            for (let [key, value] of Object.entries(tag.attributes)) {
+            for (const [key, value] of Object.entries(tag.attributes)) {
                 if (value === undefined) continue;
-                if (typeof value === "number") value = value.toString();
+                const valueStr = typeof value === "number" ? value.toString() : value;
 
-                element.setAttribute(key, value);
+                element.setAttribute(key, valueStr);
             }
 
             svg.appendChild(element);

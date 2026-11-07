@@ -66,7 +66,7 @@ export default class TabFoldersModal extends Modal {
 			return;
 		}
 
-		this.plugin.settings.tabFolderPaths.forEach((folderPath, index) => {
+		this.plugin.settings.tabFolderPaths.forEach((folderPath, _index) => {
 			const folder = this.app.vault.getAbstractFileByPath(folderPath);
 
 			const listItem = list.createEl("li", { cls: "pinned-note-item" });

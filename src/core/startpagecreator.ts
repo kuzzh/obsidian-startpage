@@ -1,5 +1,5 @@
 import { ID_STAT_TOTAL_NOTES, ID_STAT_TODAY_EDITED, ID_STAT_TOTAL_SIZE } from "@/types";
-import { App, TFolder, TFile, Menu, Platform, Keymap, WorkspaceLeaf } from "obsidian";
+import { App, TFile, Menu, Keymap, WorkspaceLeaf } from "obsidian";
 import StartPagePlugin from "@/main";
 import { t } from "@/i18n";
 import { VIEW_TYPE_START_PAGE } from "@/views/startpageview";
@@ -144,7 +144,7 @@ export default class StartPageCreator {
 		this.searchBox = this.createElement("input", "search-box", "") as HTMLInputElement;
 		this.searchBox.type = "text";
 		this.searchBox.placeholder = t("search_placeholder");
-		this.searchBox.addEventListener("click", (e) => {
+		this.searchBox.addEventListener("click", () => {
 			this.showSearchModal();
 		});
 		

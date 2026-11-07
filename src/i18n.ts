@@ -8,12 +8,10 @@ const languages: Record<string, LocaleStrings> = {
   zh
 };
 
-let currentLang = "en";
 let currentStrings = en;
 
 export function setLocale(lang: string) {
   if (languages[lang]) {
-    currentLang = lang;
     currentStrings = languages[lang];
     return;
   }
@@ -21,7 +19,6 @@ export function setLocale(lang: string) {
   // Obsidian 可能返回 zh-TW 等变体，需回退到基础语言而非英文
   const base = lang.split("-")[0];
   if (languages[base]) {
-    currentLang = base;
     currentStrings = languages[base];
   }
 }

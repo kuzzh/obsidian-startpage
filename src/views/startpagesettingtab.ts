@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting, Platform, TextComponent, ToggleComponent, Notice, TFolder, ButtonComponent } from "obsidian";
+import { App, PluginSettingTab, Setting, Platform, TextComponent, ToggleComponent, TFolder } from "obsidian";
 import StartPagePlugin from "@/main";
 import { VIEW_TYPE_START_PAGE, StartPageView } from "@/views/startpageview";
 import { t } from "@/i18n";
@@ -206,8 +206,7 @@ export class StartPageSettingTab extends PluginSettingTab {
             .setName(t("new_note_title_template"))
             .setDesc(t("new_note_title_template_desc"));
 
-        let previewEl: HTMLElement;
-
+        // 回调仅在初始化完成后触发，闭包引用后置声明是安全的
         templateSetting.addText((text) => {
             text.setPlaceholder(t("new_note_title_template_placeholder"));
             text.setValue(this.plugin.settings.newNoteTitleTemplate);
@@ -218,7 +217,7 @@ export class StartPageSettingTab extends PluginSettingTab {
             });
         });
 
-        previewEl = containerEl.createDiv({ cls: "new-note-template-preview" });
+        const previewEl = containerEl.createDiv({ cls: "new-note-template-preview" });
         this.updateNewNotePreview(previewEl);
 
         const folderSetting = new Setting(containerEl)
@@ -426,7 +425,6 @@ export class StartPageSettingTab extends PluginSettingTab {
 				});
 			});
 
-		const folderCount = this.plugin.settings.tabFolderPaths.length;
 		new Setting(containerEl)
 			.setName(t("folder_tabs_settings"))
 			.setDesc(t("folder_tabs_settings_desc"))

@@ -3,6 +3,7 @@ import StartPagePlugin from "@/main";
 import { t } from "@/i18n";
 import SvgUtil from "@/utils/svgutil";
 import { MyUtil } from "@/utils/myutil";
+import NoteSuggestModal from "@/views/notesuggestmodal";
 
 export default class PinnedNotesModal extends Modal {
 	private plugin: StartPagePlugin;
@@ -28,7 +29,6 @@ export default class PinnedNotesModal extends Modal {
 			.setDesc(t("pinned_notes_select_desc"))
 			.addButton((button) => {
 				button.setButtonText(t("pinned_notes_select_button")).onClick(() => {
-					const NoteSuggestModal = require("@/views/notesuggestmodal").default;
 					new NoteSuggestModal(this.app, async (file: any) => {
 						if (!this.plugin.settings.pinnedNotes.includes(file.path)) {
 							this.plugin.settings.pinnedNotes.push(file.path);

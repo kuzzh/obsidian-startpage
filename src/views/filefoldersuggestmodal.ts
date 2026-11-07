@@ -1,4 +1,4 @@
-import { App, SuggestModal, TAbstractFile, TFile, TFolder } from "obsidian";
+import { App, SuggestModal, TAbstractFile, TFolder } from "obsidian";
 
 export default class FileFolderSuggestModal extends SuggestModal<TAbstractFile> {
 	onChooseItem: (item: TAbstractFile) => void;
@@ -34,7 +34,7 @@ export default class FileFolderSuggestModal extends SuggestModal<TAbstractFile> 
 		container.createSpan({ text: item.path });
 	}
 
-	onChooseSuggestion(item: TAbstractFile, evt: MouseEvent | KeyboardEvent) {
+	onChooseSuggestion(item: TAbstractFile, _evt: MouseEvent | KeyboardEvent) {
 		this.onChooseItem(item);
 	}
 }

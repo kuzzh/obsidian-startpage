@@ -1,4 +1,4 @@
-import { App, Modal, Setting, DropdownComponent } from "obsidian";
+import { App, Modal, Setting } from "obsidian";
 import StartPagePlugin from "@/main";
 import { t } from "@/i18n";
 import { SectionStyleSettings } from "@/types";
