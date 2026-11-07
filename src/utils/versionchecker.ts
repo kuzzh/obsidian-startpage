@@ -11,6 +11,10 @@ export class VersionChecker {
 	private static readonly GITHUB_API_URL = "https://api.github.com/repos/kuzzh/obsidian-startpage/releases/latest";
 	private static readonly GITHUB_RELEASE_URL = "https://github.com/kuzzh/obsidian-startpage/releases";
 	
+	static hasUpdate(currentVersion: string, latestVersion: string): boolean {
+		return this.compareVersions(latestVersion, currentVersion) > 0;
+	}
+
 	static async checkForUpdate(currentVersion: string): Promise<VersionInfo | null> {
 		try {
 			const response = await requestUrl({

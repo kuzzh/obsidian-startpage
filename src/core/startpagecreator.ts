@@ -2,11 +2,12 @@ import { ID_STAT_TOTAL_NOTES, ID_STAT_TODAY_EDITED, ID_STAT_TOTAL_SIZE } from "@
 import { App, TFolder, TFile, Menu, Platform, Keymap, WorkspaceLeaf } from "obsidian";
 import StartPagePlugin from "@/main";
 import { t } from "@/i18n";
-import { VIEW_TYPE_START_PAGE, StartPageView } from "@/views/startpageview";
+import { VIEW_TYPE_START_PAGE } from "@/views/startpageview";
 import FooterTextUtil from "@/utils/footertextutil";
 import SvgUtil from "@/utils/svgutil";
 import { MyUtil } from "@/utils/myutil";
 import { NewNoteUtil } from "@/utils/newnoteutil";
+import { VersionChecker } from "@/utils/versionchecker";
 import SearchModal from "@/views/searchmodal";
 
 declare module "obsidian" {
@@ -274,10 +275,10 @@ export default class StartPageCreator {
 						.setIcon("pin-off")
 						.onClick(async () => {
 							this.plugin.settings.pinnedNotes = this.plugin.settings.pinnedNotes.filter((path) => path !== note.path);
-							await this.plugin.saveSettings();
+								await this.plugin.saveSettings();
 
-							this.refreshStartPage();
-						});
+								MyUtil.refreshStartPage(this.app);
+							});
 				});
 
 				menu.showAtMouseEvent(event);
@@ -434,7 +435,7 @@ export default class StartPageCreator {
 							this.plugin.settings.tabFolderPaths =
 								this.plugin.settings.tabFolderPaths.filter((p) => p !== tab.folderPath);
 							this.plugin.saveSettings();
-							this.refreshStartPage();
+							MyUtil.refreshStartPage(this.app);
 						}
 					});
 					tabItem.appendChild(closeBtn);
@@ -675,16 +676,6 @@ export default class StartPageCreator {
 		return element;
 	}
 
-	private refreshStartPage(): void {
-		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_START_PAGE);
-		leaves.forEach((leaf) => {
-			if (leaf.view instanceof StartPageView) {
-				leaf.view.renderContent();
-				return;
-			}
-		});
-	}
-
 	private createRecentNotesLimitDropdown(): HTMLDivElement {
 		const dropdown = document.createElement("select");
 
@@ -703,7 +694,7 @@ export default class StartPageCreator {
 			const limit = parseInt(dropdown.value, 10);
 			this.plugin.settings.recentNotesLimit = limit;
 			this.plugin.saveSettings();
-			this.refreshStartPage();
+			MyUtil.refreshStartPage(this.app);
 		});
 
 		const label = document.createElement("label");
@@ -798,24 +789,11 @@ export default class StartPageCreator {
 	}
 
 	private hasUpdate(): boolean {
-		const currentVersion = this.plugin.manifest.version;
 		const latestVersion = this.plugin.settings.latestVersion;
-		
 		if (!latestVersion) {
 			return false;
 		}
-
-		const current = currentVersion.split(".").map(Number);
-		const latest = latestVersion.split(".").map(Number);
-
-		for (let i = 0; i < Math.max(current.length, latest.length); i++) {
-			const c = current[i] || 0;
-			const l = latest[i] || 0;
-			if (l > c) return true;
-			if (l < c) return false;
-		}
-
-		return false;
+		return VersionChecker.hasUpdate(this.plugin.manifest.version, latestVersion);
 	}
 
 	private createUpdateBadge(): HTMLElement {

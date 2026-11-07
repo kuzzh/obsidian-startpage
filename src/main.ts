@@ -4,6 +4,7 @@ import { StartPageSettingTab } from "@/views/startpagesettingtab";
 import { StartPageSettings, DEFAULT_SETTINGS } from "@/types";
 import { setLocale, t } from "@/i18n";
 import { VersionChecker } from "@/utils/versionchecker";
+import { MyUtil } from "@/utils/myutil";
 
 export default class StartPagePlugin extends Plugin {
 	settings: StartPageSettings;
@@ -254,12 +255,7 @@ export default class StartPagePlugin extends Plugin {
 					}
 					await this.saveSettings();
 
-					const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_START_PAGE);
-					leaves.forEach((leaf) => {
-						if (leaf.view instanceof StartPageView) {
-							leaf.view.renderContent();
-						}
-					});
+					MyUtil.refreshStartPage(this.app);
 				});
 		});
 	}
@@ -278,12 +274,7 @@ export default class StartPagePlugin extends Plugin {
 					}
 					await this.saveSettings();
 
-					const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_START_PAGE);
-					leaves.forEach((leaf) => {
-						if (leaf.view instanceof StartPageView) {
-							leaf.view.renderContent();
-						}
-					});
+					MyUtil.refreshStartPage(this.app);
 				});
 		});
 	}
@@ -308,12 +299,7 @@ export default class StartPagePlugin extends Plugin {
 				this.settings.lastVersionCheck = now;
 				await this.saveSettings();
 
-				const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_START_PAGE);
-				leaves.forEach((leaf) => {
-					if (leaf.view instanceof StartPageView) {
-						leaf.view.renderContent();
-					}
-				});
+				MyUtil.refreshStartPage(this.app);
 			} else {
 				this.settings.lastVersionCheck = now;
 				await this.saveSettings();
