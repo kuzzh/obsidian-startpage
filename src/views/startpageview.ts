@@ -82,6 +82,11 @@ export class StartPageView extends ItemView {
 		return true;
 	}
 
+	// 供弹窗关闭后恢复主页焦点（任意键搜索依赖容器持有焦点）
+	focusContainer(): void {
+		this.startPageCreator?.focusContainer();
+	}
+
 	async onOpen() {
 		await this.renderContent();
 

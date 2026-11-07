@@ -4,7 +4,7 @@ import { t } from "@/i18n";
 import { App, Modal, prepareFuzzySearch, SearchComponent, TFile } from "obsidian";
 import StartPagePlugin from "@/main";
 import { NewNoteUtil } from "@/utils/newnoteutil";
-import { VIEW_TYPE_START_PAGE } from "@/views/startpageview";
+import { StartPageView, VIEW_TYPE_START_PAGE } from "@/views/startpageview";
 
 export default class SearchModal extends Modal {
 	private searchComponent: SearchComponent;
@@ -87,6 +87,13 @@ export default class SearchModal extends Modal {
 	onClose() {
 		const { contentEl } = this;
 		contentEl.empty();
+		// Obsidian 的 Modal 会把键盘作用域的 tabFocusContainerEl 指向弹窗容器且不清理，
+		// 导致关闭后对主页容器的任何聚焦都被核心 blur 掉，任意键搜索失效
+		(this.scope as unknown as { setTabFocusContainerEl: (el: Element | null) => void }).setTabFocusContainerEl(null);
+		const view = this.app.workspace.getActiveViewOfType(StartPageView);
+		if (view) {
+			view.focusContainer();
+		}
 	}
 
 	updateCaseSensitiveButton(button: HTMLElement) {

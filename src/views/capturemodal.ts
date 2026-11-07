@@ -1,6 +1,7 @@
 import { App, ButtonComponent, Modal, TextComponent } from "obsidian";
 import StartPagePlugin from "@/main";
 import { DailyNoteUtil } from "@/utils/dailynoteutil";
+import { StartPageView } from "@/views/startpageview";
 import { t } from "@/i18n";
 
 export default class CaptureModal extends Modal {
@@ -10,6 +11,15 @@ export default class CaptureModal extends Modal {
 	constructor(app: App, plugin: StartPagePlugin) {
 		super(app);
 		this.plugin = plugin;
+	}
+
+	onClose() {
+		// 同 SearchModal：清理 tabFocusContainerEl 污染并恢复主页焦点
+		(this.scope as unknown as { setTabFocusContainerEl: (el: Element | null) => void }).setTabFocusContainerEl(null);
+		const view = this.app.workspace.getActiveViewOfType(StartPageView);
+		if (view) {
+			view.focusContainer();
+		}
 	}
 
 	onOpen() {

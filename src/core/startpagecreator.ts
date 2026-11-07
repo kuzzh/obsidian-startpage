@@ -318,6 +318,27 @@ export default class StartPageCreator {
 
 				menu.showAtMouseEvent(event);
 			});
+		} else {
+			// 最近/文件夹列表右键快捷置顶，提升添加置顶的可发现性
+			noteItem.addEventListener("contextmenu", (event) => {
+				event.preventDefault();
+				event.stopPropagation();
+
+				const menu = new Menu();
+				menu.addItem((item) => {
+					item.setTitle(t("add_to_pinned_notes"))
+						.setIcon("pin")
+						.onClick(async () => {
+							if (!this.plugin.settings.pinnedNotes.includes(note.path)) {
+								this.plugin.settings.pinnedNotes.push(note.path);
+								await this.plugin.saveSettings();
+								MyUtil.refreshStartPage(this.app);
+							}
+						});
+				});
+
+				menu.showAtMouseEvent(event);
+			});
 		}
 
 		const noteIcon = this.createElement("div", "note-icon");

@@ -107,6 +107,10 @@ async function main() {
 		return finish();
 	}
 
+	// Hot Reload 会在同步后自行重载插件并 detach 启动页 leaf，
+	// 先等它完成，再执行后续手动 reload，避免竞态导致断言期间 leaf 消失
+	await sleep(2500);
+
 	// ---- 3. CDP 实例 ----
 	await ensureCdpInstance();
 	const browser = await chromium.connectOverCDP(CDP_URL);
