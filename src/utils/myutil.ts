@@ -1,6 +1,6 @@
 import { t } from "../i18n";
 import { StartPageSettings } from "@/types";
-import { App, TFile } from "obsidian";
+import { App, TFile, moment } from "obsidian";
 import { StartPageView, VIEW_TYPE_START_PAGE } from "@/views/startpageview";
 
 export class MyUtil {
@@ -44,7 +44,8 @@ export class MyUtil {
 			return t("days_ago").replace("{days}", days.toString());
 		}
 
-		return date.toLocaleDateString("zh-CN", {
+		// 跟随 Obsidian 当前界面语言，而非硬编码区域
+		return date.toLocaleDateString(moment.locale(), {
 			year: "numeric",
 			month: "2-digit",
 			day: "2-digit",
