@@ -105,7 +105,8 @@ A modern startup homepage plugin for Obsidian that provides a beautiful dashboar
 2. **View Statistics**: The top of the homepage displays vault statistics (total notes, today's edits, total storage space).
 3. **Quick Create**: Click the floating "New Note" button in the bottom right corner to create a new note using your configured title template and folder.
 4. **Access Notes**: Click on pinned notes or recent notes to directly open the corresponding notes.
-5. **Context Menu**: Right-click on files in the file explorer to quickly add or remove pinned notes.
+5. **Context Menu**: Right-click on files in the file explorer to quickly add or remove pinned notes; right-click recent notes to pin them.
+6. **Quick Capture**: Click the pencil button above the new-note button to append a timestamped line to today's daily note.
 
 ### Setting Pinned Notes
 
@@ -117,7 +118,7 @@ A modern startup homepage plugin for Obsidian that provides a beautiful dashboar
 6. Alternatively, right-click any file in the file explorer and select "Add to pinned notes".
 7. You can also import all your bookmarked notes by clicking "Import bookmarks" in the settings.
 8. Click the "Manage" button in the pinned notes area on the homepage to quickly jump to the settings page.
-9. Reorder pinned notes using the up/down arrow buttons in the settings.
+9. Reorder pinned notes by dragging them into place on the homepage, or with the up/down arrow buttons in the settings.
 
 ### Custom Settings
 
@@ -213,6 +214,7 @@ npm run build
   - Supports unlimited pinned notes
   - One-click management button to quickly jump to settings page
   - Right-click on any pinned note to remove it from pinned list
+  - Drag and drop pinned notes to reorder them
   - Shows file icon, title, folder path, and modification time
   - Click to open the note in the current tab or reveal if already open
 - **Recent Notes Section**:
