@@ -159,6 +159,7 @@
     "tab_folder_recursive_desc": "递归包含所有子文件夹中的文件",
     "add_to_tab_folders": "显示在启动首页标签页",
     "tab_pinned": "置顶",
+    "pinned_empty_hint": "暂无置顶笔记，右键任意笔记即可置顶",
     "new_note_settings_heading": "新建笔记",
     "new_note_title_template": "标题模板",
     "new_note_title_template_desc": "新建笔记的标题模板，支持 {{date}}、{{date:格式}}、{{time}}、{{time:格式}} 和 {{datetime:格式}}，其中“格式”使用 moment.js 占位符（如 {{date:YYYYMMDD}}）。文件名非法字符（/ \\ : * ? \" < > |）会被替换为“-”。",

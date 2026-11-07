@@ -369,19 +369,26 @@ export default class StartPageCreator {
 		const notesList = this.createElement("div", "notes-list");
 		if (styleSettings.listGap) notesList.style.gap = styleSettings.listGap;
 
-		if (notes) {
+		if (notes && notes.length > 0) {
 			notes.forEach((note) => {
 				const noteItem = this.createNoteItem(note, isPinned);
 				if (noteItem) {
 					notesList.appendChild(noteItem);
 				}
 			});
+		} else if (isPinned) {
+			notesList.appendChild(this.createPinnedEmptyState());
 		}
 
 		section.appendChild(sectionHeader);
 		section.appendChild(notesList);
 
 		return section;
+	}
+
+	private createPinnedEmptyState(): HTMLElement {
+		const empty = this.createElement("div", "notes-list-empty", t("pinned_empty_hint"));
+		return empty;
 	}
 
 		private createContentGrid(): HTMLElement {

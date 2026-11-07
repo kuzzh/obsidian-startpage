@@ -4,7 +4,6 @@ import { StartPageSettingTab } from "@/views/startpagesettingtab";
 import { StartPageSettings, DEFAULT_SETTINGS } from "@/types";
 import { setLocale, t } from "@/i18n";
 import { VersionChecker } from "@/utils/versionchecker";
-import "@/types";
 
 export default class StartPagePlugin extends Plugin {
 	settings: StartPageSettings;
@@ -48,7 +47,7 @@ export default class StartPagePlugin extends Plugin {
 		this.registerEvent(
 			this.app.workspace.on("active-leaf-change", (leaf: WorkspaceLeaf | null) => {
 				if (this.settings.replaceNewTab) {
-					if (leaf && !leaf.view.getViewType().startsWith(VIEW_TYPE_START_PAGE)) {
+					if (leaf && leaf.view.getViewType() !== VIEW_TYPE_START_PAGE) {
 						const state = leaf.getViewState();
 						if (state.type === "empty" && !state.state?.file) {
 							this.replaceWithStartPage(leaf);
