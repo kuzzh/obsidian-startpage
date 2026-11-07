@@ -58,6 +58,8 @@ export default class StartPageCreator {
 		private pinnedNotes: TFile[] | null = null;
 		private recentNotes: TFile[] | null = null;
 		private tabFolderItems: { folderPath: string; folderName: string; files: TFile[] }[] | null = null;
+	private resizeObserver: ResizeObserver | null = null;
+	private resizeHandler: (() => void) | null = null;
 
 		constructor(app: App, plugin: StartPagePlugin, container: Element) {
 		this.app = app;
@@ -97,6 +99,9 @@ export default class StartPageCreator {
 
 	public destroy(): void {
 		this.removeKeyListener();
+		this.resizeObserver?.disconnect();
+		this.resizeObserver = null;
+		this.resizeHandler = null;
 	}
 
 		private initData(
@@ -478,8 +483,13 @@ export default class StartPageCreator {
 				this.updateScrollButtons(tabList, scrollLeft, scrollRight);
 			};
 
-			const resizeObserver = new ResizeObserver(updateButtons);
-			resizeObserver.observe(tabList);
+			// 单例 observer，每次渲染仅重挂回调并重定向观察目标，避免重建泄漏
+			if (!this.resizeObserver) {
+				this.resizeObserver = new ResizeObserver(() => this.resizeHandler?.());
+			}
+			this.resizeObserver.disconnect();
+			this.resizeHandler = updateButtons;
+			this.resizeObserver.observe(tabList);
 
 			tabList.addEventListener("scroll", updateButtons);
 			scrollLeft.addEventListener("click", () => {

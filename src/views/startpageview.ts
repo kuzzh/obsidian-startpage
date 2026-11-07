@@ -1,4 +1,4 @@
-import { App, ItemView, TFile, TFolder, Menu, EventRef, Platform } from "obsidian";
+import { App, ItemView, TFile, TFolder, Menu, Platform } from "obsidian";
 import StartPagePlugin from "@/main";
 import { t } from "@/i18n";
 import StartPageCreator from "@/core/startpagecreator";
@@ -25,10 +25,6 @@ function findScroller(container: HTMLElement, key: string): HTMLElement | null {
 
 export class StartPageView extends ItemView {
 	plugin: StartPagePlugin;
-	private fileChangeEventRef: EventRef;
-	private fileCreateEventRef: EventRef;
-	private fileDeleteEventRef: EventRef;
-	private fileRenameEventRef: EventRef;
 	private refreshTimer: number | null = null;
 	private readonly REFRESH_INTERVAL = 60000;
 	private startPageCreator: StartPageCreator;
@@ -90,33 +86,42 @@ export class StartPageView extends ItemView {
 			}),
 		);
 
-		this.fileChangeEventRef = this.app.vault.on("modify", () => {
-			this.renderContent();
-			if (this.app.workspace.getActiveViewOfType(StartPageView) === this) {
-				this.startPageCreator?.focusContainer();
-			}
-		});
+		// registerEvent 随组件卸载自动清理，避免 onOpen 中途异常时事件泄漏
+		this.registerEvent(
+			this.app.vault.on("modify", () => {
+				this.renderContent();
+				if (this.app.workspace.getActiveViewOfType(StartPageView) === this) {
+					this.startPageCreator?.focusContainer();
+				}
+			}),
+		);
 
-		this.fileCreateEventRef = this.app.vault.on("create", () => {
-			this.renderContent();
-			if (this.app.workspace.getActiveViewOfType(StartPageView) === this) {
-				this.startPageCreator?.focusContainer();
-			}
-		});
+		this.registerEvent(
+			this.app.vault.on("create", () => {
+				this.renderContent();
+				if (this.app.workspace.getActiveViewOfType(StartPageView) === this) {
+					this.startPageCreator?.focusContainer();
+				}
+			}),
+		);
 
-		this.fileDeleteEventRef = this.app.vault.on("delete", () => {
-			this.renderContent();
-			if (this.app.workspace.getActiveViewOfType(StartPageView) === this) {
-				this.startPageCreator?.focusContainer();
-			}
-		});
+		this.registerEvent(
+			this.app.vault.on("delete", () => {
+				this.renderContent();
+				if (this.app.workspace.getActiveViewOfType(StartPageView) === this) {
+					this.startPageCreator?.focusContainer();
+				}
+			}),
+		);
 
-		this.fileRenameEventRef = this.app.vault.on("rename", () => {
-			this.renderContent();
-			if (this.app.workspace.getActiveViewOfType(StartPageView) === this) {
-				this.startPageCreator?.focusContainer();
-			}
-		});
+		this.registerEvent(
+			this.app.vault.on("rename", () => {
+				this.renderContent();
+				if (this.app.workspace.getActiveViewOfType(StartPageView) === this) {
+					this.startPageCreator?.focusContainer();
+				}
+			}),
+		);
 
 		this.registerDomEvent(this.containerEl, "contextmenu", (evt: MouseEvent) => {
 			const menu = new Menu();
@@ -139,23 +144,12 @@ export class StartPageView extends ItemView {
 		if (this.startPageCreator) {
 			this.startPageCreator.destroy();
 		}
-		if (this.fileChangeEventRef) {
-			this.app.vault.offref(this.fileChangeEventRef);
-		}
-		if (this.fileCreateEventRef) {
-			this.app.vault.offref(this.fileCreateEventRef);
-		}
-		if (this.fileDeleteEventRef) {
-			this.app.vault.offref(this.fileDeleteEventRef);
-		}
-		if (this.fileRenameEventRef) {
-			this.app.vault.offref(this.fileRenameEventRef);
-		}
 		this.clearRefreshTimer();
 	}
 
 	private clearRefreshTimer() {
 		if (this.refreshTimer !== null) {
+			// id 即 window 定时器 id；组件卸载时 registerInterval 也会兜底清理
 			window.clearInterval(this.refreshTimer);
 			this.refreshTimer = null;
 		}
@@ -170,9 +164,12 @@ export class StartPageView extends ItemView {
 		});
 
 		if (needsRefresh) {
-			this.refreshTimer = window.setInterval(() => {
-				this.updateModifiedTimes();
-			}, this.REFRESH_INTERVAL);
+			// registerInterval 随组件卸载自动清理，异常路径不泄漏
+			this.refreshTimer = this.registerInterval(
+				window.setInterval(() => {
+					this.updateModifiedTimes();
+				}, this.REFRESH_INTERVAL),
+			);
 		}
 	}
 
