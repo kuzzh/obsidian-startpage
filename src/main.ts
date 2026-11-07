@@ -6,6 +6,35 @@ import { setLocale, t } from "@/i18n";
 import { VersionChecker } from "@/utils/versionchecker";
 import { MyUtil } from "@/utils/myutil";
 
+// 以 DEFAULT_SETTINGS 的字段类型为准做校验，新增设置项无需改动加载逻辑
+function isTypeMatch(value: unknown, fallback: unknown): boolean {
+	if (value === undefined || value === null) return false;
+	if (Array.isArray(fallback)) return Array.isArray(value);
+	if (typeof fallback === "object") return typeof value === "object" && !Array.isArray(value);
+	return typeof value === typeof fallback;
+}
+
+function mergeSettings<T extends object>(
+	defaults: T,
+	saved: Record<string, unknown>,
+	validators: Record<string, (v: unknown) => boolean> = {},
+): T {
+	const result = { ...defaults } as Record<string, unknown>;
+	for (const key of Object.keys(defaults)) {
+		const fallback = (defaults as Record<string, unknown>)[key];
+		const value = saved[key];
+		if (!isTypeMatch(value, fallback)) continue;
+		if (validators[key] && !validators[key](value)) continue;
+		// 嵌套对象（如分区样式）按字段合并，保留未覆盖的默认值
+		if (fallback && typeof fallback === "object" && !Array.isArray(fallback) && value && typeof value === "object" && !Array.isArray(value)) {
+			result[key] = mergeSettings(fallback as object, value as Record<string, unknown>, validators);
+		} else {
+			result[key] = value;
+		}
+	}
+	return result as T;
+}
+
 export default class StartPagePlugin extends Plugin {
 	settings: StartPageSettings;
 	backupDir: string = this.manifest.dir + "/backup";
@@ -76,51 +105,19 @@ export default class StartPagePlugin extends Plugin {
 		await this.backupSettings();
 
 		const savedData = await this.loadData();
+		const saved = savedData && typeof savedData === "object" ? (savedData as Record<string, unknown>) : {};
+		this.settings = mergeSettings(DEFAULT_SETTINGS, saved, {
+			// 枚举型字段需限定取值范围
+			showTitleNavigationBar: (v) => ["default", "show", "hide"].includes(v as string),
+			newNoteConflict: (v) => ["duplicate", "open"].includes(v as string),
+		});
 
-		if (savedData && typeof savedData === "object") {
-			this.settings = {
-				...DEFAULT_SETTINGS,
-				...savedData,
-				pinnedNotes: Array.isArray(savedData.pinnedNotes) ? savedData.pinnedNotes : [],
-				recentNotesLimit: typeof savedData.recentNotesLimit === "number" ? savedData.recentNotesLimit : 10,
-				includeAllFilesInRecent: typeof savedData.includeAllFilesInRecent === "boolean" ? savedData.includeAllFilesInRecent : true,
-				replaceNewTab: typeof savedData.replaceNewTab === "boolean" ? savedData.replaceNewTab : true,
-				openNotesInNewTab: typeof savedData.openNotesInNewTab === "boolean" ? savedData.openNotesInNewTab : false,
-				showTitleNavigationBar: ["default", "show", "hide"].includes(savedData.showTitleNavigationBar) ? savedData.showTitleNavigationBar : "default",
-				showCustomFooterText: typeof savedData.showCustomFooterText === "boolean" ? savedData.showCustomFooterText : false,
-				useRandomFooterText: typeof savedData.useRandomFooterText === "boolean" ? savedData.useRandomFooterText : false,
-				todayRandomEnFooterText: typeof savedData.todayRandomEnFooterText === "string" ? savedData.todayRandomEnFooterText : "",
-				todayRandomZhFooterText: typeof savedData.todayRandomZhFooterText === "string" ? savedData.todayRandomZhFooterText : "",
-				customFooterText: typeof savedData.customFooterText === "string" ? savedData.customFooterText : "",
-				scrollPosition: typeof savedData.scrollPosition === "number" ? savedData.scrollPosition : 0,
-				scrollPositionKey: typeof savedData.scrollPositionKey === "string" ? savedData.scrollPositionKey : "",
-				showStatBar: typeof savedData.showStatBar === "boolean" ? savedData.showStatBar : true,
-				lastVersionCheck: typeof savedData.lastVersionCheck === "number" ? savedData.lastVersionCheck : 0,
-				latestVersion: typeof savedData.latestVersion === "string" ? savedData.latestVersion : "",
-				checkForUpdates: typeof savedData.checkForUpdates === "boolean" ? savedData.checkForUpdates : DEFAULT_SETTINGS.checkForUpdates,
-				searchExcludePaths: Array.isArray(savedData.searchExcludePaths)
-						? savedData.searchExcludePaths
-						: (Array.isArray(savedData.excludeList) ? savedData.excludeList : []),
-					searchExcludeExtensions: Array.isArray(savedData.searchExcludeExtensions)
-						? savedData.searchExcludeExtensions
-						: (Array.isArray(savedData.excludeExtensions) ? savedData.excludeExtensions : []),
-				pinnedNotesStyle:
-					typeof savedData.pinnedNotesStyle === "object"
-						? { ...DEFAULT_SETTINGS.pinnedNotesStyle, ...savedData.pinnedNotesStyle }
-						: { ...DEFAULT_SETTINGS.pinnedNotesStyle },
-				recentNotesStyle:
-					typeof savedData.recentNotesStyle === "object"
-						? { ...DEFAULT_SETTINGS.recentNotesStyle, ...savedData.recentNotesStyle }
-						: { ...DEFAULT_SETTINGS.recentNotesStyle },
-				backupMaxFiles: typeof savedData.backupMaxFiles === "number" ? savedData.backupMaxFiles : DEFAULT_SETTINGS.backupMaxFiles,
-					tabFolderPaths: Array.isArray(savedData.tabFolderPaths) ? savedData.tabFolderPaths : [],
-					tabFolderRecursive: typeof savedData.tabFolderRecursive === "boolean" ? savedData.tabFolderRecursive : true,
-					newNoteTitleTemplate: typeof savedData.newNoteTitleTemplate === "string" ? savedData.newNoteTitleTemplate : DEFAULT_SETTINGS.newNoteTitleTemplate,
-					newNoteFolderPath: typeof savedData.newNoteFolderPath === "string" ? savedData.newNoteFolderPath : DEFAULT_SETTINGS.newNoteFolderPath,
-					newNoteConflict: ["duplicate", "open"].includes(savedData.newNoteConflict) ? savedData.newNoteConflict : DEFAULT_SETTINGS.newNoteConflict,
-			};
-		} else {
-			this.settings = { ...DEFAULT_SETTINGS };
+		// 旧版字段迁移
+		if (this.settings.searchExcludePaths.length === 0 && Array.isArray(saved.excludeList)) {
+			this.settings.searchExcludePaths = saved.excludeList as string[];
+		}
+		if (this.settings.searchExcludeExtensions.length === 0 && Array.isArray(saved.excludeExtensions)) {
+			this.settings.searchExcludeExtensions = saved.excludeExtensions as string[];
 		}
 
 		await this.cleanupOldBackups();
