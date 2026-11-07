@@ -1,4 +1,4 @@
-import { App, ItemView, TFile, TFolder, Menu, Platform } from "obsidian";
+import { App, ItemView, TFile, TFolder, Menu, Platform, debounce } from "obsidian";
 import StartPagePlugin from "@/main";
 import { t } from "@/i18n";
 import StartPageCreator from "@/core/startpagecreator";
@@ -32,6 +32,8 @@ export class StartPageView extends ItemView {
 	private isRendering = false;
 	private renderPending = false;
 	private lastScroll: { key: string; top: number } | null = null;
+	private pendingVisibleRender = false;
+	private debouncedRender: () => void;
 
 	constructor(leaf: any, app: App, plugin: StartPagePlugin) {
 		super(leaf);
@@ -41,6 +43,15 @@ export class StartPageView extends ItemView {
 		this.navigation = true;
 		this.icon = "home";
 		this.contentEl.addClass("start-page-view");
+
+		// vault 事件风暴（初次索引对每个文件触发 create）下合并为一次渲染
+		this.debouncedRender = debounce(() => {
+			void this.renderContent().then(() => {
+				if (this.app.workspace.getActiveViewOfType(StartPageView) === this) {
+					this.startPageCreator?.focusContainer();
+				}
+			});
+		}, 500, true);
 
 		if (this.plugin.settings.showTitleNavigationBar === "show") {
 			this.showTitleNavigationBar(true);
@@ -81,47 +92,21 @@ export class StartPageView extends ItemView {
 		this.registerEvent(
 			this.app.workspace.on("active-leaf-change", (leaf) => {
 				if (leaf?.view instanceof StartPageView) {
+					// 后台期间积累的变更，回到前台时补一次渲染
+					if (leaf.view === this && this.pendingVisibleRender) {
+						this.pendingVisibleRender = false;
+						this.debouncedRender();
+					}
 					this.startPageCreator?.focusContainer();
 				}
 			}),
 		);
 
 		// registerEvent 随组件卸载自动清理，避免 onOpen 中途异常时事件泄漏
-		this.registerEvent(
-			this.app.vault.on("modify", () => {
-				this.renderContent();
-				if (this.app.workspace.getActiveViewOfType(StartPageView) === this) {
-					this.startPageCreator?.focusContainer();
-				}
-			}),
-		);
-
-		this.registerEvent(
-			this.app.vault.on("create", () => {
-				this.renderContent();
-				if (this.app.workspace.getActiveViewOfType(StartPageView) === this) {
-					this.startPageCreator?.focusContainer();
-				}
-			}),
-		);
-
-		this.registerEvent(
-			this.app.vault.on("delete", () => {
-				this.renderContent();
-				if (this.app.workspace.getActiveViewOfType(StartPageView) === this) {
-					this.startPageCreator?.focusContainer();
-				}
-			}),
-		);
-
-		this.registerEvent(
-			this.app.vault.on("rename", () => {
-				this.renderContent();
-				if (this.app.workspace.getActiveViewOfType(StartPageView) === this) {
-					this.startPageCreator?.focusContainer();
-				}
-			}),
-		);
+		this.registerEvent(this.app.vault.on("modify", () => this.handleVaultEvent()));
+		this.registerEvent(this.app.vault.on("create", () => this.handleVaultEvent()));
+		this.registerEvent(this.app.vault.on("delete", () => this.handleVaultEvent()));
+		this.registerEvent(this.app.vault.on("rename", () => this.handleVaultEvent()));
 
 		this.registerDomEvent(this.containerEl, "contextmenu", (evt: MouseEvent) => {
 			const menu = new Menu();
@@ -225,12 +210,44 @@ export class StartPageView extends ItemView {
 		if (!this.startPageCreator) {
 			this.startPageCreator = new StartPageCreator(this.app, this.plugin, container);
 		}
+		// 重建 DOM 会把内部列表滚回顶部，重建前记录、重建后恢复
+		const scrollState = this.captureScrollState(container);
 		const pinnedNotes = this.getTFiles(this.plugin.settings.pinnedNotes);
 		const recentNotes = this.getRecentNotes(this.plugin.settings.recentNotesLimit);
 		const tabFolderItems = this.getTabFolderItems();
 		await this.startPageCreator.createStartPage(pinnedNotes, recentNotes, tabFolderItems);
+		this.applyScrollState(container, scrollState);
 
 		this.startRefreshTimerIfNeeded(pinnedNotes, recentNotes);
+	}
+
+	private captureScrollState(container: HTMLElement): { key: string; top: number }[] {
+		const state: { key: string; top: number }[] = [];
+		container.querySelectorAll<HTMLElement>(".notes-list").forEach((el) => {
+			if (el.scrollTop > 0) state.push({ key: scrollerKey(el), top: el.scrollTop });
+		});
+		return state;
+	}
+
+	private applyScrollState(container: HTMLElement, state: { key: string; top: number }[]) {
+		for (const s of state) {
+			const el = findScroller(container, s.key);
+			if (el) el.scrollTop = s.top;
+		}
+	}
+
+	private isViewVisible(): boolean {
+		// 后台标签页的 leaf 为 display:none，offsetParent 为 null
+		return this.containerEl.offsetParent !== null;
+	}
+
+	private handleVaultEvent() {
+		// 后台标签页跳过重渲染，重新激活时再补一次（active-leaf-change 处理）
+		if (!this.isViewVisible()) {
+			this.pendingVisibleRender = true;
+			return;
+		}
+		this.debouncedRender();
 	}
 
 	private handleScrollEvent(e: Event) {
