@@ -93,6 +93,30 @@ export class StartPageSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
+			.setName(t("show_tabs_section"))
+			.setDesc(t("show_tabs_section_desc"))
+			.addToggle((toggle) => {
+				toggle.setValue(this.plugin.settings.showTabs);
+				toggle.onChange(async (value) => {
+					this.plugin.settings.showTabs = value;
+					await this.plugin.saveSettings();
+					MyUtil.refreshStartPage(this.app);
+				});
+			});
+
+		new Setting(containerEl)
+			.setName(t("show_recent_section"))
+			.setDesc(t("show_recent_section_desc"))
+			.addToggle((toggle) => {
+				toggle.setValue(this.plugin.settings.showRecentSection);
+				toggle.onChange(async (value) => {
+					this.plugin.settings.showRecentSection = value;
+					await this.plugin.saveSettings();
+					MyUtil.refreshStartPage(this.app);
+				});
+			});
+
+		new Setting(containerEl)
 			.setName(t("recent_notes_limit"))
 			.setDesc(t("recent_notes_limit_desc"))
 			.addDropdown((dropdown) => {

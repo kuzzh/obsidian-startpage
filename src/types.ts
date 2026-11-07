@@ -58,6 +58,8 @@ export interface StartPageSettings {
 	includeAllFilesInRecent: boolean;
 	recentNotesLimit: number;
 	showRecentAccessedNotes: boolean;
+	showTabs: boolean;
+	showRecentSection: boolean;
 	pinnedNotes: string[];
 	replaceNewTab: boolean;
 	openNotesInNewTab: boolean;
@@ -89,6 +91,8 @@ export const DEFAULT_SETTINGS: StartPageSettings = {
 	includeAllFilesInRecent: true,
 	recentNotesLimit: 10,
 	showRecentAccessedNotes: true,
+	showTabs: true,
+	showRecentSection: true,
 	pinnedNotes: [],
 		replaceNewTab: true,
 		openNotesInNewTab: false,

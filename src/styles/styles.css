@@ -224,6 +224,11 @@
 	min-height: 0;
 }
 
+/* 仅渲染一个板块时占满整行 */
+.start-page-container .content-grid.single-section {
+	grid-template-columns: 1fr;
+}
+
 /* 区块样式 */
 .start-page-container .section {
 	display: flex;

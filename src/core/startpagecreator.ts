@@ -400,14 +400,25 @@ export default class StartPageCreator {
 		private createContentGrid(): HTMLElement {
 			const contentGrid = this.createElement("div", "content-grid");
 
-			const tabContainer = this.createTabContainer();
-			tabContainer.classList.add("pinned-notes");
+			// 板块显隐开关：置顶与文件夹标签共用标签容器
+			const showTabs = this.plugin.settings.showTabs;
+			const showRecent = this.plugin.settings.showRecentSection;
+			if (showTabs) {
+				const tabContainer = this.createTabContainer();
+				tabContainer.classList.add("pinned-notes");
+				contentGrid.appendChild(tabContainer);
+			}
 
-			const recentSection = this.createNotesSection(t("recent_notes"), this.recentNotes, false, SvgUtil.createRecentNoteIcon());
-			recentSection.classList.add("recent-notes");
+			if (showRecent) {
+				const recentSection = this.createNotesSection(t("recent_notes"), this.recentNotes, false, SvgUtil.createRecentNoteIcon());
+				recentSection.classList.add("recent-notes");
+				contentGrid.appendChild(recentSection);
+			}
 
-			contentGrid.appendChild(tabContainer);
-			contentGrid.appendChild(recentSection);
+			// 只剩一个板块时占满整行，避免栅格留下半栏空白
+			if (showTabs !== showRecent) {
+				contentGrid.addClass("single-section");
+			}
 
 			return contentGrid;
 		}
@@ -465,7 +476,7 @@ export default class StartPageCreator {
 			tabs.forEach((tab, i) => {
 				const panel = this.createElement("div", `tab-panel${i === 0 ? " active" : ""}`);
 				panel.dataset.tabIndex = i.toString();
-				if (i === 0) {
+				if (tab.id === "pinned") {
 					// Pinned notes tab — reuse createNotesSection with isPinned=true for the "Manage" button
 					const section = this.createNotesSection(t("pinned_notes"), this.pinnedNotes, true, SvgUtil.createPinnedNoteIcon());
 					panel.appendChild(section);
@@ -503,14 +514,16 @@ export default class StartPageCreator {
 		}
 
 		private buildTabItems(): { id: string; label: string; notes: TFile[]; closable: boolean; folderPath?: string }[] {
-			const tabs: { id: string; label: string; notes: TFile[]; closable: boolean; folderPath?: string }[] = [
-				{
+			const tabs: { id: string; label: string; notes: TFile[]; closable: boolean; folderPath?: string }[] = [];
+
+			{
+				tabs.push({
 					id: "pinned",
 					label: t("tab_pinned"),
 					notes: this.pinnedNotes || [],
 					closable: false,
-				},
-			];
+				});
+			}
 
 			if (this.tabFolderItems) {
 				for (const item of this.tabFolderItems) {
