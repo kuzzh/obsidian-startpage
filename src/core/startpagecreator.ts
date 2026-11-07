@@ -1,5 +1,5 @@
 import { ID_STAT_TOTAL_NOTES, ID_STAT_TODAY_EDITED, ID_STAT_TOTAL_SIZE } from "@/types";
-import { App, TFile, Menu, Keymap, WorkspaceLeaf } from "obsidian";
+import { App, TFile, Menu, Keymap, WorkspaceLeaf, moment } from "obsidian";
 import StartPagePlugin from "@/main";
 import { t } from "@/i18n";
 import { VIEW_TYPE_START_PAGE } from "@/views/startpageview";
@@ -139,7 +139,10 @@ export default class StartPageCreator {
 
 		const logo = this.createElement("div", "logo");
 		const logoIcon = SvgUtil.createLogoIcon();
-		const logoText = this.createElement("span", "logo-text", "Start Page for Obsidian");
+		// 问候语替代默认标题占位，不额外占用一行
+		const logoText = this.plugin.settings.showGreeting
+			? this.createElement("span", "logo-text greeting", this.getGreetingText())
+			: this.createElement("span", "logo-text", "Start Page for Obsidian");
 
 		this.searchBox = this.createElement("input", "search-box", "") as HTMLInputElement;
 		this.searchBox.type = "text";
@@ -598,6 +601,17 @@ export default class StartPageCreator {
 			scrollLeft.classList.toggle("hidden", !hasOverflow || tabList.scrollLeft <= 1);
 			scrollRight.classList.toggle("hidden", !hasOverflow || tabList.scrollLeft >= tabList.scrollWidth - tabList.clientWidth - 2);
 		}
+
+		private getGreetingText(): string {
+		// 时间段问候 + 本地化长日期，随 moment.locale() 走界面语言
+		// Obsidian 对 moment 的类型声明是命名空间，需与 newnoteutil 相同的转换
+		const createMoment = moment as unknown as () => { format(format?: string): string; hour(): number };
+		const now = createMoment();
+		const hour = now.hour();
+		const key = hour < 5 ? "greeting_night" : hour < 12 ? "greeting_morning" : hour < 18 ? "greeting_afternoon" : "greeting_evening";
+		const dateStr = `${now.format("LL")} ${now.format("dddd")}`;
+		return `${t(key)} · ${dateStr}`;
+	}
 
 		private createMainContent(): HTMLElement {
 		const mainContent = this.createElement("main", "main-content");

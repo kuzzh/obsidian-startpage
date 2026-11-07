@@ -56,6 +56,17 @@
 	background-clip: text;
 }
 
+/* 问候语替代标题时保持低调，不喧宾夺主 */
+.start-page-container .logo-text.greeting {
+	font-size: 15px;
+	font-weight: 600;
+	background: none;
+	-webkit-background-clip: border-box;
+	background-clip: border-box;
+	-webkit-text-fill-color: var(--text-muted);
+	color: var(--text-muted);
+}
+
 .start-page-container .header-actions {
 	display: flex;
 	align-items: center;

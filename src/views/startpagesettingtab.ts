@@ -167,6 +167,18 @@ export class StartPageSettingTab extends PluginSettingTab {
 				});
 			});
 		new Setting(containerEl)
+			.setName(t("show_greeting"))
+			.setDesc(t("show_greeting_desc"))
+			.addToggle((toggle) => {
+				toggle.setValue(this.plugin.settings.showGreeting);
+				toggle.onChange(async (value) => {
+					this.plugin.settings.showGreeting = value;
+					await this.plugin.saveSettings();
+					MyUtil.refreshStartPage(this.app);
+				});
+			});
+
+		new Setting(containerEl)
 			.setName(t("show_stat_bar"))
 			.setDesc(t("show_stat_bar_desc"))
 			.addToggle((toggle) => {
