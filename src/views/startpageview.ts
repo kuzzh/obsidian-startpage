@@ -302,30 +302,22 @@ export class StartPageView extends ItemView {
 	}
 
 	getFilesFromFolder(folder: TFolder, recursive: boolean): TFile[] {
+		// 递归遍历 folder.children 而非全库扫描，复杂度与子树大小而非全库大小相关
 		const files: TFile[] = [];
-		const allFiles = recursive
-			? this.app.vault.getFiles()
-			: (folder.children.filter((child): child is TFile => child instanceof TFile));
+		const includeAll = this.plugin.settings.includeAllFilesInRecent;
 
-		if (recursive) {
-			for (const file of allFiles) {
-				if (file instanceof TFile && file.path.startsWith(folder.path + "/")) {
-					if (this.plugin.settings.includeAllFilesInRecent || file.extension === "md") {
-						if (!MyUtil.isFileExcluded(this.plugin.settings, file)) {
-							files.push(file);
-						}
+		const walk = (node: TFolder) => {
+			for (const child of node.children) {
+				if (child instanceof TFile) {
+					if ((includeAll || child.extension === "md") && !MyUtil.isFileExcluded(this.plugin.settings, child)) {
+						files.push(child);
 					}
+				} else if (recursive && child instanceof TFolder) {
+					walk(child);
 				}
 			}
-		} else {
-			for (const file of allFiles) {
-				if (this.plugin.settings.includeAllFilesInRecent || file.extension === "md") {
-					if (!MyUtil.isFileExcluded(this.plugin.settings, file)) {
-						files.push(file);
-					}
-				}
-			}
-		}
+		};
+		walk(folder);
 
 		return files;
 	}

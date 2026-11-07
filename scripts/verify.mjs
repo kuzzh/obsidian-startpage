@@ -14,6 +14,7 @@ import { spawn } from "node:child_process";
 import { cp, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 const args = process.argv.slice(2);
 const OPT = (flag) => {
@@ -160,7 +161,7 @@ async function main() {
 
 	// ---- 6. 自定义断言 ----
 	if (CHECKS_FILE && CHECKS_FILE !== true) {
-		const mod = await import(path.resolve(CHECKS_FILE));
+		const mod = await import(pathToFileURL(path.resolve(CHECKS_FILE)).href);
 		const checks = await mod.default(page);
 		for (const c of checks) record(c.name, c.pass, c.detail ?? "");
 	}
