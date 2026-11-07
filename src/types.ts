@@ -66,6 +66,7 @@ export interface StartPageSettings {
 	showTitleNavigationBar: "default" | "show" | "hide";
 	showCustomFooterText: boolean;
 	showShortcutHints: boolean;
+	showDailyCapture: boolean;
 	useRandomFooterText: boolean;
 	todayRandomEnFooterText: string; 
 	todayRandomZhFooterText: string; 
@@ -101,6 +102,7 @@ export const DEFAULT_SETTINGS: StartPageSettings = {
 		showTitleNavigationBar: "default",
 	showCustomFooterText: false,
 	showShortcutHints: true,
+	showDailyCapture: true,
 	useRandomFooterText: false,
 	todayRandomEnFooterText: "",
 	todayRandomZhFooterText: "",

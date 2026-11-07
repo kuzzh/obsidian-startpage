@@ -9,6 +9,8 @@ import { MyUtil } from "@/utils/myutil";
 import { NewNoteUtil } from "@/utils/newnoteutil";
 import { VersionChecker } from "@/utils/versionchecker";
 import SearchModal from "@/views/searchmodal";
+import CaptureModal from "@/views/capturemodal";
+import { DailyNoteUtil } from "@/utils/dailynoteutil";
 
 declare module "obsidian" {
 	interface App {
@@ -88,6 +90,11 @@ export default class StartPageCreator {
 
 		const newNoteBtn = this.createNewNoteButton();
 		this.container.appendChild(newNoteBtn);
+
+		const captureBtn = this.createDailyCaptureButton();
+		if (captureBtn) {
+			this.container.appendChild(captureBtn);
+		}
 
 		this.setupKeyListener();
 
@@ -698,6 +705,19 @@ export default class StartPageCreator {
 		} catch (error) {
 			console.error("Failed to load footer text:", error);
 		}
+	}
+
+	private createDailyCaptureButton(): HTMLElement | null {
+		// 未启用核心 Daily notes 插件时隐藏速记入口
+		if (!this.plugin.settings.showDailyCapture || !DailyNoteUtil.getTarget(this.app)) {
+			return null;
+		}
+		const btn = this.createElement("button", "start-page-capture-btn");
+		btn.setAttribute("title", t("capture_title"));
+		btn.setAttribute("aria-label", t("capture_title"));
+		btn.appendChild(SvgUtil.createCaptureIcon());
+		btn.addEventListener("click", () => new CaptureModal(this.app, this.plugin).open());
+		return btn;
 	}
 
 	private createNewNoteButton(): HTMLElement {

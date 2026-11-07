@@ -105,6 +105,18 @@ export class StartPageSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
+			.setName(t("show_daily_capture"))
+			.setDesc(t("show_daily_capture_desc"))
+			.addToggle((toggle) => {
+				toggle.setValue(this.plugin.settings.showDailyCapture);
+				toggle.onChange(async (value) => {
+					this.plugin.settings.showDailyCapture = value;
+					await this.plugin.saveSettings();
+					MyUtil.refreshStartPage(this.app);
+				});
+			});
+
+		new Setting(containerEl)
 			.setName(t("show_recent_section"))
 			.setDesc(t("show_recent_section_desc"))
 			.addToggle((toggle) => {
