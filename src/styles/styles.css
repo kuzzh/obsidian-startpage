@@ -350,6 +350,15 @@
 	gap: 8px;
 }
 
+.start-page-container .notes-group-title {
+	padding: 12px 4px 2px;
+	color: var(--text-faint);
+	font-size: 0.8em;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
 .start-page-container .notes-list-empty {
 	display: flex;
 	align-items: center;

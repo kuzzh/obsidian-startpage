@@ -496,12 +496,16 @@ export default class StartPageCreator {
 		}
 
 		if (notes && notes.length > 0) {
-			notes.forEach((note) => {
-				const noteItem = this.createNoteItem(note, isPinned);
-				if (noteItem) {
-					notesList.appendChild(noteItem);
-				}
-			});
+			if (isPinned) {
+				notes.forEach((note) => {
+					const noteItem = this.createNoteItem(note, isPinned);
+					if (noteItem) {
+						notesList.appendChild(noteItem);
+					}
+				});
+			} else {
+				this.appendGroupedRecentNotes(notesList, notes);
+			}
 		} else if (isPinned) {
 			notesList.appendChild(this.createPinnedEmptyState());
 		} else {
@@ -552,6 +556,41 @@ export default class StartPageCreator {
 		list.splice(to, 0, srcPath);
 		void this.plugin.saveSettings();
 		MyUtil.refreshStartPage(this.app);
+	}
+
+	private appendGroupedRecentNotes(notesList: HTMLElement, notes: TFile[]): void {
+		// 分段边界与相对时间的 24h/7d 规则对齐；标题插入同一列表容器，保持单一滚动区
+		const todayStart = new Date();
+		todayStart.setHours(0, 0, 0, 0);
+		const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+
+		const groups: { title: string; notes: TFile[] }[] = [
+			{ title: t("recent_group_today"), notes: [] },
+			{ title: t("recent_group_this_week"), notes: [] },
+			{ title: t("recent_group_earlier"), notes: [] },
+		];
+		for (const note of notes) {
+			if (note.stat.mtime >= todayStart.getTime()) {
+				groups[0].notes.push(note);
+			} else if (note.stat.mtime >= weekAgo) {
+				groups[1].notes.push(note);
+			} else {
+				groups[2].notes.push(note);
+			}
+		}
+
+		for (const group of groups) {
+			if (group.notes.length === 0) {
+				continue;
+			}
+			notesList.appendChild(this.createElement("div", "notes-group-title", group.title));
+			for (const note of group.notes) {
+				const noteItem = this.createNoteItem(note, false);
+				if (noteItem) {
+					notesList.appendChild(noteItem);
+				}
+			}
+		}
 	}
 
 	private createPinnedEmptyState(): HTMLElement {
