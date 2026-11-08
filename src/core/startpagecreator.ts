@@ -305,6 +305,8 @@ export default class StartPageCreator {
 			noteItem.addEventListener("dragover", (e) => e.preventDefault());
 			noteItem.addEventListener("drop", (e) => {
 				e.preventDefault();
+				// 阻断冒泡，避免落点在条目上时又触发列表末尾追加
+				e.stopPropagation();
 				if (this.draggingPinnedPath && this.draggingPinnedPath !== note.path) {
 					this.reorderPinnedNote(this.draggingPinnedPath, note.path);
 				}
@@ -465,6 +467,18 @@ export default class StartPageCreator {
 		const notesList = this.createElement("div", "notes-list");
 		if (styleSettings.listGap) notesList.style.gap = styleSettings.listGap;
 
+		if (isPinned && notes && notes.length > 0) {
+			// 列表空白区域也是合法落点：支持拖到末尾；条目自身的 drop 会阻断冒泡
+			notesList.addEventListener("dragover", (e) => e.preventDefault());
+			notesList.addEventListener("drop", (e) => {
+				e.preventDefault();
+				if (this.draggingPinnedPath) {
+					this.movePinnedNoteToEnd(this.draggingPinnedPath);
+					this.draggingPinnedPath = null;
+				}
+			});
+		}
+
 		if (notes && notes.length > 0) {
 			notes.forEach((note) => {
 				const noteItem = this.createNoteItem(note, isPinned);
@@ -495,6 +509,19 @@ export default class StartPageCreator {
 			this.plugin.settings.pinnedNotes = list.filter((path) => path !== note.path);
 		}
 		await this.plugin.saveSettings();
+		MyUtil.refreshStartPage(this.app);
+	}
+
+	private movePinnedNoteToEnd(srcPath: string): void {
+		const list = this.plugin.settings.pinnedNotes;
+		const from = list.indexOf(srcPath);
+		// 已在末尾时无需重排，避免无意义重渲染
+		if (from === -1 || from === list.length - 1) {
+			return;
+		}
+		list.splice(from, 1);
+		list.push(srcPath);
+		void this.plugin.saveSettings();
 		MyUtil.refreshStartPage(this.app);
 	}
 
