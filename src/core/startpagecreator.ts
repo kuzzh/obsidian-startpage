@@ -10,6 +10,7 @@ import { NewNoteUtil } from "@/utils/newnoteutil";
 import { VersionChecker } from "@/utils/versionchecker";
 import SearchModal from "@/views/searchmodal";
 import CaptureModal from "@/views/capturemodal";
+import PinnedNotesModal from "@/views/pinnednotesmodal";
 import { DailyNoteUtil } from "@/utils/dailynoteutil";
 
 declare module "obsidian" {
@@ -436,6 +437,8 @@ export default class StartPageCreator {
 			});
 		} else if (isPinned) {
 			notesList.appendChild(this.createPinnedEmptyState());
+		} else {
+			notesList.appendChild(this.createEmptyState(t("recent_empty_hint")));
 		}
 
 		section.appendChild(sectionHeader);
@@ -458,8 +461,18 @@ export default class StartPageCreator {
 	}
 
 	private createPinnedEmptyState(): HTMLElement {
-		const empty = this.createElement("div", "notes-list-empty", t("pinned_empty_hint"));
+		// 空状态附带动线入口：文案里的右键添加路径不可发现，按钮直达置顶管理弹窗
+		const empty = this.createEmptyState(t("pinned_empty_hint"));
+		const addBtn = this.createElement("button", "notes-list-empty-action", t("pinned_empty_add"));
+		addBtn.addEventListener("click", () => {
+			new PinnedNotesModal(this.app, this.plugin, () => MyUtil.refreshStartPage(this.app)).open();
+		});
+		empty.appendChild(addBtn);
 		return empty;
+	}
+
+	private createEmptyState(text: string): HTMLElement {
+		return this.createElement("div", "notes-list-empty", text);
 	}
 
 		private createContentGrid(): HTMLElement {
@@ -633,13 +646,15 @@ export default class StartPageCreator {
 			const notesList = this.createElement("div", "notes-list");
 			if (styleSettings.listGap) notesList.style.gap = styleSettings.listGap;
 
-			if (notes) {
+			if (notes && notes.length > 0) {
 				for (const note of notes) {
 					const noteItem = this.createNoteItem(note, false);
 					if (noteItem) {
 						notesList.appendChild(noteItem);
 					}
 				}
+			} else {
+				notesList.appendChild(this.createEmptyState(t("folder_tab_empty_hint")));
 			}
 
 			section.appendChild(sectionHeader);

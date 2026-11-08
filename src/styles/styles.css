@@ -343,11 +343,28 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	flex-wrap: wrap;
+	gap: 8px;
 	padding: 32px 12px;
 	border: 1px dashed var(--tag-border-color);
 	border-radius: 10px;
 	color: var(--text-faint);
 	font-size: 0.9em;
+}
+
+.start-page-container .notes-list-empty-action {
+	padding: 4px 14px;
+	border: none;
+	border-radius: 8px;
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	font-size: 0.9em;
+	cursor: pointer;
+	transition: background 0.2s ease;
+}
+
+.start-page-container .notes-list-empty-action:hover {
+	background: var(--interactive-accent-hover);
 }
 
 .start-page-container .note-item {
