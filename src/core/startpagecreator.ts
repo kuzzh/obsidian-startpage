@@ -29,6 +29,7 @@ export default class StartPageCreator {
 	private container: Element;
 	private searchBox: HTMLInputElement;
 	private keyHandler: (e: KeyboardEvent) => void;
+	private arrowHandler: ((e: KeyboardEvent) => void) | null = null;
 	private initialQuery: string = "";
 	private stats = [
 		{
@@ -161,10 +162,12 @@ export default class StartPageCreator {
 		this.searchBox.addEventListener("click", () => {
 			this.showSearchModal();
 		});
-		
+
 		this.searchBox.addEventListener("focus", (e) => {
 			(e.target as HTMLInputElement).blur();
 		});
+		// 假搜索框必须移出 Tab 序：其 focus 即自 blur 的监听会把 Tab 焦点弹飞，表现为"按 Tab 没反应"
+		this.searchBox.setAttribute("tabindex", "-1");
 
 		const searchBoxContainer = this.createElement("div", "search-box-container");
 		searchBoxContainer.appendChild(this.searchBox);
@@ -243,7 +246,20 @@ export default class StartPageCreator {
 
 		const noteItem = this.createElement("div", `note-item${isPinned ? " pinned" : ""}`);
 		noteItem.setAttribute("data-note-path", note.path);
-		
+
+		// 列表键盘可达：条目可 Tab 聚焦，Enter/空格与点击同语义；
+		// 空格是单字符键，会冒泡进主页"任意字符开搜索"监听，必须阻断
+		noteItem.setAttribute("role", "button");
+		noteItem.setAttribute("tabindex", "0");
+		noteItem.addEventListener("keydown", (event: KeyboardEvent) => {
+			if (event.key !== "Enter" && event.key !== " ") {
+				return;
+			}
+			event.preventDefault();
+			event.stopPropagation();
+			noteItem.click();
+		});
+
 		if (styleSettings.itemPadding) noteItem.style.padding = styleSettings.itemPadding;
 		if (styleSettings.itemMargin) noteItem.style.margin = styleSettings.itemMargin;
 
@@ -982,6 +998,47 @@ export default class StartPageCreator {
 		};
 
 		(this.container as HTMLElement).addEventListener("keydown", this.keyHandler);
+
+		// ↑/↓ 在可见条目间移动焦点，避免 Tab 穿越每个条目后的 ⋯ 按钮链
+		this.arrowHandler = (e: KeyboardEvent) => {
+			if (e.key !== "ArrowDown" && e.key !== "ArrowUp") {
+				return;
+			}
+
+			const target = e.target as Node;
+			if (
+				target.instanceOf(HTMLInputElement) ||
+				target.instanceOf(HTMLTextAreaElement) ||
+				target.instanceOf(HTMLSelectElement) ||
+				(target.instanceOf(HTMLElement) && target.isContentEditable)
+			) {
+				return;
+			}
+
+			if (document.querySelector(".modal-container")) {
+				return;
+			}
+
+			const items = this.getVisibleNoteItems();
+			if (items.length === 0) {
+				return;
+			}
+
+			const current = items.indexOf(document.activeElement as HTMLElement);
+			const next = current === -1
+				? (e.key === "ArrowDown" ? 0 : items.length - 1)
+				: e.key === "ArrowDown"
+					? Math.min(current + 1, items.length - 1)
+					: Math.max(current - 1, 0);
+			items[next].focus();
+			e.preventDefault();
+		};
+		(this.container as HTMLElement).addEventListener("keydown", this.arrowHandler);
+	}
+
+	private getVisibleNoteItems(): HTMLElement[] {
+		// 隐藏面板（display:none 的 tab panel）内条目 offsetParent 为 null，需排除
+		return Array.from(this.container.querySelectorAll<HTMLElement>(".note-item")).filter((el) => el.offsetParent !== null);
 	}
 
 		private showSearchModal(): void {
@@ -1001,6 +1058,10 @@ export default class StartPageCreator {
 	private removeKeyListener(): void {
 		if (this.keyHandler) {
 			(this.container as HTMLElement).removeEventListener("keydown", this.keyHandler);
+		}
+		if (this.arrowHandler) {
+			(this.container as HTMLElement).removeEventListener("keydown", this.arrowHandler);
+			this.arrowHandler = null;
 		}
 	}
 

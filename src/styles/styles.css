@@ -235,6 +235,13 @@
 	cursor: default;
 }
 
+/* 键盘聚焦态：默认细轮廓不醒目，用 accent 描边 + 激活底色强调 */
+.start-page-container .note-item:focus-visible {
+	outline: 2px solid var(--interactive-accent);
+	outline-offset: -2px;
+	background: var(--background-modifier-active-hover);
+}
+
 .start-page-container .stat-icon {
 	width: 40px;
 	height: 40px;
@@ -379,7 +386,8 @@
 	border-radius: 10px;
 	background: var(--tag-background);
 	border: 1px solid var(--tag-border-color);
-	transition: all 0.3s ease;
+	/* outline 必须排除在过渡外：键盘聚焦的轮廓反馈需要即时呈现 */
+	transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 	cursor: pointer;
 	min-width: 0;
 	max-width: 100%;
