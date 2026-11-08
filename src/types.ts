@@ -55,9 +55,11 @@ export const DEFAULT_SECTION_STYLE: SectionStyleSettings = {
 };
 
 export type ContentLayout = "columns" | "columns-reversed" | "stacked";
+export type ListDensity = "comfortable" | "compact";
 
 export interface StartPageSettings {
 	contentLayout: ContentLayout;
+	listDensity: ListDensity;
 	includeAllFilesInRecent: boolean;
 	recentNotesLimit: number;
 	showRecentAccessedNotes: boolean;
@@ -96,6 +98,7 @@ export interface StartPageSettings {
 
 export const DEFAULT_SETTINGS: StartPageSettings = {
 	contentLayout: "columns",
+	listDensity: "comfortable",
 	includeAllFilesInRecent: true,
 	recentNotesLimit: 10,
 	showRecentAccessedNotes: true,

@@ -10,7 +10,7 @@ export default async (page) => {
 		await wait(500);
 
 		// ---- a. 结构：112 格、今日之前无隐藏格 ----
-		const grid = document.querySelector(".header-meta .activity-grid");
+		const grid = document.querySelector(".chip-row .activity-grid");
 		const cells = [...document.querySelectorAll(".activity-cell")];
 		const future = document.querySelectorAll(".activity-future").length;
 		assert("activity grid rendered in header meta with 112 cells", !!grid && cells.length === 112, `cells=${cells.length}`);
@@ -45,12 +45,12 @@ export default async (page) => {
 		await plugin.saveSettings();
 		await view.renderContent();
 		await wait(300);
-		assert("heatmap hidden via setting", !document.querySelector(".header-meta .activity-grid"), "");
+		assert("heatmap hidden via setting", !document.querySelector(".chip-row .activity-grid"), "");
 		plugin.settings.showActivityHeatmap = true;
 		await plugin.saveSettings();
 		await view.renderContent();
 		await wait(300);
-		assert("heatmap restored via setting", !!document.querySelector(".header-meta .activity-grid"), "");
+		assert("heatmap restored via setting", !!document.querySelector(".chip-row .activity-grid"), "");
 
 		return results;
 	});

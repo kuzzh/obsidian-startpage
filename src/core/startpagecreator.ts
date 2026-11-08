@@ -70,6 +70,7 @@ export default class StartPageCreator {
 	private draggingPinnedPath: string | null = null;
 	private resizeHandler: (() => void) | null = null;
 	private activeTabIndex = 0;
+	private pendingPreviewItems: { el: HTMLElement; file: TFile }[] = [];
 
 		constructor(app: App, plugin: StartPagePlugin, container: Element) {
 		this.app = app;
@@ -89,16 +90,16 @@ export default class StartPageCreator {
 
 		const header = this.createHeader();
 		const mainContent = this.createMainContent();
+		// 列表密度作用于整个内容区，紧凑档隐藏摘要与元信息行
+		mainContent.addClass("density-" + this.plugin.settings.listDensity);
 		const footer = await this.createFooter();
 
 		this.container.appendChild(header);
 		this.container.appendChild(mainContent);
 		this.container.appendChild(footer);
 
-		const newNoteBtn = this.createNewNoteButton();
-		this.container.appendChild(newNoteBtn);
-
 		this.setupKeyListener();
+		this.flushNotePreviews();
 
 		(this.container as HTMLElement).tabIndex = -1;
 	}
@@ -145,16 +146,18 @@ export default class StartPageCreator {
 	}
 
 	private createHeader(): HTMLElement {
-		const header = this.createElement("header", "header");
+		// 命令条头部（变体 C）：问候与命令条同行，chips 行随下，垂直空间全部让给列表
+		const header = this.createElement("header", "command-header" + (this.plugin.settings.showGreeting ? "" : " no-greeting"));
 
-		const logo = this.createElement("div", "logo");
-		const logoIcon = SvgUtil.createLogoIcon();
-		// 问候语替代默认标题占位，不额外占用一行
-		const logoText = this.plugin.settings.showGreeting
-			? this.createElement("span", "logo-text greeting", this.getGreetingText())
-			: this.createElement("span", "logo-text", "Start Page for Obsidian");
+		const greetingRow = this.createElement("div", "command-greeting-row");
+		if (this.plugin.settings.showGreeting) {
+			greetingRow.appendChild(this.createElement("div", "command-greeting", this.getGreetingText()));
+		}
 
-		this.searchBox = this.createElement("input", "search-box", "") as HTMLInputElement;
+		const bar = this.createElement("div", "command-bar");
+		bar.appendChild(this.createElement("span", "command-prompt", "›"));
+
+		this.searchBox = this.createElement("input", "search-box") as HTMLInputElement;
 		this.searchBox.type = "text";
 		this.searchBox.placeholder = t("search_placeholder");
 		this.searchBox.addEventListener("click", () => {
@@ -166,51 +169,104 @@ export default class StartPageCreator {
 		});
 		// 假搜索框必须移出 Tab 序：其 focus 即自 blur 的监听会把 Tab 焦点弹飞，表现为"按 Tab 没反应"
 		this.searchBox.setAttribute("tabindex", "-1");
+		bar.appendChild(this.searchBox);
 
-		const searchBoxContainer = this.createElement("div", "search-box-container");
-		searchBoxContainer.appendChild(this.searchBox);
+		bar.appendChild(this.createElement("span", "command-kbd", t("kbd_any_key")));
+		bar.appendChild(this.createElement("span", "command-kbd", t("kbd_ctrl_enter")));
 
-		logo.appendChild(logoIcon);
-		logo.appendChild(logoText);
-		logo.appendChild(searchBoxContainer);
+		const manageBtn = this.createElement("button", "manage-btn");
+		manageBtn.setAttribute("title", t("manage"));
+		manageBtn.appendChild(SvgUtil.createSettingsIcon());
+		manageBtn.addEventListener("click", () => {
+			const setting = this.app.setting;
+			setting.open();
 
-		const headerTop = this.createElement("div", "header-top");
+			window.setTimeout(() => {
+				setting.openTabById(this.plugin.manifest.id);
+			}, 100);
+		});
+		bar.appendChild(manageBtn);
 
-		const headerActions = this.createElement("div", "header-actions");
+		greetingRow.appendChild(bar);
+		header.appendChild(greetingRow);
 
-			const manageBtn = this.createElement("button", "manage-btn");
-			manageBtn.setAttribute("title", t("manage"));
-			manageBtn.appendChild(SvgUtil.createSettingsIcon());
-			manageBtn.addEventListener("click", () => {
-				const setting = this.app.setting;
-				setting.open();
+		// 快捷 chips 行：原浮动按钮的动作全部收编于此，行尾接统计文字与热力图
+		const chips = this.createElement("div", "chip-row");
+		const newChip = this.createElement("button", "chip chip-primary", t("new_note"));
+		newChip.addEventListener("click", () => {
+			void this.createNewNote();
+		});
+		chips.appendChild(newChip);
 
-				window.setTimeout(() => {
-					setting.openTabById(this.plugin.manifest.id);
-				}, 100);
+		if (this.plugin.settings.showDailyCapture && DailyNoteUtil.getTarget(this.app)) {
+			const captureChip = this.createElement("button", "chip", t("capture_title"));
+			captureChip.addEventListener("click", () => {
+				new CaptureModal(this.app, this.plugin).open();
 			});
-			headerActions.appendChild(manageBtn);
-
-			if (this.hasUpdate()) {
-			const updateBadge = this.createUpdateBadge();
-			headerActions.appendChild(updateBadge);
+			chips.appendChild(captureChip);
+		}
+		if (DailyNoteUtil.getTarget(this.app)) {
+			// 复用核心命令：创建/打开/模板/定位行为全部随核心插件
+			const dailyChip = this.createElement("button", "chip", t("open_daily_note"));
+			dailyChip.addEventListener("click", () => {
+				this.app.commands.executeCommandById("daily-notes");
+			});
+			chips.appendChild(dailyChip);
 		}
 
-		headerTop.appendChild(logo);
-		headerTop.appendChild(headerActions);
-		header.appendChild(headerTop);
-
-		// 概要行：统计降格为可点文字、热力图压缩成 6px 格并入问候卡，把垂直空间让给列表
-		if (this.plugin.settings.showStatBar || this.plugin.settings.showActivityHeatmap) {
-			const metaRow = this.createElement("div", "header-meta");
-			if (this.plugin.settings.showStatBar) {
-				metaRow.appendChild(this.createStatsText());
-			}
-			if (this.plugin.settings.showActivityHeatmap) {
-				metaRow.appendChild(this.createActivityGrid());
-			}
-			header.appendChild(metaRow);
+		if (this.hasUpdate()) {
+			chips.appendChild(this.createUpdateBadge());
 		}
+
+		// 移动端：单个 ＋ 按钮弹出菜单（触屏无 hover 且横向空间有限），桌面由 CSS 隐藏；
+		// 无 Daily notes 时 ＋ 直接新建，省一次菜单点击
+		const dailyTarget = DailyNoteUtil.getTarget(this.app);
+		const fab = this.createElement("button", "chip-fab");
+		fab.setAttribute("aria-label", t("new_note"));
+		fab.textContent = "+";
+		fab.addEventListener("click", (event) => {
+			if (!dailyTarget) {
+				void this.createNewNote();
+				return;
+			}
+			const menu = new Menu();
+			menu.addItem((item) => {
+				item.setTitle(t("new_note"))
+					.setIcon("plus")
+					.onClick(() => {
+						void this.createNewNote();
+					});
+			});
+			if (this.plugin.settings.showDailyCapture) {
+				menu.addItem((item) => {
+					item.setTitle(t("capture_title"))
+						.setIcon("pencil")
+						.onClick(() => {
+							new CaptureModal(this.app, this.plugin).open();
+						});
+				});
+			}
+			menu.addItem((item) => {
+				item.setTitle(t("open_daily_note"))
+					.setIcon("calendar")
+					.onClick(() => {
+						this.app.commands.executeCommandById("daily-notes");
+					});
+			});
+			menu.showAtMouseEvent(event);
+		});
+		chips.appendChild(fab);
+
+		chips.appendChild(this.createElement("div", "chip-spacer"));
+
+		if (this.plugin.settings.showStatBar) {
+			chips.appendChild(this.createStatsText());
+		}
+		if (this.plugin.settings.showActivityHeatmap) {
+			chips.appendChild(this.createActivityGrid());
+		}
+
+		header.appendChild(chips);
 
 		return header;
 	}
@@ -369,44 +425,16 @@ export default class StartPageCreator {
 			});
 		}
 
-		const noteIcon = this.createElement("div", "note-icon");
-		const fileType = note.extension;
-		const iconSvg = SvgUtil.createFileIcon(fileType);
-		noteIcon.appendChild(iconSvg);
-
-		const noteContent = this.createElement("div", "note-content");
+		// 紧凑三行式（参考 Notebook Navigator）：加粗标题 / 摘要 / 时间·路径；行间分隔线交给 CSS
+		const noteTitleRow = this.createElement("div", "note-title-row");
 		const noteTitle = this.createElement("div", "note-title", note.basename);
-		
+		noteTitle.setAttribute("title", note.basename);
+
 		if (styleSettings.noteTitleFontSize) noteTitle.style.fontSize = styleSettings.noteTitleFontSize;
 		if (styleSettings.noteTitleMargin) noteTitle.style.margin = styleSettings.noteTitleMargin;
 		if (styleSettings.noteTitlePadding) noteTitle.style.padding = styleSettings.noteTitlePadding;
 
-		const noteMeta = this.createElement("div", "note-meta", "");
-
-		const noteDate = MyUtil.formatDate(note.stat.mtime);
-		let folderPath = note.parent ? note.parent.path : "/";
-		if (!folderPath.startsWith("/")) {
-			folderPath = "/" + folderPath;
-		}
-		const noteDateEl = this.createElement("div", "note-date", noteDate);
-		if (styleSettings.noteDateFontSize) noteDateEl.style.fontSize = styleSettings.noteDateFontSize;
-		
-		noteMeta.appendChild(noteDateEl);
-
-		const noteExtEl = this.createElement("div", "note-ext", "." + note.extension);
-		noteMeta.appendChild(noteExtEl);
-
-		const folderIcon = SvgUtil.createFolderIcon();
-		noteMeta.appendChild(folderIcon);
-		
-		const noteFolderEl = this.createElement("div", "note-folder", MyUtil.truncateMiddle(folderPath));
-		if (styleSettings.noteFolderFontSize) noteFolderEl.style.fontSize = styleSettings.noteFolderFontSize;
-
-		noteMeta.appendChild(noteFolderEl);
-
-		noteTitle.setAttribute("title", note.basename);
-		noteContent.appendChild(noteTitle);
-		noteContent.appendChild(noteMeta);
+		noteTitleRow.appendChild(noteTitle);
 
 		// 悬停动作区：置顶非高频操作，与低频动作统一收进 ⋯ 菜单，条目保持简洁
 		const noteActions = this.createElement("div", "note-actions");
@@ -448,43 +476,140 @@ export default class StartPageCreator {
 			menu.showAtMouseEvent(event);
 		});
 		noteActions.appendChild(moreBtn);
+		noteTitleRow.appendChild(noteActions);
 
-		noteItem.appendChild(noteIcon);
-		noteItem.appendChild(noteContent);
-		noteItem.appendChild(noteActions);
+		let folderPath = note.parent ? note.parent.path : "/";
+		if (!folderPath.startsWith("/")) {
+			folderPath = "/" + folderPath;
+		}
+
+		const notePreview = this.createElement("div", "note-preview");
+
+		const noteDateEl = this.createElement("span", "note-date", MyUtil.formatDate(note.stat.mtime));
+		if (styleSettings.noteDateFontSize) noteDateEl.style.fontSize = styleSettings.noteDateFontSize;
+
+		const noteFolderEl = this.createElement("span", "note-folder", MyUtil.truncateMiddle(folderPath));
+		noteFolderEl.setAttribute("title", folderPath);
+		if (styleSettings.noteFolderFontSize) noteFolderEl.style.fontSize = styleSettings.noteFolderFontSize;
+
+		const noteMetaRow = this.createElement("div", "note-meta-row");
+		noteMetaRow.appendChild(noteDateEl);
+		noteMetaRow.appendChild(this.createElement("span", "note-meta-separator", "·"));
+		noteMetaRow.appendChild(noteFolderEl);
+		noteMetaRow.appendChild(this.createElement("span", "note-meta-separator", "·"));
+		noteMetaRow.appendChild(this.createElement("span", "note-type", note.extension.toUpperCase()));
+
+		const noteMain = this.createElement("div", "note-main");
+		noteMain.appendChild(noteTitleRow);
+		noteMain.appendChild(notePreview);
+		noteMain.appendChild(noteMetaRow);
+		noteItem.appendChild(noteMain);
+
+		this.pendingPreviewItems.push({ el: noteItem, file: note });
+
+		// 缩略图：首个能解析的内嵌图片，浏览器原生 lazy 加载；无图不占位
+		const imageFile = this.getFirstImageFile(note);
+		if (imageFile) {
+			const thumb = this.createElement("div", "note-thumb");
+			const img = document.createElement("img");
+			img.loading = "lazy";
+			img.alt = "";
+			img.src = this.app.vault.getResourcePath(imageFile);
+			thumb.appendChild(img);
+			noteItem.appendChild(thumb);
+		}
 
 		return noteItem;
 	}
 
-	private createNotesSection(title: string, notes: TFile[] | null, isPinned: boolean = false, icon: SVGSVGElement): HTMLElement {
-		const styleSettings = isPinned ? this.plugin.settings.pinnedNotesStyle : this.plugin.settings.recentNotesStyle;
-
-		const section = this.createElement("section", "section");
-		if (styleSettings.sectionMargin) section.style.margin = styleSettings.sectionMargin;
-		if (styleSettings.sectionPadding) section.style.padding = styleSettings.sectionPadding;
-
-		const sectionHeader = this.createElement("div", "section-header");
-		if (styleSettings.headerMargin) sectionHeader.style.margin = styleSettings.headerMargin;
-		if (styleSettings.headerPadding) sectionHeader.style.padding = styleSettings.headerPadding;
-
-			const sectionTitle = this.createElement("h2", "section-title");
-			sectionTitle.appendChild(icon);
-			sectionTitle.appendChild(document.createTextNode(title));
-			if (isPinned && notes) {
-				const countBadge = this.createElement("span", "note-count-badge", `${notes.length}`);
-				sectionTitle.appendChild(countBadge);
+	// 首个能解析到库内文件的内嵌图片，用于条目缩略图
+	private getFirstImageFile(file: TFile): TFile | null {
+		const imageExtensions = new Set(["png", "jpg", "jpeg", "gif", "webp", "svg", "bmp", "avif"]);
+		const cache = this.app.metadataCache.getFileCache(file);
+		for (const embed of cache?.embeds ?? []) {
+			const dest = this.app.metadataCache.getFirstLinkpathDest(embed.link, file.path);
+			if (dest && imageExtensions.has(dest.extension.toLowerCase())) {
+				return dest;
 			}
-			if (styleSettings.titleFontSize) sectionTitle.style.fontSize = styleSettings.titleFontSize;
-			if (styleSettings.titleMargin) sectionTitle.style.margin = styleSettings.titleMargin;
-			if (styleSettings.titlePadding) sectionTitle.style.padding = styleSettings.titlePadding;
-
-			if (isPinned) {
-				sectionHeader.appendChild(sectionTitle);
-			} else {
-			const dropdownDiv = this.createRecentNotesLimitDropdown();
-			sectionHeader.appendChild(sectionTitle);
-			sectionHeader.appendChild(dropdownDiv);
 		}
+		return null;
+	}
+
+	// 渲染后异步填充摘要：cachedRead 走 Obsidian 内容缓存，不阻塞整页渲染；二进制文件无摘要
+	private flushNotePreviews(): void {
+		const textExtensions = new Set(["md", "markdown", "mdtxt", "txt"]);
+		const items = this.pendingPreviewItems;
+		this.pendingPreviewItems = [];
+		for (const { el, file } of items) {
+			if (!textExtensions.has(file.extension.toLowerCase())) {
+				continue;
+			}
+			void this.app.vault.cachedRead(file).then((content) => {
+				if (!el.isConnected) {
+					return;
+				}
+				const preview = el.querySelector(".note-preview");
+				if (preview) {
+					preview.textContent = this.extractPreview(content);
+				}
+			});
+		}
+	}
+
+	private extractPreview(content: string): string {
+		let text = content;
+		// 去 frontmatter（循环剥离：测试环境存在被破坏的多重块）
+		while (text.startsWith("---\n")) {
+			const end = text.indexOf("\n---", 4);
+			if (end === -1) {
+				break;
+			}
+			text = text.slice(text.indexOf("\n", end + 1) + 1);
+		}
+		// 多行正文按空格合并成一段（换行符替换为空格），展示时由 CSS 两行截断
+		const parts: string[] = [];
+		let inFence = false;
+		for (const rawLine of text.split("\n")) {
+			const line = rawLine.trim();
+			if (line.startsWith("```")) {
+				inFence = !inFence;
+				continue;
+			}
+			if (inFence || !line || line === "---" || (line.startsWith("#") && !line.startsWith("#tag"))) {
+				continue;
+			}
+			// 残留的裸 YAML 键（如 "tags:"）不作为正文
+			if (/^[A-Za-z][\w-]*:\s*$/.test(line)) {
+				continue;
+			}
+			const plain = line
+				.replace(/!\[\[[^\]]*\]\]/g, "")
+				.replace(/\[\[([^\]|]*\|)?([^\]]*)\]\]/g, "$2")
+				.replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+				.replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+				.replace(/(\*\*|\*|__|_|==|~~|`)/g, "")
+				.replace(/^\s*(?:[-*+]|\d+\.)\s+/, "")
+				.replace(/^\s*>\s?/, "")
+				.replace(/(^|\s)#[^\s#]+/g, "$1")
+				.trim();
+			if (plain) {
+				parts.push(plain);
+			}
+		}
+		const joined = parts.join(" ");
+		// 上限放宽到 160 字符：两行可容纳约此数量，超出部分由 CSS line-clamp 截断
+		return joined.length > 160 ? joined.slice(0, 160) + "…" : joined;
+	}
+
+	// 通用列表构建：条目渲染 / 空状态 / 置顶拖拽落点 / 最近列表时间分组
+	private createNotesList(
+		notes: TFile[] | null,
+		isPinned: boolean,
+		grouped: boolean,
+		emptyState: HTMLElement,
+		firstRowExtra?: HTMLElement,
+	): HTMLElement {
+		const styleSettings = isPinned ? this.plugin.settings.pinnedNotesStyle : this.plugin.settings.recentNotesStyle;
 
 		const notesList = this.createElement("div", "notes-list");
 		if (styleSettings.listGap) notesList.style.gap = styleSettings.listGap;
@@ -502,26 +627,55 @@ export default class StartPageCreator {
 		}
 
 		if (notes && notes.length > 0) {
-			if (isPinned) {
-				notes.forEach((note) => {
+			if (grouped) {
+				this.appendGroupedRecentNotes(notesList, notes, firstRowExtra);
+			} else {
+				for (const note of notes) {
 					const noteItem = this.createNoteItem(note, isPinned);
 					if (noteItem) {
 						notesList.appendChild(noteItem);
 					}
-				});
-			} else {
-				this.appendGroupedRecentNotes(notesList, notes);
+				}
 			}
-		} else if (isPinned) {
-			notesList.appendChild(this.createPinnedEmptyState());
 		} else {
-			notesList.appendChild(this.createEmptyState(t("recent_empty_hint")));
+			notesList.appendChild(emptyState);
 		}
 
-		section.appendChild(sectionHeader);
-		section.appendChild(notesList);
+		return notesList;
+	}
+
+	// 最近笔记：无独立 header；「最近 · 今天」首行右侧挂数量下拉（参照图布局）
+	private createRecentSection(): HTMLElement {
+		const styleSettings = this.plugin.settings.recentNotesStyle;
+
+		const section = this.createElement("section", "section");
+		if (styleSettings.sectionMargin) section.style.margin = styleSettings.sectionMargin;
+		if (styleSettings.sectionPadding) section.style.padding = styleSettings.sectionPadding;
+
+		const dropdown = this.createRecentNotesLimitDropdown();
+		const notes = this.recentNotes;
+		if (notes && notes.length > 0) {
+			section.appendChild(
+				this.createNotesList(notes, false, true, this.createEmptyState(t("recent_empty_hint")), dropdown),
+			);
+		} else {
+			// 空列表也保留首行，数量下拉仍有入口
+			const list = this.createElement("div", "notes-list");
+			list.appendChild(this.createGroupTitleRow(`${t("recent_short")} · ${t("recent_group_today")}`, dropdown));
+			list.appendChild(this.createEmptyState(t("recent_empty_hint")));
+			section.appendChild(list);
+		}
 
 		return section;
+	}
+
+	private createGroupTitleRow(label: string, extra?: HTMLElement): HTMLElement {
+		const row = this.createElement("div", "notes-group-title");
+		row.appendChild(this.createElement("span", "notes-group-label", label));
+		if (extra) {
+			row.appendChild(extra);
+		}
+		return row;
 	}
 
 	private async togglePinnedNote(note: TFile, pin: boolean): Promise<void> {
@@ -564,7 +718,7 @@ export default class StartPageCreator {
 		MyUtil.refreshStartPage(this.app);
 	}
 
-	private appendGroupedRecentNotes(notesList: HTMLElement, notes: TFile[]): void {
+	private appendGroupedRecentNotes(notesList: HTMLElement, notes: TFile[], firstRowExtra?: HTMLElement): void {
 		// 分段边界与相对时间的 24h/7d 规则对齐；标题插入同一列表容器，保持单一滚动区
 		const todayStart = new Date();
 		todayStart.setHours(0, 0, 0, 0);
@@ -585,11 +739,16 @@ export default class StartPageCreator {
 			}
 		}
 
+		// 首个分组行带「最近 ·」前缀并挂上数量下拉，后续分组只显示段名
+		let first = true;
 		for (const group of groups) {
 			if (group.notes.length === 0) {
 				continue;
 			}
-			notesList.appendChild(this.createElement("div", "notes-group-title", group.title));
+			notesList.appendChild(
+				this.createGroupTitleRow(first ? `${t("recent_short")} · ${group.title}` : group.title, first ? firstRowExtra : undefined),
+			);
+			first = false;
 			for (const note of group.notes) {
 				const noteItem = this.createNoteItem(note, false);
 				if (noteItem) {
@@ -629,7 +788,7 @@ export default class StartPageCreator {
 			}
 
 			if (showRecent) {
-				const recentSection = this.createNotesSection(t("recent_notes"), this.recentNotes, false, SvgUtil.createRecentNoteIcon());
+				const recentSection = this.createRecentSection();
 				recentSection.classList.add("recent-notes");
 				contentGrid.appendChild(recentSection);
 			}
@@ -663,6 +822,11 @@ export default class StartPageCreator {
 
 				const label = this.createElement("span", "tab-item-label", tab.label);
 				tabItem.appendChild(label);
+
+				// 计数并入 tab 标签，替代原先面板内的标题+徽标
+				if (tab.id === "pinned") {
+					tabItem.appendChild(this.createElement("span", "tab-count", `${tab.notes.length}`));
+				}
 
 				if (tab.closable) {
 					const closeBtn = this.createElement("button", "tab-close-btn");
@@ -699,13 +863,14 @@ export default class StartPageCreator {
 				const panel = this.createElement("div", `tab-panel${i === activeIndex ? " active" : ""}`);
 				panel.dataset.tabIndex = i.toString();
 				if (tab.id === "pinned") {
-					// Pinned notes tab — reuse createNotesSection with isPinned=true for the "Manage" button
-					const section = this.createNotesSection(t("pinned_notes"), this.pinnedNotes, true, SvgUtil.createPinnedNoteIcon());
-					panel.appendChild(section);
+					// tab 栏即面板 header，计数在标签内；面板只留列表
+					panel.appendChild(
+						this.createNotesList(this.pinnedNotes, true, false, this.createPinnedEmptyState()),
+					);
 				} else {
-					// Folder tab — use folder-specific panel
-					const section = this.createFolderTabPanel(tab.label, tab.notes);
-					panel.appendChild(section);
+					panel.appendChild(
+						this.createNotesList(tab.notes, false, false, this.createEmptyState(t("folder_tab_empty_hint"))),
+					);
 				}
 				contentWrapper.appendChild(panel);
 			});
@@ -760,48 +925,6 @@ export default class StartPageCreator {
 			}
 
 			return tabs;
-		}
-
-		private createFolderTabPanel(title: string, notes: TFile[]): HTMLElement {
-			const styleSettings = this.plugin.settings.pinnedNotesStyle;
-
-			const section = this.createElement("section", "section");
-			if (styleSettings.sectionMargin) section.style.margin = styleSettings.sectionMargin;
-			if (styleSettings.sectionPadding) section.style.padding = styleSettings.sectionPadding;
-
-			const sectionHeader = this.createElement("div", "section-header");
-			if (styleSettings.headerMargin) sectionHeader.style.margin = styleSettings.headerMargin;
-			if (styleSettings.headerPadding) sectionHeader.style.padding = styleSettings.headerPadding;
-
-			const sectionTitle = this.createElement("h2", "section-title");
-				const folderIcon = SvgUtil.createFolderIcon();
-				sectionTitle.appendChild(folderIcon);
-				sectionTitle.appendChild(document.createTextNode(title));
-				if (notes) {
-					const countBadge = this.createElement("span", "note-count-badge", `${notes.length}`);
-					sectionTitle.appendChild(countBadge);
-				}
-
-			sectionHeader.appendChild(sectionTitle);
-
-			const notesList = this.createElement("div", "notes-list");
-			if (styleSettings.listGap) notesList.style.gap = styleSettings.listGap;
-
-			if (notes && notes.length > 0) {
-				for (const note of notes) {
-					const noteItem = this.createNoteItem(note, false);
-					if (noteItem) {
-						notesList.appendChild(noteItem);
-					}
-				}
-			} else {
-				notesList.appendChild(this.createEmptyState(t("folder_tab_empty_hint")));
-			}
-
-			section.appendChild(sectionHeader);
-			section.appendChild(notesList);
-
-			return section;
 		}
 
 		private switchTab(index: number) {
@@ -924,50 +1047,6 @@ export default class StartPageCreator {
 		} catch (error) {
 			console.error("Failed to load footer text:", error);
 		}
-	}
-
-	private createNewNoteButton(): HTMLElement {
-		const btn = this.createElement("button", "start-page-new-note-btn");
-		btn.setAttribute("title", t("new_note"));
-		btn.setAttribute("aria-label", t("new_note"));
-
-		const icon = SvgUtil.createNewNoteIcon();
-		btn.appendChild(icon);
-
-		btn.addEventListener("click", async () => {
-			await this.createNewNote();
-		});
-
-		// 日记相关动作收进右键菜单，避免右下角浮动按钮堆叠；未启用 Daily notes 时交还页面默认右键
-		btn.addEventListener("contextmenu", (event) => {
-			if (!DailyNoteUtil.getTarget(this.app)) {
-				return;
-			}
-			event.preventDefault();
-			event.stopPropagation();
-
-			const menu = new Menu();
-			menu.addItem((item) => {
-				item.setTitle(t("open_daily_note"))
-					.setIcon("calendar")
-					.onClick(() => {
-						// 复用核心命令：创建/打开/模板/定位行为全部随核心插件
-						this.app.commands.executeCommandById("daily-notes");
-					});
-			});
-			if (this.plugin.settings.showDailyCapture) {
-				menu.addItem((item) => {
-					item.setTitle(t("capture_title"))
-						.setIcon("pencil")
-						.onClick(() => {
-							new CaptureModal(this.app, this.plugin).open();
-						});
-				});
-			}
-			menu.showAtMouseEvent(event);
-		});
-
-		return btn;
 	}
 
 	private async createNewNote(): Promise<void> {

@@ -30,3 +30,7 @@ TODOLIST.md
 AGENTS.md
 Screenshots/cdp-verify-poc.png
 e2e.config.json
+
+# 本地测试与设计记录不入库
+TestRecord/
+designs/

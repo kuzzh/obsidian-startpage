@@ -121,6 +121,9 @@ async function main() {
 		return finish();
 	}
 
+	// 视口在上一个套件的移动端步骤后可能残留为窄屏，统一恢复桌面宽度
+	await page.setViewportSize({ width: 1600, height: 900 });
+
 	// 首次打开 vault 会出现信任提示，CDP 直接点击即可
 	const trustBtn = page.locator("button", { hasText: /Trust author and enable plugins/ });
 	if (await trustBtn.count()) {

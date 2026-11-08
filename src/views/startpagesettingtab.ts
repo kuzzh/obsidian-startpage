@@ -220,6 +220,21 @@ export class StartPageSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
+			.setName(t("list_density"))
+			.setDesc(t("list_density_desc"))
+			.addDropdown((dropdown) => {
+				dropdown
+					.addOption("comfortable", t("density_comfortable"))
+					.addOption("compact", t("density_compact"))
+					.setValue(this.plugin.settings.listDensity)
+					.onChange(async (value) => {
+						this.plugin.settings.listDensity = value as StartPageSettings["listDensity"];
+						await this.plugin.saveSettings();
+						MyUtil.refreshStartPage(this.app);
+					});
+			});
+
+		new Setting(containerEl)
 			.setName(t("show_activity_heatmap"))
 			.setDesc(t("show_activity_heatmap_desc"))
 			.addToggle((toggle) => {

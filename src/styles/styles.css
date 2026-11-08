@@ -21,72 +21,100 @@
 }
 
 /* 头部样式：问候行 + 概要行（统计文字 + 热力图）纵向合并，压缩垂直占用 */
-.start-page-container .header {
+/* 命令条头部：问候语与命令条同行，chips 行随下 */
+.start-page-container .command-header {
 	display: flex;
 	flex-direction: column;
-	background: var(--background-secondary);
-	backdrop-filter: blur(10px);
-	border-radius: 12px;
-	padding: 14px 20px 12px;
-	margin-bottom: 20px;
-	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-	border: 1px solid var(--background-modifier-border);
+	gap: 10px;
+	margin-bottom: 14px;
 }
 
-.start-page-container .header-top {
+.start-page-container .command-greeting-row {
 	display: flex;
-	justify-content: space-between;
 	align-items: center;
 	gap: 12px;
+	min-width: 0;
 }
 
-.start-page-container .logo {
+.start-page-container .command-greeting {
+	flex: 1;
+	min-width: 0;
+	font-size: 13px;
+	color: var(--text-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.start-page-container .command-bar {
+	flex: 0 1 420px;
+	margin-left: auto;
 	display: flex;
 	align-items: center;
 	gap: 10px;
+	background: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 10px;
+	padding: 5px 10px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* 关闭问候语时命令条独占整行 */
+.start-page-container .command-header.no-greeting .command-bar {
 	flex: 1;
+	margin-left: 0;
 }
 
-.start-page-container .logo-icon {
-	width: 28px;
-	height: 28px;
-	color: var(--color-accent);
-}
-
-.start-page-container .logo-text {
-	font-size: 20px;
+.start-page-container .command-prompt {
+	color: var(--interactive-accent);
 	font-weight: 700;
-	background: linear-gradient(135deg, var(--color-purple), var(--color-accent));
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-	background-clip: text;
+	flex-shrink: 0;
 }
 
-/* 问候语替代标题时保持低调，不喧宾夺主 */
-.start-page-container .logo-text.greeting {
-	font-size: 15px;
-	font-weight: 600;
-	background: none;
-	-webkit-background-clip: border-box;
-	background-clip: border-box;
-	-webkit-text-fill-color: var(--text-muted);
-	color: var(--text-muted);
+.start-page-container .command-bar .search-box {
+	flex: 1;
+	min-width: 0;
+	background: transparent;
+	border: none;
+	box-shadow: none;
+	padding: 0;
+	font-size: 13px;
+	color: var(--text-normal);
 }
 
-.start-page-container .header-actions {
-	display: flex;
-	align-items: center;
-	gap: 8px;
+.start-page-container .command-bar .search-box::placeholder {
+	color: var(--text-faint);
+}
+
+.start-page-container .command-kbd {
+	flex-shrink: 0;
+	font-size: 10.5px;
+	color: var(--text-faint);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	background: var(--background-secondary);
+	white-space: nowrap;
+}
+
+/* 紧凑密度：隐藏摘要与元信息行，条目收窄（⋯ 菜单保持可达） */
+.start-page-container .density-compact .note-preview,
+.start-page-container .density-compact .note-meta-row {
+	display: none;
+}
+
+.start-page-container .density-compact .note-item {
+	padding: 4px 12px;
 }
 
 .start-page-container .manage-btn {
-	width: 32px;
-	height: 32px;
-	border: none !important;
-	box-shadow: none !important;
-	outline: none !important;
+	width: 26px;
+	height: 26px;
+	border: none;
+	box-shadow: none;
+	outline: none;
 	background: transparent;
-	border-radius: 8px;
+	border-radius: 6px;
 	cursor: pointer;
 	color: var(--text-muted);
 	display: flex;
@@ -94,6 +122,7 @@
 	justify-content: center;
 	transition: all 0.2s;
 	padding: 0;
+	flex-shrink: 0;
 }
 
 .start-page-container .manage-btn:hover {
@@ -102,8 +131,69 @@
 }
 
 .start-page-container .manage-btn svg {
-	width: 18px;
-	height: 18px;
+	width: 16px;
+	height: 16px;
+}
+
+/* 快捷 chips 行：动作与概要信息同排 */
+.start-page-container .chip-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.start-page-container .chip-spacer {
+	flex: 1;
+}
+
+.start-page-container .chip {
+	font-family: inherit;
+	font-size: 12px;
+	color: var(--text-muted);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 999px;
+	padding: 3px 12px;
+	background: var(--background-primary);
+	cursor: pointer;
+	transition: all 0.15s ease;
+	white-space: nowrap;
+}
+
+.start-page-container .chip:hover {
+	color: var(--text-normal);
+	background: var(--background-modifier-hover);
+}
+
+.start-page-container .chip-primary {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-color: transparent;
+	font-weight: 600;
+}
+
+.start-page-container .chip-primary:hover {
+	background: var(--interactive-accent-hover);
+	color: var(--text-on-accent);
+}
+
+/* 移动端专属 ＋ 钮：桌面隐藏，移动端替代三个文字 chips */
+.start-page-container .chip-fab {
+	display: none;
+	width: 34px;
+	height: 34px;
+	border-radius: 50%;
+	border: none;
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	font-size: 20px;
+	font-weight: 600;
+	line-height: 1;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	padding: 0;
+	flex-shrink: 0;
 }
 
 /* 按钮样式 */
@@ -140,42 +230,6 @@
 
 .start-page-capture-content .capture-row input[type="text"] {
 	flex: 1;
-}
-
-/* 悬浮新建笔记按钮 */
-.start-page-new-note-btn {
-	position: fixed;
-	bottom: 32px;
-	right: 32px;
-	width: 56px;
-	height: 56px;
-	border-radius: 50%;
-	background: var(--color-accent);
-	border: none;
-	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	transition: all 0.3s ease;
-	z-index: 100;
-	color: var(--text-on-accent, #fff);
-	padding: 0;
-}
-
-.start-page-new-note-btn:hover {
-	transform: scale(1.1);
-	box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
-	background: var(--color-accent-hover, var(--color-accent));
-}
-
-.start-page-new-note-btn:active {
-	transform: scale(0.95);
-}
-
-.start-page-new-note-btn svg {
-	width: 28px;
-	height: 28px;
 }
 
 /* 新建笔记标题模板预览 */
@@ -314,43 +368,11 @@
 	background: var(--background-secondary);
 	backdrop-filter: blur(10px);
 	border-radius: 12px;
-	padding: 20px;
+	padding: 10px 12px;
 	border: 1px solid var(--background-modifier-border);
 }
 
-.start-page-container .section-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: 12px;
-}
-
-.section-title {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	font-size: 16px;
-	font-weight: 600;
-	color: var(--text-normal);
-}
-
-.section-title .note-count-badge {
-	font-size: 12px;
-	font-weight: 500;
-	color: var(--text-faint);
-	background: var(--background-modifier-hover);
-	padding: 1px 7px;
-	border-radius: 10px;
-	line-height: 1.5;
-}
-
-.start-page-container .section-icon {
-	width: 20px;
-	height: 20px;
-	color: var(--icon-color);
-}
-
-/* 笔记列表 */
+/* 笔记列表：直接坐在区块底色上，不再叠一层灰底 */
 .start-page-container .notes-list {
 	display: flex;
 	flex-direction: column;
@@ -358,11 +380,14 @@
 	overflow-y: auto;
 	overflow-x: hidden;
 	min-height: 0;
-	gap: 8px;
 }
 
 .start-page-container .notes-group-title {
-	padding: 12px 4px 2px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	padding: 10px 4px 2px;
 	color: var(--text-faint);
 	font-size: 0.8em;
 	font-weight: 600;
@@ -398,19 +423,23 @@
 	background: var(--interactive-accent-hover);
 }
 
+/* 扁平列表条目：行间分隔线 + hover 高亮；三行式（加粗标题/摘要/时间·路径）+ 可选缩略图 */
 .start-page-container .note-item {
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	padding: 12px;
-	border-radius: 10px;
-	background: var(--tag-background);
-	border: 1px solid var(--tag-border-color);
+	padding: 8px 12px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
 	/* outline 必须排除在过渡外：键盘聚焦的轮廓反馈需要即时呈现 */
-	transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+	transition: background 0.15s ease;
 	cursor: pointer;
 	min-width: 0;
 	max-width: 100%;
+}
+
+.start-page-container .note-item:last-child {
+	border-bottom: none;
 }
 
 .start-page-container .note-item.dragging {
@@ -418,105 +447,142 @@
 }
 
 .start-page-container .note-item:hover {
-	background: var(--tag-background-hover);
-	transform: translateX(4px);
-	border-color: var(--tag-border-color-hover);
-	box-shadow: 0 4px 15px var(--background-modifier-border);
+	background: var(--background-modifier-hover);
 }
 
-.start-page-container .note-icon {
-	width: 32px;
-	height: 32px;
-	background: var(--tag-border-color);
-	border-radius: 6px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: var(--icon-color);
-	flex-shrink: 0;
-}
-
-.start-page-container .note-icon svg {
-	width: 16px;
-	height: 16px;
-}
-
-.start-page-container .note-content {
+.start-page-container .note-main {
 	flex: 1;
 	min-width: 0;
-	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+
+.start-page-container .note-title-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
 }
 
 .start-page-container .note-title {
-	font-weight: 500;
+	font-size: 14px;
+	line-height: 1.35;
+	font-weight: 700;
 	color: var(--text-normal);
-	margin-bottom: 2px;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	max-width: 100%;
+	min-width: 0;
+	flex: 0 1 auto;
 }
 
-.start-page-container .note-meta {
-	display: flex;
-	align-items: center;
-	gap: 4px;
+.start-page-container .note-preview {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	overflow: hidden;
+	word-break: break-word;
 	font-size: 12px;
+	line-height: 1.4;
 	color: var(--text-faint);
 }
 
-.start-page-container .note-date {
-	margin-right: 8px;
-	flex-shrink: 0;
-	white-space: nowrap;
+.start-page-container .note-meta-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+	font-size: 11px;
+	color: var(--text-faint);
 }
 
-.start-page-container .note-ext {
-	margin-right: 8px;
+.start-page-container .note-meta-separator {
+	flex-shrink: 0;
+	opacity: 0.7;
+}
+
+.start-page-container .note-date {
 	flex-shrink: 0;
 	white-space: nowrap;
-	background-color: var(--background-modifier-hover);
-	color: var(--text-muted);
-	border-radius: 4px;
-	padding: 2px 6px;
-	font-size: 0.75em;
-	font-weight: 500;
 }
 
 .start-page-container .note-folder {
-	flex: 1;
+	flex: 0 1 auto;
 	min-width: 0;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+.start-page-container .note-type {
+	flex-shrink: 0;
+	white-space: nowrap;
+}
+
+.start-page-container .note-thumb {
+	width: 40px;
+	height: 40px;
+	border-radius: 6px;
+	overflow: hidden;
+	flex-shrink: 0;
+	background: var(--background-modifier-border);
+}
+
+.start-page-container .note-thumb img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
 }
 
 .start-page-container .note-actions {
 	display: flex;
 	gap: 4px;
+	flex-shrink: 0;
+	/* 非悬停/聚焦时隐藏动作区，视觉降噪；键盘聚焦同样需要可达 */
+	opacity: 0;
+	transition: opacity 0.15s ease;
+}
+
+/* ⋯ 按钮收窄保持两行紧凑；Obsidian 核心给所有 button 固定了 var(--input-height) 高度，需还原自适应 */
+.start-page-container .note-title-row .btn-icon {
+	padding: 2px;
+	height: auto;
+	align-self: center;
+}
+
+.start-page-container .note-item:hover .note-actions,
+.start-page-container .note-item:focus-visible .note-actions {
+	opacity: 1;
 }
 
 /* Tab 控件样式 */
+/* tab 容器承担卡片外观：tab 栏就是面板 header，省掉独立标题块 */
 .start-page-container .tab-container {
 	display: flex;
 	flex-direction: column;
 	flex: 1;
 	min-height: 0;
 	overflow: hidden;
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 12px;
+	padding: 8px 12px 10px;
 }
 
 .start-page-container .tab-bar {
 	display: flex;
 	align-items: center;
-	gap: 4px;
+	gap: 2px;
 	border-bottom: 1px solid var(--background-modifier-border);
-	margin-bottom: 10px;
+	margin-bottom: 4px;
 	flex-shrink: 0;
 }
 
 .start-page-container .tab-list {
 	display: flex;
-	gap: 2px;
+	gap: 0;
 	overflow-x: auto;
 	flex: 1;
 	scrollbar-width: none;
@@ -530,7 +596,7 @@
 	display: flex;
 	align-items: center;
 	gap: 4px;
-	padding: 6px 12px;
+	padding: 4px 9px;
 	cursor: pointer;
 	border-radius: 6px 6px 0 0;
 	font-size: 13px;
@@ -541,6 +607,12 @@
 	transition: all 0.2s;
 	user-select: none;
 	flex-shrink: 0;
+}
+
+.start-page-container .tab-count {
+	font-size: 10.5px;
+	font-weight: 500;
+	color: var(--text-faint);
 }
 
 .start-page-container .tab-item:hover {
@@ -566,17 +638,17 @@
 	cursor: pointer;
 	color: var(--text-faint);
 	padding: 0;
-	display: flex;
+	/* 不显示时完全移出布局：opacity 隐藏会留下 18px+gap 的空白，显得间隔极宽 */
+	display: none;
 	align-items: center;
 	justify-content: center;
 	border-radius: 3px;
-	opacity: 0;
-	transition: opacity 0.15s, color 0.15s, background-color 0.15s;
+	transition: color 0.15s, background-color 0.15s;
 	flex-shrink: 0;
 }
 
 .start-page-container .tab-item:hover .tab-close-btn {
-	opacity: 1;
+	display: flex;
 }
 
 .start-page-container .tab-close-btn:hover {
@@ -611,8 +683,8 @@
 }
 
 .start-page-container .tab-scroll-btn.hidden {
-	visibility: hidden;
-	pointer-events: none;
+	/* 隐藏时必须移除占位，否则首个 tab 前会留出整块空白 */
+	display: none;
 }
 
 .start-page-container .tab-scroll-btn svg {
@@ -637,12 +709,6 @@
 
 .start-page-container .tab-panel.active {
 	display: flex;
-}
-
-.start-page-container .tab-panel .section {
-	flex: 1;
-	min-height: 0;
-	overflow: hidden;
 }
 
 .start-page-container .tab-panel .notes-list {
@@ -673,6 +739,20 @@
 .start-page-container .recent-notes-limit-label {
 	margin-right: 0.5rem;
 	color: var(--text-faint);
+}
+
+/* 分段标题行内的数量下拉保持紧凑、弱化 */
+.start-page-container .notes-group-title .recent-notes-limit-label {
+	font-size: 11px;
+	font-weight: 500;
+	letter-spacing: 0;
+	text-transform: none;
+}
+
+.start-page-container .notes-group-title select {
+	font-size: 11px;
+	padding: 0 4px;
+	height: 22px;
 }
 
 .start-page-container .footer {
@@ -832,17 +912,6 @@
 }
 
 /* Search modal styles */
-
-.start-page-container .search-box-container {
-	flex: 1;
-	display: flex;
-	justify-content: right;
-	padding-right: 12px;
-}
-
-.start-page-container .search-box {
-	min-width: 300px;
-}
 
 .my-today-edited-modal {
 	width: 480px;
@@ -1180,36 +1249,11 @@
 		overflow-x: hidden !important;
 	}
 
-		.start-page-container .header {
+		.start-page-container .command-header {
 			margin-bottom: 10px;
 		}
 
-		/* 窄屏只隐藏非问候标题；问候语是概要信息，收缩截断而非隐藏 */
-		.start-page-container .logo-text:not(.greeting) {
-			display: none;
-		}
-
-		.start-page-container .logo-text.greeting {
-			font-size: 13px;
-			flex: 1 1 100%;
-			order: 3;
-			min-width: 0;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-		}
-
-		.start-page-container .logo {
-			min-width: 0;
-			flex-wrap: wrap;
-			row-gap: 6px;
-		}
-
-		.start-page-container .search-box-container {
-			order: 2;
-		}
-
-		.start-page-container .search-box {
+		.start-page-container .command-bar .search-box {
 			flex: 1;
 			min-width: 0px;
 		}
@@ -1222,8 +1266,8 @@
 			grid-template-columns: 1fr;
 		}
 
-		.start-page-container .header-meta {
-			margin-top: 8px;
+		.start-page-container .chip-row .activity-grid {
+			display: none;
 		}
 
 		.start-page-container .stats-text {
@@ -1233,10 +1277,6 @@
 		.start-page-container .section {
 			overflow: unset;
 			overflow-x: hidden;
-		}
-
-		.start-page-container .section-header {
-			margin-bottom: 10px;
 		}
 
 		.start-page-container .main-content {
@@ -1251,10 +1291,11 @@
 			max-height: 50vh;
 		}
 
-		.start-page-container .note-icon,
+		/* 触屏无 hover：动作区常显 */
 		.start-page-container .note-actions {
-		display: none;
-	}
+			display: flex;
+			opacity: 1;
+		}
 
 	.my-search-modal {
 		top: 10%;
@@ -1284,11 +1325,36 @@
 		padding: 10px;
 	}
 
-	.start-page-container .header {
-		gap: 0px;
-		text-align: center;
-		padding: 10px;
-		margin: 0px 0px 10px 0px;
+	/* 移动端隐藏问候语与热力图，节约纵向空间（主人拍板）；命令条独占整行 */
+	.start-page-container .command-greeting {
+		display: none;
+	}
+
+	.start-page-container .command-bar {
+		flex: 1;
+		margin-left: 0;
+	}
+
+	.start-page-container .command-bar .command-kbd {
+		display: none;
+	}
+
+	/* 三个文字 chips 收进单个 ＋ 按钮的菜单，并浮动到右下角 */
+	.start-page-container .chip-row .chip {
+		display: none;
+	}
+
+	.start-page-container .chip-fab {
+		display: flex;
+		position: fixed;
+		right: 22px;
+		/* 抬高避开 Obsidian 移动端底栏 */
+		bottom: 88px;
+		width: 48px;
+		height: 48px;
+		font-size: 24px;
+		z-index: 100;
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 	}
 
 	.start-page-container .actions-grid {
@@ -1304,10 +1370,6 @@
 			height: 24px;
 			padding: 2px 4px;
 		}
-
-		.start-page-new-note-btn {
-			bottom: 72px;
-		}
 }
 
 @media (max-width: 480px) {
@@ -1316,14 +1378,10 @@
 	}
 
 	.start-page-container .note-item {
-		padding: 10px;
+		padding: 6px 8px;
 	}
 
 	.start-page-container .action-card {
 		padding: 12px 10px;
-	}
-
-	.start-page-container .search-box-container {
-		flex: 1;
 	}
 }

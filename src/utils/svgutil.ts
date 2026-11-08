@@ -70,10 +70,6 @@ export default class SvgUtil {
         return svg;
     }
 
-    static createFileIcon(fileType: string): SVGSVGElement {
-        return SvgUtil.createSVG((this.iconSVGs as Record<string, SVGTag[]>)[fileType] || this.iconSVGs["md"]);
-    }
-
     static createRefreshIcon(): SVGSVGElement {
         return this.createSVG([
             { tagName: "path", attributes: { d: "M3 2v6h6" } },
@@ -127,45 +123,12 @@ export default class SvgUtil {
         ]);
     }
 
-    static createPinnedNoteIcon(): SVGSVGElement {
-        return this.createSVG([
-            {
-                tagName: "path",
-                attributes: {
-                    d: "M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z",
-                    fill: "currentColor",
-                },
-            },
-        ], "section-icon");
-    }
-
     static createMoreIcon(): SVGSVGElement {
         return this.createSVG([
             { tagName: "circle", attributes: { cx: "5", cy: "12", r: "1", fill: "currentColor" } },
             { tagName: "circle", attributes: { cx: "12", cy: "12", r: "1", fill: "currentColor" } },
             { tagName: "circle", attributes: { cx: "19", cy: "12", r: "1", fill: "currentColor" } },
         ]);
-    }
-
-    static createRecentNoteIcon(): SVGSVGElement {
-        return this.createSVG([
-            {
-                tagName: "path",
-                attributes: {
-                    d: "M12 8V12L15 15",
-                },
-            },
-            {
-                tagName: "circle",
-                attributes: {
-                    cx: 12,
-                    cy: 12,
-                    r: 10,
-                    stroke: "currentColor",
-                    "stroke-width": 2,
-                },
-            },
-        ], "section-icon");
     }
 
     static createSVG(tags: SVGTag[], className: string | null = null): SVGSVGElement {
@@ -196,27 +159,5 @@ export default class SvgUtil {
         });
 
         return svg;
-    }
-
-    static iconSVGs = {
-        "md": [
-            { tagName: "path", attributes: { d: "M14 2H6A2 2 0 0 0 4 4V20A2 2 0 0 0 6 22H18A2 2 0 0 0 20 20V8L14 2Z" } },
-            { tagName: "path", attributes: { d: "M14 2V8H20" } },
-        ],
-        "base": [
-            { tagName: "rect", attributes: { x: "4", y: "3", width: "16", height: "20", rx: "2", stroke: "currentColor", "stroke-width": "2", fill: "none" } },
-            { tagName: "path", attributes: { d: "M6 10H18", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } },
-            { tagName: "path", attributes: { d: "M6 16H18", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } },
-            { tagName: "path", attributes: { d: "M10 4V24", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } }
-        ],
-        "canvas": [
-            { tagName: "rect", attributes: { x: "4", y: "3", width: "16", height: "20", rx: "2", stroke: "currentColor", "stroke-width": "2", fill: "none" } },
-            { tagName: "circle", attributes: { cx: "8", cy: "9", r: "2", fill: "currentColor" } },
-            { tagName: "circle", attributes: { cx: "16", cy: "9", r: "2", fill: "currentColor" } },
-            { tagName: "circle", attributes: { cx: "12", cy: "17", r: "2", fill: "currentColor" } },
-            { tagName: "path", attributes: { d: "M10 9L14 9", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } },
-            { tagName: "path", attributes: { d: "M9.4 10.6L12 15", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } },
-            { tagName: "path", attributes: { d: "M14.6 10.6L12 15", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } }
-        ],
     }
 }
