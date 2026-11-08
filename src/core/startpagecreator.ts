@@ -11,6 +11,7 @@ import { VersionChecker } from "@/utils/versionchecker";
 import SearchModal from "@/views/searchmodal";
 import CaptureModal from "@/views/capturemodal";
 import PinnedNotesModal from "@/views/pinnednotesmodal";
+import TodayEditedModal from "@/views/todayeditedmodal";
 import { DailyNoteUtil } from "@/utils/dailynoteutil";
 
 declare module "obsidian" {
@@ -202,7 +203,9 @@ export default class StartPageCreator {
 		const statsSection = this.createElement("div", "stats-section");
 
 		this.stats.forEach((stat) => {
-			const statCard = this.createElement("div", "stat-card");
+			// 卡片按语义路由：总笔记开搜索、今日编辑下钻列表、总大小纯信息不可点
+			const hasAction = stat.id !== ID_STAT_TOTAL_SIZE;
+			const statCard = this.createElement("div", `stat-card${hasAction ? "" : " static"}`);
 			const statIcon = this.createElement("div", "stat-icon");
 			const svg = SvgUtil.createStatIcon(stat.id);
 			statIcon.appendChild(svg!);
@@ -217,9 +220,15 @@ export default class StartPageCreator {
 			statCard.appendChild(statContent);
 			statsSection.appendChild(statCard);
 
-			statCard.addEventListener("click", () => {
-				this.showSearchModal();
-			});
+			if (stat.id === ID_STAT_TODAY_EDITED) {
+				statCard.addEventListener("click", () => {
+					new TodayEditedModal(this.app, this.plugin).open();
+				});
+			} else if (stat.id === ID_STAT_TOTAL_NOTES) {
+				statCard.addEventListener("click", () => {
+					this.showSearchModal();
+				});
+			}
 		});
 
 		return statsSection;

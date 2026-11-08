@@ -231,6 +231,10 @@
 	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
+.start-page-container .stat-card.static {
+	cursor: default;
+}
+
 .start-page-container .stat-icon {
 	width: 40px;
 	height: 40px;
@@ -810,6 +814,58 @@
 
 .start-page-container .search-box {
 	min-width: 300px;
+}
+
+.my-today-edited-modal {
+	width: 480px;
+	max-width: 90vw !important;
+}
+
+.my-today-edited-modal .my-today-edited-content {
+	max-height: 60vh;
+	overflow-y: auto;
+	padding: 0.5em 1em 1em 1em;
+}
+
+.my-today-edited-modal .today-edited-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.my-today-edited-modal .today-edited-item {
+	padding: 10px 14px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 12px;
+	cursor: pointer;
+	border-radius: 6px;
+	font-size: 15px;
+	transition: background 0.15s;
+}
+
+.my-today-edited-modal .today-edited-item:hover {
+	background: var(--background-modifier-hover);
+}
+
+.my-today-edited-modal .today-edited-item-name {
+	font-weight: 500;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.my-today-edited-modal .today-edited-item-meta {
+	color: var(--text-muted);
+	font-size: 13px;
+	flex-shrink: 0;
+}
+
+.my-today-edited-modal .today-edited-empty {
+	color: var(--text-faint);
+	text-align: center;
+	padding: 24px 0;
 }
 
 .my-search-modal {

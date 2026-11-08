@@ -41,6 +41,7 @@
     "new_note": "新建笔记",
     "total_notes": "总笔记数",
     "today_edited": "今日编辑",
+    "today_edited_empty": "今天还没有编辑过笔记",
     "total_size": "总占用空间",
     "manage": "管理",
     "replace_new_tab": "替换新标签页",

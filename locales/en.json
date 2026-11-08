@@ -41,6 +41,7 @@
     "new_note": "New note",
     "total_notes": "Total notes",
     "today_edited": "Today edited",
+    "today_edited_empty": "No notes edited today.",
     "total_size": "Total size",
     "manage": "Manage",
     "replace_new_tab": "Replace new tab",
