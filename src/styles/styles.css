@@ -948,6 +948,21 @@
 	flex: 1 !important;
 }
 
+.my-search-modal .search-syntax-hints {
+	padding: 0 1em 4px;
+	color: var(--text-faint);
+	font-size: 12px;
+	flex-shrink: 0;
+}
+
+.my-search-modal .search-syntax-hints code {
+	color: var(--text-muted);
+	background: var(--background-primary-alt);
+	padding: 1px 5px;
+	border-radius: 4px;
+	font-size: 11px;
+}
+
 .my-search-modal .search-results-container {
 	flex: 1;
 	overflow-y: auto;
@@ -979,6 +994,11 @@
 
 .my-search-modal .search-result-item.is-active {
 	background: var(--background-modifier-active-hover);
+}
+
+.my-search-modal .search-result-item-highlight {
+	background: var(--text-highlight-bg);
+	border-radius: 2px;
 }
 
 .my-search-modal .search-result-item-file-name {

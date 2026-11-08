@@ -6,18 +6,32 @@ import StartPagePlugin from "@/main";
 import { NewNoteUtil } from "@/utils/newnoteutil";
 import { StartPageView, VIEW_TYPE_START_PAGE } from "@/views/startpageview";
 
+interface ParsedQuery {
+	tags: string[];
+	folders: string[];
+	text: string;
+}
+
+interface SearchResult {
+	file: TFile;
+	// 命中偏移按显示文本（basename / 别名原文）计，用于渲染高亮
+	nameOffsets: [number, number][];
+	alias: string | null;
+	aliasOffsets: [number, number][];
+}
+
 export default class SearchModal extends Modal {
 	private searchComponent: SearchComponent;
 	private allFiles: TFile[];
-	private filteredResults: TFile[];
+	private filteredResults: SearchResult[];
 	private resultsContainer: HTMLElement;
-	private onChooseItem: (item: TFile) => void;
+	private onChooseItem: (item: TFile, forceTab: boolean) => void;
 	private initialQuery: string = "";
 	private selectedIndex: number = -1;
 	private caseSensitive: boolean = false;
 	private plugin: StartPagePlugin;
 
-	constructor(app: App, plugin: StartPagePlugin, onChoose: (item: TFile) => void, initialQuery: string = "") {
+	constructor(app: App, plugin: StartPagePlugin, onChoose: (item: TFile, forceTab: boolean) => void, initialQuery: string = "") {
 		super(app);
 		this.plugin = plugin;
 		this.setTitle(t("search_modal_title"));
@@ -73,6 +87,21 @@ export default class SearchModal extends Modal {
 			}
 		});
 
+		// 语法提示：过滤令牌与修饰键行为不可自主发现，以弱化小字列在结果区上方
+		const hintsEl = contentEl.createDiv("search-syntax-hints");
+		const hints: [string, string][] = [
+			["#tag", t("search_hint_tag")],
+			["folder:path", t("search_hint_folder")],
+			["Ctrl+Enter", t("search_hint_new_tab")],
+		];
+		hints.forEach(([token, label], index) => {
+			if (index > 0) {
+				hintsEl.appendText("  ·  ");
+			}
+			hintsEl.createEl("code", { text: token });
+			hintsEl.appendText(` ${label}`);
+		});
+
 		this.resultsContainer = contentEl.createDiv("search-results-container");
 
 		if (this.initialQuery) {
@@ -104,44 +133,141 @@ export default class SearchModal extends Modal {
 		}
 	}
 
+	// 查询中的 #tag 与 folder: 前缀作为过滤令牌剥离（位置任意、可多个、AND 组合），其余文本参与模糊匹配
+	private parseQuery(query: string): ParsedQuery {
+		const parsed: ParsedQuery = { tags: [], folders: [], text: "" };
+		const words: string[] = [];
+		for (const token of query.split(/\s+/)) {
+			if (!token) {
+				continue;
+			}
+			if (token.startsWith("#") && token.length > 1) {
+				parsed.tags.push(token.slice(1).toLowerCase());
+			} else if (token.toLowerCase().startsWith("folder:") && token.length > 7) {
+				parsed.folders.push(token.slice(7).toLowerCase());
+			} else {
+				words.push(token);
+			}
+		}
+		parsed.text = words.join(" ");
+		return parsed;
+	}
+
+	// frontmatter tags + 正文行内 #tag，子标签按段前缀命中（a 匹配 a/b 但不匹配 ab）
+	private getFileTags(file: TFile): string[] {
+		const cache = this.app.metadataCache.getFileCache(file);
+		const tags = new Set<string>();
+		const fm = cache?.frontmatter?.tags ?? cache?.frontmatter?.tag;
+		const list = Array.isArray(fm) ? fm : fm ? [fm] : [];
+		for (const tag of list) {
+			if (typeof tag === "string") {
+				tags.add(tag.replace(/^#/, "").toLowerCase());
+			}
+		}
+		for (const tag of cache?.tags ?? []) {
+			tags.add(tag.tag.replace(/^#/, "").toLowerCase());
+		}
+		return [...tags];
+	}
+
+	private passesFilters(file: TFile, parsed: ParsedQuery): boolean {
+		for (const tag of parsed.tags) {
+			if (!this.getFileTags(file).some((candidate) => candidate === tag || candidate.startsWith(tag + "/"))) {
+				return false;
+			}
+		}
+		for (const folder of parsed.folders) {
+			if (!file.path.toLowerCase().startsWith(folder + "/")) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	// 统一两种匹配的产物为偏移对，供高亮渲染；offsets 兼容嵌套数组与扁平数组两种形态
+	private toOffsetPairs(offsets: unknown): [number, number][] {
+		if (!Array.isArray(offsets) || offsets.length === 0) {
+			return [];
+		}
+		if (Array.isArray(offsets[0])) {
+			return offsets as [number, number][];
+		}
+		const pairs: [number, number][] = [];
+		for (let i = 0; i + 1 < offsets.length; i += 2) {
+			pairs.push([offsets[i] as number, offsets[i + 1] as number]);
+		}
+		return pairs;
+	}
+
+	private substringOffsets(text: string, query: string): [number, number][] {
+		const start = text.indexOf(query);
+		return start === -1 ? [] : [[start, start + query.length]];
+	}
+
 	performSearch(query: string) {
-		if (query === "") {
-			this.filteredResults = [];
-		} else if (this.caseSensitive) {
-			// 区分大小写保持原有子串语义
-			this.filteredResults = this.allFiles.filter((file) => {
+		const parsed = this.parseQuery(query);
+		this.filteredResults = [];
+
+		if (query !== "") {
+			const candidates = this.allFiles.filter((file) => {
 				if (MyUtil.isFileExcluded(this.plugin.settings, file)) {
 					return false;
 				}
-				if (file.name.includes(query)) {
-					return true;
-				}
-				return this.getAliases(file).some((alias) => alias.includes(query));
+				return this.passesFilters(file, parsed);
 			});
-		} else {
-			// 模糊匹配 + 按相关度排序，对齐核心 Quick Switcher 体验
-			const fuzzy = prepareFuzzySearch(query);
-			const scored: { file: TFile; score: number }[] = [];
-			for (const file of this.allFiles) {
-				if (MyUtil.isFileExcluded(this.plugin.settings, file)) {
-					continue;
-				}
-				let match = fuzzy(file.name);
-				if (!match) {
+
+			if (parsed.text === "") {
+				// 纯过滤令牌：无文本匹配，按修改时间倒序展示
+				this.filteredResults = candidates
+					.sort((a, b) => b.stat.mtime - a.stat.mtime)
+					.map((file) => ({ file, nameOffsets: [], alias: null, aliasOffsets: [] }));
+			} else if (this.caseSensitive) {
+				// 区分大小写保持原有子串语义
+				for (const file of candidates) {
+					const nameOffsets = this.substringOffsets(file.basename, parsed.text);
+					if (nameOffsets.length > 0) {
+						this.filteredResults.push({ file, nameOffsets, alias: null, aliasOffsets: [] });
+						continue;
+					}
 					for (const alias of this.getAliases(file)) {
-						match = fuzzy(alias);
-						if (match) break;
+						const aliasOffsets = this.substringOffsets(alias, parsed.text);
+						if (aliasOffsets.length > 0) {
+							this.filteredResults.push({ file, nameOffsets: [], alias, aliasOffsets });
+							break;
+						}
 					}
 				}
-				if (match) {
-					scored.push({ file, score: match.score });
+			} else {
+				// 模糊匹配 + 按相关度排序，对齐核心 Quick Switcher 体验
+				// 匹配目标改为 basename，使偏移与显示文本直接对齐（原为含扩展名的 file.name）
+				const fuzzy = prepareFuzzySearch(parsed.text);
+				const scored: { result: SearchResult; score: number }[] = [];
+				for (const file of candidates) {
+					const nameMatch = fuzzy(file.basename);
+					if (nameMatch) {
+						scored.push({
+							score: nameMatch.score,
+							result: { file, nameOffsets: this.toOffsetPairs(nameMatch.matches), alias: null, aliasOffsets: [] },
+						});
+						continue;
+					}
+					for (const alias of this.getAliases(file)) {
+						const aliasMatch = fuzzy(alias);
+						if (aliasMatch) {
+							scored.push({
+								score: aliasMatch.score,
+								result: { file, nameOffsets: [], alias, aliasOffsets: this.toOffsetPairs(aliasMatch.matches) },
+							});
+							break;
+						}
+					}
 				}
+				scored.sort((a, b) => b.score - a.score);
+				this.filteredResults = scored.map((s) => s.result);
 			}
-			scored.sort((a, b) => b.score - a.score);
-			this.filteredResults = scored.map((s) => s.file);
 		}
 
-		this.renderResults();
+		this.renderResults(parsed);
 	}
 
 	private getAliases(file: TFile): string[] {
@@ -153,13 +279,32 @@ export default class SearchModal extends Modal {
 		return (Array.isArray(aliases) ? aliases : [aliases]).filter((a): a is string => typeof a === "string");
 	}
 
-	renderResults() {
+	// offsets 不重叠且升序（prepareFuzzySearch 保证），命中片段包高亮 span
+	private appendHighlightedText(container: HTMLElement, text: string, offsets: [number, number][]): void {
+		if (offsets.length === 0) {
+			container.setText(text);
+			return;
+		}
+		let cursor = 0;
+		for (const [start, end] of offsets) {
+			if (start > cursor) {
+				container.appendText(text.slice(cursor, start));
+			}
+			container.createEl("span", { cls: "search-result-item-highlight", text: text.slice(start, end) });
+			cursor = end;
+		}
+		if (cursor < text.length) {
+			container.appendText(text.slice(cursor));
+		}
+	}
+
+	renderResults(parsed: ParsedQuery) {
 		this.resultsContainer.empty();
 		this.selectedIndex = -1;
 
 		if (this.filteredResults.length === 0) {
 			const emptyEl = this.resultsContainer.createDiv("search-empty-state");
-			const query = this.searchComponent.getValue();
+			const query = parsed.text;
 			if (query) {
 				const [beforeEnter, rest] = t("no_results_press_enter").split("{enter}");
 				const [beforeQuery, afterQuery] = rest.split("{query}");
@@ -176,30 +321,25 @@ export default class SearchModal extends Modal {
 
 		const listEl = this.resultsContainer.createEl("ul", { cls: "search-results-list" });
 		for (let i = 0; i < this.filteredResults.length; i++) {
-			const file = this.filteredResults[i];
+			const result = this.filteredResults[i];
+			const file = result.file;
 			const itemEl = listEl.createEl("li", { cls: "search-result-item" });
-			const fileNameWithoutExt = MyUtil.getFileNameWithoutExtension(file.name);
 
 			const fileNameEl = document.createElement("span");
 			fileNameEl.addClass("search-result-item-file-name");
-			fileNameEl.setText(fileNameWithoutExt);
-			itemEl.setAttribute("title", fileNameWithoutExt);
+			this.appendHighlightedText(fileNameEl, file.basename, result.nameOffsets);
+			itemEl.setAttribute("title", file.basename);
 			itemEl.appendChild(fileNameEl);
 
-			const query = this.searchComponent.getValue();
-			const cache = this.app.metadataCache.getFileCache(file);
-			const aliases = cache?.frontmatter?.aliases || cache?.frontmatter?.alias;
-			const matchedAlias = this.getMatchedAlias(aliases, query);
-			
 			const extEl = document.createElement("span");
 			extEl.addClass("search-result-item-ext");
 			itemEl.appendChild(extEl);
 			extEl.setText(file.extension.toUpperCase());
 
-			if (matchedAlias) {
+			if (result.alias) {
 				const aliasEl = document.createElement("span");
 				aliasEl.addClass("search-result-item-alias");
-				aliasEl.setText(matchedAlias);
+				this.appendHighlightedText(aliasEl, result.alias, result.aliasOffsets);
 				itemEl.appendChild(aliasEl);
 			}
 
@@ -218,7 +358,7 @@ export default class SearchModal extends Modal {
 			}
 
 			itemEl.onClickEvent(() => {
-				this.onChooseItem(file);
+				this.onChooseItem(file, false);
 				this.close();
 			});
 
@@ -245,13 +385,16 @@ export default class SearchModal extends Modal {
 				e.preventDefault();
 
 				if (this.filteredResults.length === 0) {
-					const query = this.searchComponent.getValue().trim();
-					if (query) {
-						this.createNewNote(query);
+					// 过滤令牌不进入新建笔记标题，只用纯文本部分
+					const text = this.parseQuery(this.searchComponent.getValue()).text.trim();
+					if (text) {
+						this.createNewNote(text);
 					}
 				} else if (this.selectedIndex >= 0 && this.selectedIndex < this.filteredResults.length) {
-					const selectedFile = this.filteredResults[this.selectedIndex];
-					this.onChooseItem(selectedFile);
+					// Ctrl/Cmd+Enter 强制新标签打开，不受"新标签打开"设置影响
+					const forceTab = e.ctrlKey || e.metaKey;
+					const selected = this.filteredResults[this.selectedIndex];
+					this.onChooseItem(selected.file, forceTab);
 					this.close();
 				}
 				return;
@@ -297,48 +440,30 @@ export default class SearchModal extends Modal {
 		}
 	}
 
-	private getMatchedAlias(aliases: string | string[] | undefined, query: string): string | null {
-		if (!aliases || !query) return null;
-		
-		const aliasArray = Array.isArray(aliases) ? aliases : [aliases];
-		const searchQuery = this.caseSensitive ? query : query.toLowerCase();
-		
-		for (const alias of aliasArray) {
-			if (typeof alias !== 'string') continue;
-			
-			const aliasToCheck = this.caseSensitive ? alias : alias.toLowerCase();
-			if (aliasToCheck.includes(searchQuery)) {
-				return alias;
-			}
-		}
-		
-		return null;
-	}
-
 	private getExcludeTooltip(): string {
 		const excludeList = this.plugin.settings.searchExcludePaths;
 		const excludeExtensions = this.plugin.settings.searchExcludeExtensions;
-		
+
 		if (excludeList.length === 0 && excludeExtensions.length === 0) {
 			return t("search_exclude_settings_tooltip").replace("{list}", t("no_results"));
 		}
-		
+
 		const items: string[] = [];
-		
+
 		if (excludeList.length > 0) {
 			const displayList = excludeList.length <= 2
 				? excludeList.join(", ")
 				: excludeList.slice(0, 2).join(", ") + "...";
 			items.push(displayList);
 		}
-		
+
 		if (excludeExtensions.length > 0) {
 			const extDisplay = excludeExtensions.length <= 2
 				? excludeExtensions.map(ext => `.${ext}`).join(", ")
 				: excludeExtensions.slice(0, 2).map(ext => `.${ext}`).join(", ") + "...";
 			items.push(extDisplay);
 		}
-		
+
 		return t("search_exclude_settings_tooltip").replace("{list}", items.join(" | "));
 	}
 

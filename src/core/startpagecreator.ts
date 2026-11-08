@@ -1084,15 +1084,15 @@ export default class StartPageCreator {
 			const modal = new SearchModal(
 				this.app,
 				this.plugin,
-				(item: TFile) => {
-					const newLeaf = this.plugin.settings.openNotesInNewTab ? "tab" : false;
+				(item: TFile, forceTab: boolean) => {
+					const newLeaf = forceTab || this.plugin.settings.openNotesInNewTab ? "tab" : false;
 					this.app.workspace.openLinkText(item.path, "", newLeaf);
 				},
 				this.initialQuery
 			);
-		modal.open();
-		this.initialQuery = "";
-	}
+			modal.open();
+			this.initialQuery = "";
+		}
 
 	private removeKeyListener(): void {
 		if (this.keyHandler) {
