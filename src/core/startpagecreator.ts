@@ -319,12 +319,9 @@ export default class StartPageCreator {
 				menu.addItem((item) => {
 					item.setTitle(t("remove_from_pinned_notes"))
 						.setIcon("pin-off")
-						.onClick(async () => {
-							this.plugin.settings.pinnedNotes = this.plugin.settings.pinnedNotes.filter((path) => path !== note.path);
-								await this.plugin.saveSettings();
-
-								MyUtil.refreshStartPage(this.app);
-							});
+						.onClick(() => {
+							void this.togglePinnedNote(note, false);
+						});
 				});
 
 				menu.showAtMouseEvent(event);
@@ -339,12 +336,8 @@ export default class StartPageCreator {
 				menu.addItem((item) => {
 					item.setTitle(t("add_to_pinned_notes"))
 						.setIcon("pin")
-						.onClick(async () => {
-							if (!this.plugin.settings.pinnedNotes.includes(note.path)) {
-								this.plugin.settings.pinnedNotes.push(note.path);
-								await this.plugin.saveSettings();
-								MyUtil.refreshStartPage(this.app);
-							}
+						.onClick(() => {
+							void this.togglePinnedNote(note, true);
 						});
 				});
 
@@ -391,11 +384,46 @@ export default class StartPageCreator {
 		noteContent.appendChild(noteTitle);
 		noteContent.appendChild(noteMeta);
 
+		// 悬停动作区：置顶非高频操作，与低频动作统一收进 ⋯ 菜单，条目保持简洁
 		const noteActions = this.createElement("div", "note-actions");
-		const editBtn = this.createElement("button", "btn-icon");
-		const editIcon = SvgUtil.createEditIcon();
-		editBtn.appendChild(editIcon);
-		noteActions.appendChild(editBtn);
+
+		const moreBtn = this.createElement("button", "btn-icon");
+		moreBtn.setAttribute("title", t("more_actions"));
+		moreBtn.setAttribute("aria-label", t("more_actions"));
+		moreBtn.appendChild(SvgUtil.createMoreIcon());
+		moreBtn.addEventListener("click", (event) => {
+			// 阻断冒泡，避免按钮点击触发整条目的打开
+			event.stopPropagation();
+
+			const menu = new Menu();
+			menu.addItem((item) => {
+				item.setTitle(isPinned ? t("remove_from_pinned_notes") : t("add_to_pinned_notes"))
+					.setIcon(isPinned ? "pin-off" : "pin")
+					.onClick(() => {
+						void this.togglePinnedNote(note, !isPinned);
+					});
+			});
+			menu.addSeparator();
+			menu.addItem((item) => {
+				item.setTitle(t("open_in_new_tab"))
+					.setIcon("external-link")
+					.onClick(() => {
+						this.app.workspace.openLinkText(note.path, "", "tab");
+					});
+			});
+			menu.addItem((item) => {
+				item.setTitle(t("reveal_in_file_explorer"))
+					.setIcon("folder-open")
+					.onClick(() => {
+						// revealInFolder 是 file-explorer 视图的内部方法，移动端无此 leaf 时静默跳过
+						const explorer = this.app.workspace.getLeavesOfType("file-explorer")[0]?.view as unknown as { revealInFolder?: (file: TFile) => void };
+						explorer?.revealInFolder?.(note);
+					});
+			});
+
+			menu.showAtMouseEvent(event);
+		});
+		noteActions.appendChild(moreBtn);
 
 		noteItem.appendChild(noteIcon);
 		noteItem.appendChild(noteContent);
@@ -454,6 +482,20 @@ export default class StartPageCreator {
 		section.appendChild(notesList);
 
 		return section;
+	}
+
+	private async togglePinnedNote(note: TFile, pin: boolean): Promise<void> {
+		const list = this.plugin.settings.pinnedNotes;
+		if (pin) {
+			if (list.includes(note.path)) {
+				return;
+			}
+			list.push(note.path);
+		} else {
+			this.plugin.settings.pinnedNotes = list.filter((path) => path !== note.path);
+		}
+		await this.plugin.saveSettings();
+		MyUtil.refreshStartPage(this.app);
 	}
 
 	private reorderPinnedNote(srcPath: string, targetPath: string): void {

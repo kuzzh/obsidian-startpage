@@ -74,13 +74,6 @@ export default class SvgUtil {
         return SvgUtil.createSVG((this.iconSVGs as Record<string, SVGTag[]>)[fileType] || this.iconSVGs["md"]);
     }
 
-    static createEditIcon(): SVGSVGElement {
-        return this.createSVG([
-            { tagName: "path", attributes: { d: "M11 4H4A2 2 0 0 0 2 6V20A2 2 0 0 0 4 22H18A2 2 0 0 0 20 20V13" } },
-            { tagName: "path", attributes: { d: "M18.5 2.5L22 6L12 16H6V10L18.5 2.5Z" } },
-        ]);
-    }
-
     static createRefreshIcon(): SVGSVGElement {
         return this.createSVG([
             { tagName: "path", attributes: { d: "M3 2v6h6" } },
@@ -154,6 +147,14 @@ export default class SvgUtil {
                 },
             },
         ], "section-icon");
+    }
+
+    static createMoreIcon(): SVGSVGElement {
+        return this.createSVG([
+            { tagName: "circle", attributes: { cx: "5", cy: "12", r: "1", fill: "currentColor" } },
+            { tagName: "circle", attributes: { cx: "12", cy: "12", r: "1", fill: "currentColor" } },
+            { tagName: "circle", attributes: { cx: "19", cy: "12", r: "1", fill: "currentColor" } },
+        ]);
     }
 
     static createRecentNoteIcon(): SVGSVGElement {
