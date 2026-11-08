@@ -284,6 +284,19 @@
 	grid-template-columns: 1fr;
 }
 
+/* 布局自定义：左右互换用 order（direction 会波及内部文本方向），堆叠则单列全宽 */
+.start-page-container .content-grid.layout-columns-reversed .pinned-notes {
+	order: 2;
+}
+
+.start-page-container .content-grid.layout-columns-reversed .recent-notes {
+	order: 1;
+}
+
+.start-page-container .content-grid.layout-stacked {
+	grid-template-columns: 1fr;
+}
+
 .start-page-container .footer-shortcut-hints {
 	margin-top: 4px;
 	font-size: 0.8em;

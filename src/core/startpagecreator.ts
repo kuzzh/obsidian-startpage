@@ -616,6 +616,8 @@ export default class StartPageCreator {
 
 		private createContentGrid(): HTMLElement {
 			const contentGrid = this.createElement("div", "content-grid");
+			// 三种布局用修饰类切换，窄屏媒体查询仍强制单列
+			contentGrid.addClass(`layout-${this.plugin.settings.contentLayout}`);
 
 			// 板块显隐开关：置顶与文件夹标签共用标签容器
 			const showTabs = this.plugin.settings.showTabs;

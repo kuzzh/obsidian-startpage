@@ -6,8 +6,9 @@ import { t } from "@/i18n";
 	import SearchExclusionModal from "@/views/searchexclusionmodal";
 	import PinnedNotesModal from "@/views/pinnednotesmodal";
 	import TabFoldersModal from "@/views/tabfoldersmodal";
-	import { MyUtil } from "@/utils/myutil";
-	import { NewNoteUtil } from "@/utils/newnoteutil";
+import { MyUtil } from "@/utils/myutil";
+import { NewNoteUtil } from "@/utils/newnoteutil";
+import { StartPageSettings } from "@/types";
 
 export class StartPageSettingTab extends PluginSettingTab {
 	plugin: StartPagePlugin;
@@ -200,6 +201,22 @@ export class StartPageSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 					MyUtil.refreshStartPage(this.app);
 				});
+			});
+
+		new Setting(containerEl)
+			.setName(t("content_layout"))
+			.setDesc(t("content_layout_desc"))
+			.addDropdown((dropdown) => {
+				dropdown
+					.addOption("columns", t("content_layout_columns"))
+					.addOption("columns-reversed", t("content_layout_columns_reversed"))
+					.addOption("stacked", t("content_layout_stacked"))
+					.setValue(this.plugin.settings.contentLayout)
+					.onChange(async (value) => {
+						this.plugin.settings.contentLayout = value as StartPageSettings["contentLayout"];
+						await this.plugin.saveSettings();
+						MyUtil.refreshStartPage(this.app);
+					});
 			});
 
 		new Setting(containerEl)

@@ -54,7 +54,10 @@ export const DEFAULT_SECTION_STYLE: SectionStyleSettings = {
 	noteFolderFontSize: "",
 };
 
+export type ContentLayout = "columns" | "columns-reversed" | "stacked";
+
 export interface StartPageSettings {
+	contentLayout: ContentLayout;
 	includeAllFilesInRecent: boolean;
 	recentNotesLimit: number;
 	showRecentAccessedNotes: boolean;
@@ -92,6 +95,7 @@ export interface StartPageSettings {
 	}
 
 export const DEFAULT_SETTINGS: StartPageSettings = {
+	contentLayout: "columns",
 	includeAllFilesInRecent: true,
 	recentNotesLimit: 10,
 	showRecentAccessedNotes: true,
