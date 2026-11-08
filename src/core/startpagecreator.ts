@@ -20,6 +20,9 @@ declare module "obsidian" {
 			open(): void;
 			openTabById(id: string): void;
 		};
+		commands: {
+			executeCommandById(id: string): void;
+		};
 	}
 }
 
@@ -94,11 +97,6 @@ export default class StartPageCreator {
 
 		const newNoteBtn = this.createNewNoteButton();
 		this.container.appendChild(newNoteBtn);
-
-		const captureBtn = this.createDailyCaptureButton();
-		if (captureBtn) {
-			this.container.appendChild(captureBtn);
-		}
 
 		this.setupKeyListener();
 
@@ -883,19 +881,6 @@ export default class StartPageCreator {
 		}
 	}
 
-	private createDailyCaptureButton(): HTMLElement | null {
-		// 未启用核心 Daily notes 插件时隐藏速记入口
-		if (!this.plugin.settings.showDailyCapture || !DailyNoteUtil.getTarget(this.app)) {
-			return null;
-		}
-		const btn = this.createElement("button", "start-page-capture-btn");
-		btn.setAttribute("title", t("capture_title"));
-		btn.setAttribute("aria-label", t("capture_title"));
-		btn.appendChild(SvgUtil.createCaptureIcon());
-		btn.addEventListener("click", () => new CaptureModal(this.app, this.plugin).open());
-		return btn;
-	}
-
 	private createNewNoteButton(): HTMLElement {
 		const btn = this.createElement("button", "start-page-new-note-btn");
 		btn.setAttribute("title", t("new_note"));
@@ -906,6 +891,35 @@ export default class StartPageCreator {
 
 		btn.addEventListener("click", async () => {
 			await this.createNewNote();
+		});
+
+		// 日记相关动作收进右键菜单，避免右下角浮动按钮堆叠；未启用 Daily notes 时交还页面默认右键
+		btn.addEventListener("contextmenu", (event) => {
+			if (!DailyNoteUtil.getTarget(this.app)) {
+				return;
+			}
+			event.preventDefault();
+			event.stopPropagation();
+
+			const menu = new Menu();
+			menu.addItem((item) => {
+				item.setTitle(t("open_daily_note"))
+					.setIcon("calendar")
+					.onClick(() => {
+						// 复用核心命令：创建/打开/模板/定位行为全部随核心插件
+						this.app.commands.executeCommandById("daily-notes");
+					});
+			});
+			if (this.plugin.settings.showDailyCapture) {
+				menu.addItem((item) => {
+					item.setTitle(t("capture_title"))
+						.setIcon("pencil")
+						.onClick(() => {
+							new CaptureModal(this.app, this.plugin).open();
+						});
+				});
+			}
+			menu.showAtMouseEvent(event);
 		});
 
 		return btn;

@@ -136,30 +136,6 @@
 	flex: 1;
 }
 
-/* 悬浮速记按钮：位于新建按钮上方 */
-.start-page-capture-btn {
-	position: fixed;
-	bottom: 104px;
-	right: 38px;
-	width: 44px;
-	height: 44px;
-	border-radius: 50%;
-	background: var(--background-secondary);
-	border: 1px solid var(--background-modifier-border);
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-	cursor: pointer;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	transition: all 0.3s ease;
-	z-index: 10;
-}
-
-.start-page-capture-btn:hover {
-	transform: scale(1.1);
-	background: var(--background-modifier-hover);
-}
-
 /* 悬浮新建笔记按钮 */
 .start-page-new-note-btn {
 	position: fixed;
