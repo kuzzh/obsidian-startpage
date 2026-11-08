@@ -74,6 +74,7 @@ export interface StartPageSettings {
 	scrollPosition: number;
 	scrollPositionKey: string;
 	showStatBar: boolean;
+	showActivityHeatmap: boolean;
 	showGreeting: boolean;
 	lastVersionCheck: number;
 	latestVersion: string;
@@ -110,6 +111,7 @@ export const DEFAULT_SETTINGS: StartPageSettings = {
 	scrollPosition: 0,
 	scrollPositionKey: "",
 	showStatBar: true,
+	showActivityHeatmap: true,
 	showGreeting: true,
 	lastVersionCheck: 0,
 	latestVersion: "",

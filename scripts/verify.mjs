@@ -152,7 +152,7 @@ async function main() {
 			vault: window.app.vault.getName(),
 			pluginEnabled: !!window.app.plugins.plugins[id],
 			container: !!q(".start-page-container"),
-			statCards: document.querySelectorAll(".stat-card").length,
+			statCards: document.querySelectorAll(".stat-text").length,
 			recentItems: document.querySelectorAll(".recent-notes .note-item").length,
 			emptyState: q(".notes-list-empty")?.textContent ?? null,
 			pinnedBadge: q(".note-count-badge")?.textContent ?? null,
@@ -161,7 +161,7 @@ async function main() {
 
 	record("plugin enabled", smoke.pluginEnabled, `vault=${smoke.vault}`);
 	record("start page container rendered", smoke.container);
-	record("stat cards present (3)", smoke.statCards === 3, `got ${smoke.statCards}`);
+	record("stat text items present (3)", smoke.statCards === 3, `got ${smoke.statCards}`);
 	record("recent notes list rendered", smoke.recentItems > 0, `${smoke.recentItems} items`);
 	if (smoke.emptyState !== null) {
 		record("pinned empty state hint", smoke.emptyState.length > 0, smoke.emptyState);

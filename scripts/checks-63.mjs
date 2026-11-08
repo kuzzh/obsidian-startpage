@@ -10,17 +10,17 @@ export default async (page) => {
 
 		await wait(500); // 等冒烟断言后的渲染稳定
 
-		const cards = document.querySelectorAll(".stat-card");
-		assert("3 stat cards", cards.length === 3, `got ${cards.length}`);
+		const cards = document.querySelectorAll(".stat-text");
+		assert("3 stat text items", cards.length === 3, `got ${cards.length}`);
 
-		// ---- a. 总大小卡：无动作、不可点样式 ----
-		assert("total-size card is static", cards[2].classList.contains("static"), "");
+		// ---- a. 总大小项：无动作、不可点样式 ----
+		assert("total-size item is static", cards[2].classList.contains("static"), "");
 		cards[2].click();
 		await wait(300);
 		assert("total-size click opens nothing", modalCount(".modal-container") === 0, "");
 
-		// ---- b. 今日编辑卡：下钻弹窗，条目数与卡面数字一致 ----
-		const todayCount = parseInt(cards[1].querySelector(".stat-number").textContent, 10);
+		// ---- b. 今日编辑项：下钻弹窗，条目数与文字数字一致 ----
+		const todayCount = parseInt(cards[1].querySelector(".stat-text-number").textContent, 10);
 		cards[1].click();
 		await wait(400);
 		const drillOpen = modalCount(".my-today-edited-modal") === 1;
@@ -43,7 +43,7 @@ export default async (page) => {
 		}
 
 		// ---- c. 总笔记卡：保持打开搜索弹窗 ----
-		document.querySelectorAll(".stat-card")[0].click();
+		document.querySelectorAll(".stat-text")[0].click();
 		await wait(400);
 		assert("total-notes card opens search modal", modalCount(".my-search-modal") === 1, "");
 		esc();

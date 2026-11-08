@@ -201,6 +201,18 @@ export class StartPageSettingTab extends PluginSettingTab {
 					MyUtil.refreshStartPage(this.app);
 				});
 			});
+
+		new Setting(containerEl)
+			.setName(t("show_activity_heatmap"))
+			.setDesc(t("show_activity_heatmap_desc"))
+			.addToggle((toggle) => {
+				toggle.setValue(this.plugin.settings.showActivityHeatmap);
+				toggle.onChange(async (value) => {
+					this.plugin.settings.showActivityHeatmap = value;
+					await this.plugin.saveSettings();
+					MyUtil.refreshStartPage(this.app);
+				});
+			});
     }
 
     private createStyleSettings(containerEl: HTMLElement) {

@@ -1,4 +1,4 @@
-import { SVGTag, ID_STAT_TOTAL_NOTES, ID_STAT_TODAY_EDITED, ID_STAT_TOTAL_SIZE } from "../types";
+import { SVGTag } from "../types";
 
 export default class SvgUtil {
     static createFolderIcon(): SVGElement {
@@ -166,65 +166,6 @@ export default class SvgUtil {
                 },
             },
         ], "section-icon");
-    }
-
-    static createStatIcon(id: string): SVGSVGElement | null {
-        if (id === ID_STAT_TOTAL_NOTES) {
-            return this.createSVG([
-                { tagName: "path", attributes: { d: "M14 2H6A2 2 0 0 0 4 4V20A2 2 0 0 0 6 22H18A2 2 0 0 0 20 20V8L14 2Z" } },
-                { tagName: "path", attributes: { d: "M14 2V8H20" } },
-            ]);
-        } else if (id === ID_STAT_TODAY_EDITED) {
-            return this.createSVG([
-                { tagName: "path", attributes: { d: "M12 8V12L15 15" } },
-                { tagName: "circle", attributes: { cx: 12, cy: 12, r: 10, stroke: "currentColor", "stroke-width": 2 } },
-            ]);
-        } else if (id === ID_STAT_TOTAL_SIZE) {
-            return this.createSVG([
-                {
-                    tagName: "rect",
-                    attributes: {
-                        x: "3",
-                        y: "6",
-                        width: "18",
-                        height: "12",
-                        rx: "2",
-                        ry: "2",
-                        stroke: "currentColor",
-                        "stroke-width": "2",
-                        fill: "none",
-                    },
-                },
-                {
-                    tagName: "circle",
-                    attributes: {
-                        cx: "7",
-                        cy: "12",
-                        r: "1",
-                        fill: "currentColor",
-                    },
-                },
-                {
-                    tagName: "path",
-                    attributes: {
-                        d: "M11 10H17",
-                        stroke: "currentColor",
-                        "stroke-width": "2",
-                        "stroke-linecap": "round",
-                    },
-                },
-                {
-                    tagName: "path",
-                    attributes: {
-                        d: "M11 14H15",
-                        stroke: "currentColor",
-                        "stroke-width": "2",
-                        "stroke-linecap": "round",
-                    },
-                },
-            ]);
-        }
-        return null;
     }
 
     static createSVG(tags: SVGTag[], className: string | null = null): SVGSVGElement {

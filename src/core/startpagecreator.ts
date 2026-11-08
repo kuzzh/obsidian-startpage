@@ -174,6 +174,8 @@ export default class StartPageCreator {
 		logo.appendChild(logoText);
 		logo.appendChild(searchBoxContainer);
 
+		const headerTop = this.createElement("div", "header-top");
+
 		const headerActions = this.createElement("div", "header-actions");
 
 			const manageBtn = this.createElement("button", "manage-btn");
@@ -194,45 +196,51 @@ export default class StartPageCreator {
 			headerActions.appendChild(updateBadge);
 		}
 
-		header.appendChild(logo);
-		header.appendChild(headerActions);
+		headerTop.appendChild(logo);
+		headerTop.appendChild(headerActions);
+		header.appendChild(headerTop);
+
+		// 概要行：统计降格为可点文字、热力图压缩成 6px 格并入问候卡，把垂直空间让给列表
+		if (this.plugin.settings.showStatBar || this.plugin.settings.showActivityHeatmap) {
+			const metaRow = this.createElement("div", "header-meta");
+			if (this.plugin.settings.showStatBar) {
+				metaRow.appendChild(this.createStatsText());
+			}
+			if (this.plugin.settings.showActivityHeatmap) {
+				metaRow.appendChild(this.createActivityGrid());
+			}
+			header.appendChild(metaRow);
+		}
 
 		return header;
 	}
 
-	private createStatsSection(): HTMLElement {
-		const statsSection = this.createElement("div", "stats-section");
+	private createStatsText(): HTMLElement {
+		const statsText = this.createElement("div", "stats-text");
 
-		this.stats.forEach((stat) => {
-			// 卡片按语义路由：总笔记开搜索、今日编辑下钻列表、总大小纯信息不可点
-			const hasAction = stat.id !== ID_STAT_TOTAL_SIZE;
-			const statCard = this.createElement("div", `stat-card${hasAction ? "" : " static"}`);
-			const statIcon = this.createElement("div", "stat-icon");
-			const svg = SvgUtil.createStatIcon(stat.id);
-			statIcon.appendChild(svg!);
-
-			const statContent = this.createElement("div", "stat-content");
-			const statNumber = this.createElement("div", "stat-number", stat.data.number.toString());
-			const statLabel = this.createElement("div", "stat-label", stat.data.label());
-
-			statContent.appendChild(statNumber);
-			statContent.appendChild(statLabel);
-			statCard.appendChild(statIcon);
-			statCard.appendChild(statContent);
-			statsSection.appendChild(statCard);
+		this.stats.forEach((stat, index) => {
+			if (index > 0) {
+				statsText.appendChild(this.createElement("span", "stat-text-separator", "·"));
+			}
+			// 与卡片时期相同的语义路由：总笔记开搜索、今日编辑下钻、总大小纯信息不可点
+			const item = this.createElement("span", `stat-text${stat.id === ID_STAT_TOTAL_SIZE ? " static" : ""}`);
+			const number = this.createElement("span", "stat-text-number", stat.data.number.toString());
+			item.appendChild(number);
+			item.appendText(` ${stat.data.label()}`);
 
 			if (stat.id === ID_STAT_TODAY_EDITED) {
-				statCard.addEventListener("click", () => {
+				item.addEventListener("click", () => {
 					new TodayEditedModal(this.app, this.plugin).open();
 				});
 			} else if (stat.id === ID_STAT_TOTAL_NOTES) {
-				statCard.addEventListener("click", () => {
+				item.addEventListener("click", () => {
 					this.showSearchModal();
 				});
 			}
+			statsText.appendChild(item);
 		});
 
-		return statsSection;
+		return statsText;
 	}
 
 	private createNoteItem(note: TFile | null, isPinned: boolean = false): HTMLElement | null {
@@ -830,15 +838,50 @@ export default class StartPageCreator {
 		private createMainContent(): HTMLElement {
 		const mainContent = this.createElement("main", "main-content");
 
-		if (this.plugin.settings.showStatBar) {
-			const statsSection = this.createStatsSection();
-			mainContent.appendChild(statsSection);
-		}
-
 		const contentGrid = this.createContentGrid();
 		mainContent.appendChild(contentGrid);
 
 		return mainContent;
+	}
+
+	private createActivityGrid(): HTMLElement {
+		const grid = this.createElement("div", "activity-grid");
+
+		// GitHub 风格：列=周、行=星期；文件集合与统计区同口径
+		const WEEKS = 16;
+		const DAY = 24 * 60 * 60 * 1000;
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		const end = today.getTime();
+		// 末列为本周（周日起），未来几天留空隐藏：起点 = 本周日往前推 (WEEKS-1) 周
+		const start = end - ((WEEKS - 1) * 7 + today.getDay()) * DAY;
+
+		const files = this.plugin.settings.includeAllFilesInRecent ? this.app.vault.getFiles() : this.app.vault.getMarkdownFiles();
+		const counts = new Map<number, number>();
+		for (const file of files) {
+			const day = new Date(file.stat.mtime);
+			day.setHours(0, 0, 0, 0);
+			const ts = day.getTime();
+			if (ts >= start) {
+				counts.set(ts, (counts.get(ts) ?? 0) + 1);
+			}
+		}
+
+		for (let i = 0; i < WEEKS * 7; i++) {
+			const ts = start + i * DAY;
+			const count = counts.get(ts) ?? 0;
+			const level = count === 0 ? 0 : count <= 2 ? 1 : count <= 5 ? 2 : count <= 9 ? 3 : 4;
+			const cell = this.createElement("div", `activity-cell activity-l${level}`);
+			if (ts > end) {
+				cell.addClass("activity-future");
+			} else {
+				const dateStr = new Date(ts).toLocaleDateString(moment.locale(), { month: "short", day: "numeric" });
+				cell.setAttribute("title", t("heatmap_tooltip").replace("{count}", count.toString()).replace("{date}", dateStr));
+			}
+			grid.appendChild(cell);
+		}
+
+		return grid;
 	}
 
 	private async createFooter(): Promise<HTMLElement> {
