@@ -63,6 +63,7 @@ export default class StartPageCreator {
 	private resizeObserver: ResizeObserver | null = null;
 	private draggingPinnedPath: string | null = null;
 	private resizeHandler: (() => void) | null = null;
+	private activeTabIndex = 0;
 
 		constructor(app: App, plugin: StartPagePlugin, container: Element) {
 		this.app = app;
@@ -489,6 +490,9 @@ export default class StartPageCreator {
 
 		private createTabContainer(): HTMLElement {
 			const tabs = this.buildTabItems();
+			// 文件夹 tab 可能在重渲染间被移除，序号收敛到现存范围
+			const activeIndex = Math.min(this.activeTabIndex, tabs.length - 1);
+			this.activeTabIndex = activeIndex;
 			const container = this.createElement("div", "tab-container");
 
 			// Tab bar
@@ -500,7 +504,7 @@ export default class StartPageCreator {
 
 			const tabList = this.createElement("div", "tab-list");
 			tabs.forEach((tab, i) => {
-				const tabItem = this.createElement("div", `tab-item${i === 0 ? " active" : ""}`);
+				const tabItem = this.createElement("div", `tab-item${i === activeIndex ? " active" : ""}`);
 				tabItem.dataset.tabIndex = i.toString();
 
 				const label = this.createElement("span", "tab-item-label", tab.label);
@@ -538,7 +542,7 @@ export default class StartPageCreator {
 			// Content panels
 			const contentWrapper = this.createElement("div", "tab-content-wrapper");
 			tabs.forEach((tab, i) => {
-				const panel = this.createElement("div", `tab-panel${i === 0 ? " active" : ""}`);
+				const panel = this.createElement("div", `tab-panel${i === activeIndex ? " active" : ""}`);
 				panel.dataset.tabIndex = i.toString();
 				if (tab.id === "pinned") {
 					// Pinned notes tab — reuse createNotesSection with isPinned=true for the "Manage" button
@@ -645,6 +649,9 @@ export default class StartPageCreator {
 		}
 
 		private switchTab(index: number) {
+			// 记录激活序号，供 vault 事件触发整页重渲染后恢复
+			this.activeTabIndex = index;
+
 			const tabContainer = this.container.querySelector(".tab-container");
 			if (!tabContainer) return;
 
