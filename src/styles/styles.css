@@ -1262,10 +1262,6 @@
 			display: none;
 		}
 
-		.start-page-container .content-grid {
-			grid-template-columns: 1fr;
-		}
-
 		.start-page-container .chip-row .activity-grid {
 			display: none;
 		}
@@ -1323,6 +1319,11 @@
 @media (max-width: 768px) {
 	.start-page-container .container {
 		padding: 10px;
+	}
+
+	/* 桌面端的并排选择会一直保留到极窄窗口，手机上双列不可用，只有这一档强制堆叠 */
+	.start-page-container .content-grid {
+		grid-template-columns: 1fr;
 	}
 
 	/* 移动端隐藏问候语与热力图，节约纵向空间（主人拍板）；命令条独占整行 */
