@@ -8,7 +8,7 @@ A modern startup homepage plugin for Obsidian that provides a beautiful dashboar
 
 ### Smart Homepage
 - **Automatic Startup Homepage**: Automatically replaces new tabs with the start page when enabled
-- **Modern Design**: Card-based layout with responsive design, perfectly adapted to various screen sizes
+- **Modern Design**: Compact command bar with action chips, tabbed note cards and responsive layout
 - **Dashboard Statistics**: Real-time display of vault statistics (total notes, today's edits, total storage space)
 - **Quick Search**: Built-in search box with keyboard shortcuts - just start typing to search your notes
 - **Toolbar Integration**: Adds a homepage icon to the left toolbar for quick access anytime
@@ -30,7 +30,7 @@ A modern startup homepage plugin for Obsidian that provides a beautiful dashboar
 - **Real-time Refresh**: Automatically refreshes homepage content when files are modified, created, deleted, or renamed
 - **Timed Updates**: Notes modified within 24 hours trigger periodic time display refresh (every minute)
 - **Right-click Menu**: Supports right-click refresh functionality on the start page
-- **Theme Adaptation**: Perfect adaptation to Obsidian's light and dark themes
+- **Theme Adaptation**: No hard-coded colors — the page inherits Obsidian's light/dark theme and accent color
 - **Scroll Position Memory**: Remembers and restores your scroll position when returning to the start page
 - **Keyboard Navigation**: Type any character while on the start page to instantly open search modal
 
@@ -102,11 +102,11 @@ A modern startup homepage plugin for Obsidian that provides a beautiful dashboar
 1. **Open Start Page**: After installing and enabling the plugin, you can open the start page by:
    - Clicking the homepage icon in the left toolbar.
    - If "Replace new tab" is enabled, it will automatically display when opening new tabs.
-2. **View Statistics**: The top of the homepage displays vault statistics (total notes, today's edits, total storage space).
-3. **Quick Create**: Click the floating "New Note" button in the bottom right corner to create a new note using your configured title template and folder.
+2. **View Statistics**: The chips row shows vault statistics (total notes, today's edits, total storage space) next to the edit-activity heatmap. Click the total-notes figure to open search, or today's-edits figure to list today's notes.
+3. **Quick Create**: Click the "New note" chip to create a note using your configured title template and folder. On mobile the same actions live behind the floating ＋ button.
 4. **Access Notes**: Click on pinned notes or recent notes to directly open the corresponding notes.
 5. **Context Menu**: Right-click on files in the file explorer to quickly add or remove pinned notes; right-click recent notes to pin them.
-6. **Quick Capture**: Click the pencil button above the new-note button to append a timestamped line to today's daily note.
+6. **Quick Capture**: Click the "Quick capture to today's daily note" chip to append a timestamped line to today's daily note; "Open today's daily note" jumps to it. Both are in the ＋ menu on mobile.
 
 ### Setting Pinned Notes
 
@@ -117,18 +117,27 @@ A modern startup homepage plugin for Obsidian that provides a beautiful dashboar
 5. Select the notes to pin; they will be displayed in the "Pinned notes" section on the homepage.
 6. Alternatively, right-click any file in the file explorer and select "Add to pinned notes".
 7. You can also import all your bookmarked notes by clicking "Import bookmarks" in the settings.
-8. Click the "Manage" button in the pinned notes area on the homepage to quickly jump to the settings page.
+8. Click the gear icon in the start page command bar to jump to the plugin settings page.
 9. Reorder pinned notes by dragging them into place on the homepage, or with the up/down arrow buttons in the settings.
 
 ### Custom Settings
 
 #### General Settings
 - **Include All Files**: Choose to show all file types or only markdown files in recent notes
+- **Show Recently Accessed Notes**: Rank recent notes by access time as well as modification time
+- **Show Tabs Section**: Toggle the pinned/folder tab card
+- **Show Daily Note Capture Button**: Toggle the quick-capture action
+- **Show Recent Notes Section**: Toggle the recent notes card
 - **Recent Notes Count**: Adjust the display count (5-50 notes) directly on the homepage or in settings
+- **Check for Updates**: Look up new releases on GitHub and show a badge on the start page
 
 #### Appearance Settings
 - **Title Navigation Bar**: Choose to show, hide, or use default behavior (hidden on desktop, shown on mobile)
-- **Show Statistics Bar**: Toggle the dashboard statistics section on/off
+- **Show Greeting**: Show a time-of-day greeting with today's date instead of the default title
+- **Show stat. bar**: Toggle the statistics text in the chips row
+- **Content layout**: Side by side (tabs left or tabs right) or stacked full width
+- **List density**: Comfortable or compact; compact hides previews and metadata to fit more notes
+- **Show activity heatmap**: Toggle the 16-week edit heatmap in the header
 
 #### New Tab Settings
 - **Replace New Tab**: Automatically display the start page when opening new tabs
@@ -204,15 +213,16 @@ npm run build
 - **Today's Edits**: Statistics of notes modified today (since midnight)
 - **Total Storage**: Shows the total size of all files (respects "Include All Files" setting; automatically formatted as B/KB/MB/GB)
 - **Real-time Updates**: Statistics data updates automatically with file changes
-- **Interactive**: Click any stat card to open the search modal
-- **Toggle Visibility**: Can be hidden via the "Show stat. bar" setting
+- **Interactive**: Click the total-notes figure to open the search modal, or today's-edits figure to list today's notes
+- **Activity Heatmap**: Optional 16-week edit heatmap next to the statistics text
+- **Toggle Visibility**: Statistics and heatmap can each be hidden in the settings
 
 ### Note Display
 
 - **Pinned Notes Section**:
   - Displays user-manually set important notes in customizable order
   - Supports unlimited pinned notes
-  - One-click management button to quickly jump to settings page
+  - Gear icon in the command bar jumps straight to the plugin settings page
   - Right-click on any pinned note to remove it from pinned list
   - Drag and drop pinned notes to reorder them
   - Shows file icon, title, folder path, and modification time
@@ -227,7 +237,7 @@ npm run build
 
 ### New Note Creation
 
-The floating button in the bottom right corner of the start page creates a note using your configured title template, target folder, and conflict behavior. If the resulting note is already open in a tab, that tab is activated instead of opening a second one.
+The "New note" chip (desktop) or the floating ＋ button (mobile) creates a note using your configured title template, target folder, and conflict behavior. If the resulting note is already open in a tab, that tab is activated instead of opening a second one.
 
 **Title template placeholders**
 
@@ -261,18 +271,17 @@ The settings page shows a live preview of the generated title as you edit the te
 ## Interface Features
 
 ### Modern Design
-- **Card-based Layout**: Modern card design with clear information hierarchy.
-- **Gradient Effects**: Beautiful gradient colors and shadow effects.
-- **Responsive Design**: Perfect adaptation to desktop and mobile devices.
-- **Theme Compatibility**: Automatically adapts to Obsidian's light and dark themes.
+- **Card-based Layout**: Tabbed note card plus a recent-notes card with grouped headers.
+- **Theme-derived Colors**: Every color comes from Obsidian's theme variables and accent color — the plugin ships no palette of its own.
+- **Responsive Design**: Desktop shows the full command bar and chips; mobile collapses the actions into a floating ＋ button and hides the keyboard hints.
 
 ### Interactive Experience
 - **Hover Effects**: Rich mouse hover animation effects on note items and buttons
 - **Click Feedback**: Clear click feedback and state changes
 - **Keyboard Support**: Type any character to instantly open search; complete keyboard navigation in search modal
-- **Smart Search**: Click search box or stat cards to open full-featured search modal with fuzzy matching
+- **Smart Search**: Click the search bar or the total-notes figure to open the full-featured search modal with fuzzy matching
 - **Create Notes**: Press Enter in empty search results to create a new note with the search query as title
-- **Quick Create Button**: The floating button in the bottom right corner creates a note using your title template and target folder settings, and activates the tab if the note is already open
+- **Quick Create Button**: The "New note" chip (desktop) or floating ＋ button (mobile) creates a note using your title template and target folder settings, and activates the tab if the note is already open
 - **Accessibility**: Follows accessibility design principles with proper ARIA labels
 
 ## Technical Features
