@@ -55,45 +55,25 @@ A modern startup homepage plugin for Obsidian that provides a beautiful dashboar
 
 ## Screenshots
 
-### Desktop Interface
+### Compact (default)
 
-#### Light Theme
-<img src="Screenshots/startpage-desktop-light.png" alt="StartPage Desktop Light" width="600"/>
+<img src="Screenshots/startpage-desktop-dark.png" alt="StartPage Compact Desktop Dark" width="600"/>
 
-*StartPage interface in light theme on desktop*
+*Desktop (dark theme)*
 
-<img src="Screenshots/setting-desktop-light.png" alt="Settings Desktop Light" width="600"/>
+<img src="Screenshots/startpage-mobile-dark.png" alt="StartPage Compact Mobile Dark" width="400"/>
 
-*Plugin settings interface in light theme*
+*Mobile (dark theme)*
 
-#### Dark Theme
-<img src="Screenshots/startpage-desktop-dark.png" alt="StartPage Desktop Dark" width="600"/>
+### Classic
 
-*StartPage interface in dark theme on desktop*
+<img src="Screenshots/startpage-classic-desktop-dark.png" alt="StartPage Classic Desktop Dark" width="600"/>
 
-<img src="Screenshots/setting-desktop-dark.png" alt="Settings Desktop Dark" width="600"/>
+*Desktop (dark theme)*
 
-*Plugin settings interface in dark theme*
+<img src="Screenshots/startpage-classic-mobile-dark.png" alt="StartPage Classic Mobile Dark" width="400"/>
 
-### Mobile Interface
-
-#### Light Theme
-<img src="Screenshots/startpage-mobile-light.png" alt="StartPage Mobile Light" width="400"/>
-
-*StartPage interface in light theme on mobile*
-
-<img src="Screenshots/setting-mobile-light.png" alt="Settings Mobile Light" width="400"/>
-
-*Plugin settings interface in light theme on mobile*
-
-#### Dark Theme
-<img src="Screenshots/startpage-mobile-dark.png" alt="StartPage Mobile Dark" width="400"/>
-
-*StartPage interface in dark theme on mobile*
-
-<img src="Screenshots/setting-mobile-dark.png" alt="Settings Mobile Dark" width="400"/>
-
-*Plugin settings interface in dark theme on mobile*
+*Mobile (dark theme)*
 
 ## Usage
 

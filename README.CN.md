@@ -57,45 +57,25 @@
 
 ## 界面截图
 
-### 桌面端界面
+### 紧凑（默认）
 
-#### 浅色主题
-<img src="Screenshots/startpage-desktop-light.png" alt="StartPage Desktop Light" width="600"/>
+<img src="Screenshots/startpage-desktop-dark.png" alt="StartPage Compact Desktop Dark" width="600"/>
 
-*桌面端浅色主题下的 StartPage 界面*
+*桌面端（深色主题）*
 
-<img src="Screenshots/setting-desktop-light.png" alt="Settings Desktop Light" width="600"/>
+<img src="Screenshots/startpage-mobile-dark.png" alt="StartPage Compact Mobile Dark" width="400"/>
 
-*浅色主题下的插件设置界面*
+*移动端（深色主题）*
 
-#### 深色主题
-<img src="Screenshots/startpage-desktop-dark.png" alt="StartPage Desktop Dark" width="600"/>
+### 经典
 
-*桌面端深色主题下的 StartPage 界面*
+<img src="Screenshots/startpage-classic-desktop-dark.png" alt="StartPage Classic Desktop Dark" width="600"/>
 
-<img src="Screenshots/setting-desktop-dark.png" alt="Settings Desktop Dark" width="600"/>
+*桌面端（深色主题）*
 
-*深色主题下的插件设置界面*
+<img src="Screenshots/startpage-classic-mobile-dark.png" alt="StartPage Classic Mobile Dark" width="400"/>
 
-### 移动端界面
-
-#### 浅色主题
-<img src="Screenshots/startpage-mobile-light.png" alt="StartPage Mobile Light" width="400"/>
-
-*移动端浅色主题下的 StartPage 界面*
-
-<img src="Screenshots/setting-mobile-light.png" alt="Settings Mobile Light" width="400"/>
-
-*移动端浅色主题下的插件设置界面*
-
-#### 深色主题
-<img src="Screenshots/startpage-mobile-dark.png" alt="StartPage Mobile Dark" width="400"/>
-
-*移动端深色主题下的 StartPage 界面*
-
-<img src="Screenshots/setting-mobile-dark.png" alt="Settings Mobile Dark" width="400"/>
-
-*移动端深色主题下的插件设置界面*
+*移动端（深色主题）*
 
 ## 使用方法
 
