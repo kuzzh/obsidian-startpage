@@ -8,7 +8,7 @@ A modern startup homepage plugin for Obsidian that provides a beautiful dashboar
 
 ### Smart Homepage
 - **Automatic Startup Homepage**: Automatically replaces new tabs with the start page when enabled
-- **Modern Design**: Compact command bar with action chips, tabbed note cards and responsive layout
+- **Two Interface Styles**: Compact command-bar layout (default) or the classic logo header with stat cards and floating actions, switchable in settings
 - **Dashboard Statistics**: Real-time display of vault statistics (total notes, today's edits, total storage space)
 - **Quick Search**: Built-in search box with keyboard shortcuts - just start typing to search your notes
 - **Toolbar Integration**: Adds a homepage icon to the left toolbar for quick access anytime
@@ -19,7 +19,7 @@ A modern startup homepage plugin for Obsidian that provides a beautiful dashboar
 - **Recent Notes**: Display recently accessed and modified notes, intelligently sorted by both modification time and access time
 - **Smart Search Modal**: Full-featured search with fuzzy matching and case-sensitive option
 - **Dynamic Count**: Customizable number of recent notes to display (5-50 notes, adjustable directly on the homepage)
-- **Context Menu**: Support adding/removing pinned notes via right-click context menu in file explorer and on pinned notes
+- **Context Menu**: Add/remove pinned notes via right-click or long-press on note items, and via the file explorer context menu
 - **Import from Bookmarks**: Easily import pinned notes from Obsidian's built-in bookmarks feature
 - **Reorder Pinned Notes**: Move pinned notes up or down in the settings to customize the display order
 - **Configurable New Note**: Create notes from the homepage with a customizable title template (date/time placeholders) and a target folder
@@ -105,7 +105,7 @@ A modern startup homepage plugin for Obsidian that provides a beautiful dashboar
 2. **View Statistics**: The chips row shows vault statistics (total notes, today's edits, total storage space) next to the edit-activity heatmap. Click the total-notes figure to open search, or today's-edits figure to list today's notes.
 3. **Quick Create**: Click the "New note" chip to create a note using your configured title template and folder. On mobile the same actions live behind the floating ＋ button.
 4. **Access Notes**: Click on pinned notes or recent notes to directly open the corresponding notes.
-5. **Context Menu**: Right-click on files in the file explorer to quickly add or remove pinned notes; right-click recent notes to pin them.
+5. **Context Menu**: Right-click (or long-press on mobile) any pinned or recent note for pin/unpin, open in new tab, and show in file explorer; file explorer right-click still adds/removes pinned notes.
 6. **Quick Capture**: Click the "Quick capture to today's daily note" chip to append a timestamped line to today's daily note; "Open today's daily note" jumps to it. Both are in the ＋ menu on mobile.
 
 ### Setting Pinned Notes
@@ -132,6 +132,7 @@ A modern startup homepage plugin for Obsidian that provides a beautiful dashboar
 - **Check for Updates**: Look up new releases on GitHub and show a badge on the start page
 
 #### Appearance Settings
+- **Interface style**: Compact command bar (default) or classic logo header with stat cards and floating actions
 - **Title Navigation Bar**: Choose to show, hide, or use default behavior (hidden on desktop, shown on mobile)
 - **Show Greeting**: Show a time-of-day greeting with today's date instead of the default title
 - **Show stat. bar**: Toggle the statistics text in the chips row
@@ -270,8 +271,9 @@ The settings page shows a live preview of the generated title as you edit the te
 
 ## Interface Features
 
-### Modern Design
-- **Card-based Layout**: Tabbed note card plus a recent-notes card with grouped headers.
+### Interface Styles
+- **Compact**: Card-based layout with a tabbed note card and grouped recent notes; actions live in the command-bar chips.
+- **Classic**: Logo header, stat cards (hidden on mobile), flat note rows and floating new-note/capture buttons.
 - **Theme-derived Colors**: Every color comes from Obsidian's theme variables and accent color — the plugin ships no palette of its own.
 - **Responsive Design**: Desktop shows the full command bar and chips; mobile collapses the actions into a floating ＋ button and hides the keyboard hints.
 

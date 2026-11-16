@@ -1,0 +1,821 @@
+/* 修复 hover preview 窗口被 modal 遮挡的问题 */
+.popover.hover-popover {
+	z-index: 1000;
+}
+
+/* 顶级容器撑满页面：外层永不滚动，滚动只发生在左右笔记列表内 */
+.start-page-container {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	margin: 0 auto;
+	padding: 20px !important;
+	/* .view-content 自身带 overflow-y:auto，必须压过核心样式，否则整页滚动 */
+	overflow: hidden !important;
+}
+
+.start-page-container .main-content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 0 !important;
+}
+
+/* 容器就是 .view-content，核心样式带 overflow-y:auto；用更高优先级锁死外层滚动 */
+.workspace-leaf-content > .view-content.start-page-container {
+	overflow: hidden !important;
+}
+
+
+/* 按钮样式 */
+.start-page-container button {
+	cursor: pointer;
+}
+
+.start-page-container .new-note-icon {
+	width: 16px;
+	height: 16px;
+}
+
+/* 速记弹窗：输入框占满、确定按钮靠右同行 */
+.start-page-capture-content .capture-row {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.start-page-capture-content .capture-row input[type="text"] {
+	flex: 1;
+}
+
+/* 新建笔记标题模板预览 */
+.new-note-template-preview {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller, 12px);
+	margin: -8px 0 12px;
+	padding-left: 2px;
+	word-break: break-all;
+}
+
+
+/* 活动热力图：GitHub 风格 16 周 × 7 天，色阶由 accent 与透明混合 */
+.start-page-container .activity-grid {
+	display: grid;
+	grid-auto-flow: column;
+	grid-template-rows: repeat(7, 6px);
+	grid-auto-columns: 6px;
+	gap: 2px;
+	justify-content: end;
+}
+
+.start-page-container .activity-cell {
+	border-radius: 1px;
+	background: var(--background-modifier-border);
+}
+
+.start-page-container .activity-l1 {
+	background: color-mix(in srgb, var(--interactive-accent) 25%, transparent);
+}
+
+.start-page-container .activity-l2 {
+	background: color-mix(in srgb, var(--interactive-accent) 50%, transparent);
+}
+
+.start-page-container .activity-l3 {
+	background: color-mix(in srgb, var(--interactive-accent) 75%, transparent);
+}
+
+.start-page-container .activity-l4 {
+	background: var(--interactive-accent);
+}
+
+.start-page-container .activity-future {
+	visibility: hidden;
+}
+
+/* 键盘聚焦态：默认细轮廓不醒目，用 accent 描边 + 激活底色强调 */
+.start-page-container .note-item:focus-visible {
+	outline: 2px solid var(--interactive-accent);
+	outline-offset: -2px;
+	background: var(--background-modifier-active-hover);
+}
+
+/* 触屏长按用于呼出菜单，避免同时触发文字选择/系统菜单 */
+@media (pointer: coarse) {
+	.start-page-container .note-item {
+		user-select: none;
+		-webkit-touch-callout: none;
+	}
+}
+
+/* 主要内容网格 */
+.start-page-container .content-grid {
+	flex: 1;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	/* 单列/堆叠时两行均分剩余高度，让列表内部滚动而不是把整页撑高 */
+	grid-auto-rows: minmax(0, 1fr);
+	gap: 20px;
+	min-width: 0;
+	min-height: 0;
+}
+
+/* 仅渲染一个板块时占满整行 */
+.start-page-container .content-grid.single-section {
+	grid-template-columns: 1fr;
+}
+
+/* 布局自定义：左右互换用 order（direction 会波及内部文本方向），堆叠则单列全宽 */
+.start-page-container .content-grid.layout-columns-reversed .pinned-notes {
+	order: 2;
+}
+
+.start-page-container .content-grid.layout-columns-reversed .recent-notes {
+	order: 1;
+}
+
+.start-page-container .content-grid.layout-stacked {
+	grid-template-columns: 1fr;
+}
+
+.start-page-container .footer-shortcut-hints {
+	margin-top: 4px;
+	font-size: 0.8em;
+	color: var(--text-faint);
+	opacity: 0.85;
+}
+
+
+/* 区块样式 */
+.start-page-container .section {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+	background: var(--background-secondary);
+	backdrop-filter: blur(10px);
+	border-radius: 12px;
+	padding: 10px 12px;
+	border: 1px solid var(--background-modifier-border);
+}
+
+/* 笔记列表：直接坐在区块底色上，不再叠一层灰底 */
+.start-page-container .notes-list {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	overflow-y: auto;
+	overflow-x: hidden;
+	min-height: 0;
+}
+
+.start-page-container .notes-group-title {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	padding: 10px 4px 2px;
+	color: var(--text-faint);
+	font-size: 0.8em;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.start-page-container .notes-list-empty {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 8px;
+	padding: 32px 12px;
+	border: 1px dashed var(--tag-border-color);
+	border-radius: 10px;
+	color: var(--text-faint);
+	font-size: 0.9em;
+}
+
+.start-page-container .notes-list-empty-action {
+	padding: 4px 14px;
+	border: none;
+	border-radius: 8px;
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	font-size: 0.9em;
+	cursor: pointer;
+	transition: background 0.2s ease;
+}
+
+.start-page-container .notes-list-empty-action:hover {
+	background: var(--interactive-accent-hover);
+}
+
+
+.start-page-container .recent-notes-limit-label {
+	margin-right: 0.5rem;
+	color: var(--text-faint);
+}
+
+.start-page-container .footer {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	margin-top: 20px;
+	font-size: 12px;
+	color: var(--text-faint);
+}
+
+.start-page-container .footer p {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	margin: 5px;
+}
+
+.start-page-container .footer svg {
+	min-width: 16px;
+	min-height: 16px;
+}
+
+/* 动画效果 */
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Settings styles */
+.pinned-note-list {
+	padding: 0;
+}
+
+.pinned-note-item {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 10px 0;
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.pinned-note-item:last-child {
+	border-bottom: none;
+}
+
+.pinned-note-item .note-line1 {
+	display: flex;
+	align-items: center;
+}
+
+.pinned-note-item .note-title {
+	font-weight: 500;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.pinned-note-item .note-line2 {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	align-items: center;
+	gap: 8px;
+}
+
+.pinned-note-item .note-path {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	color: var(--text-faint);
+	font-size: 12px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.pinned-note-item .note-path-text {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.pinned-note-item .folder-icon {
+	color: inherit;
+	display: inline-flex;
+	align-items: center;
+	flex-shrink: 0;
+}
+
+.pinned-note-item .folder-icon svg {
+	width: 14px;
+	height: 14px;
+}
+
+.pinned-note-item .note-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 6px;
+}
+
+.pinned-note-item .control-button {
+	margin-left: 0;
+	padding: 0;
+	width: 24px;
+	height: 24px;
+	border: none;
+	background: none;
+	cursor: pointer;
+	border-radius: 4px;
+	color: var(--text-faint);
+	transition: all 0.2s;
+}
+
+.pinned-note-item .control-button:hover {
+	color: var(--text-normal);
+	background: var(--background-modifier-hover);
+}
+
+.pinned-note-item .control-button svg {
+	width: 16px;
+	height: 16px;
+}
+
+.pinned-note-item .remove-button {
+	margin-left: 8px;
+	cursor: pointer;
+}
+
+.pinned-note-item .remove-button:hover {
+	color: var(--text-error);
+	background: var(--background-modifier-hover);
+	transition: all 0.2s;
+}
+
+/* Hide title navigation bar for start page */
+/* .workspace-leaf-content[data-type="start-page-view"] .view-header { */
+/* display: none; */
+/* } */
+
+.start-page-container .refresh-icon {
+	width: 16px;
+	height: 16px;
+	cursor: pointer;
+}
+
+.start-page-container .refresh-icon:hover {
+	color: var(--text-normal);
+	transition: all 0.2s;
+}
+
+/* Search modal styles */
+
+.my-today-edited-modal {
+	width: 480px;
+	max-width: 90vw !important;
+}
+
+.my-today-edited-modal .my-today-edited-content {
+	max-height: 60vh;
+	overflow-y: auto;
+	padding: 0.5em 1em 1em 1em;
+}
+
+.my-today-edited-modal .today-edited-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.my-today-edited-modal .today-edited-item {
+	padding: 10px 14px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 12px;
+	cursor: pointer;
+	border-radius: 6px;
+	font-size: 15px;
+	transition: background 0.15s;
+}
+
+.my-today-edited-modal .today-edited-item:hover {
+	background: var(--background-modifier-hover);
+}
+
+.my-today-edited-modal .today-edited-item-name {
+	font-weight: 500;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.my-today-edited-modal .today-edited-item-meta {
+	color: var(--text-muted);
+	font-size: 13px;
+	flex-shrink: 0;
+}
+
+.my-today-edited-modal .today-edited-empty {
+	color: var(--text-faint);
+	text-align: center;
+	padding: 24px 0;
+}
+
+.my-search-modal {
+	/* 定位属性必须 !important：Obsidian 的 .modal 基础样式会覆盖成 relative + flex 垂直居中，
+	   导致高度随结果变化时整窗抖动；fixed + top 锚定 + auto margin 水平居中则完全稳定 */
+	top: 12% !important;
+	bottom: auto !important;
+	left: 0 !important;
+	right: 0 !important;
+	margin: 0 auto !important;
+	position: fixed !important;
+	width: 600px;
+	max-width: 90vw !important;
+	min-height: 100px !important;
+	max-height: calc(80vh - 20%) !important;
+	display: flex;
+	flex-direction: column;
+}
+
+.my-search-modal .my-search-content {
+	display: flex;
+	flex-direction: column;
+	min-height: 100px;
+	max-height: 80vh;
+	overflow: hidden;
+}
+
+.my-search-modal .search-container {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	flex-shrink: 0;
+	padding: 1em;
+}
+
+.my-search-modal .search-case-sensitive-btn {
+	width: 28px;
+	height: 30px;
+	border: none;
+	color: var(--text-muted);
+	background: transparent;
+	cursor: pointer;
+	border-radius: 4px;
+	font-weight: 600;
+	font-size: 14px;
+	opacity: 0.5;
+	box-shadow: none;
+	transition: opacity 0.2s, background-color 0.2s;
+}
+
+.my-search-modal .search-case-sensitive-btn:hover {
+	opacity: 1;
+	background: var(--background-modifier-hover);
+}
+
+.my-search-modal .search-case-sensitive-btn.is-active {
+	opacity: 1;
+	color: var(--text-accent);
+}
+
+.my-search-modal .search-input-container {
+	flex: 1 !important;
+}
+
+.my-search-modal .search-syntax-hints {
+	padding: 0 1em 4px;
+	color: var(--text-faint);
+	font-size: 12px;
+	flex-shrink: 0;
+}
+
+.my-search-modal .search-syntax-hints code {
+	color: var(--text-muted);
+	background: var(--background-primary-alt);
+	padding: 1px 5px;
+	border-radius: 4px;
+	font-size: 11px;
+}
+
+.my-search-modal .search-results-container {
+	flex: 1;
+	overflow-y: auto;
+	padding: 0 1em 1em 1em;
+}
+
+.my-search-modal .search-results-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	border: none;
+	overflow: hidden;
+}
+
+.my-search-modal .search-result-item {
+	padding: 10px 14px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	cursor: pointer;
+	transition: background 0.15s;
+	font-size: 15px;
+	border-radius: 6px;
+}
+
+.my-search-modal .search-result-item:hover {
+	background: var(--background-modifier-hover);
+}
+
+.my-search-modal .search-result-item.is-active {
+	background: var(--background-modifier-active-hover);
+}
+
+.my-search-modal .search-result-item-highlight {
+	background: var(--text-highlight-bg);
+	border-radius: 2px;
+}
+
+.my-search-modal .search-result-item-file-name {
+	font-weight: 500;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 100%;
+}
+
+.my-search-modal .search-result-item-alias {
+	margin-left: 8px;
+	padding: 2px 8px;
+	background-color: var(--tag-background);
+	border: 1px solid var(--tag-border-color);
+	border-radius: 12px;
+	color: var(--tag-color);
+	font-size: 11px;
+	font-weight: 500;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+.my-search-modal .search-result-item-ext {
+	flex: 1;
+	text-transform: uppercase;
+	background-color: var(--nav-tag-background);
+	border-radius: var(--nav-tag-radius);
+	color: var(--nav-tag-color);
+	font-size: 9px;
+	font-weight: var(--nav-tag-weight);
+	letter-spacing: 0.05em;
+	line-height: var(--line-height-normal);
+	margin-inline-start: auto;
+	padding: 0 var(--size-4-1);
+	align-self: center;
+	margin-right: 8px;
+	min-width: 16px;
+	min-height: 16px;
+}
+
+.my-search-modal .search-result-item-folder-name,
+.my-search-modal .search-result-item-folder-icon {
+	background-color: var(--nav-tag-background);
+	border-radius: var(--nav-tag-radius);
+	color: var(--nav-tag-color);
+	margin-left: 4px;
+	font-size: 12px;
+	flex-shrink: 0;
+}
+
+/* Search Exclude Settings Button */
+.my-search-modal .search-exclude-settings-btn {
+	width: 28px;
+	height: 30px;
+	border: none;
+	color: var(--text-muted);
+	background: transparent;
+	cursor: pointer;
+	border-radius: 4px;
+	opacity: 0.5;
+	box-shadow: none;
+	transition: opacity 0.2s, background-color 0.2s;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 600;
+	font-size: 14px;
+}
+
+.my-search-modal .search-exclude-settings-btn:hover {
+	opacity: 1;
+	background: var(--background-modifier-hover);
+}
+
+.my-search-modal .search-exclude-settings-btn svg {
+	width: 20px;
+	height: 20px;
+	flex-shrink: 0;
+}
+
+/* Exclude List Item Styles */
+.extension-tags-container {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.extension-tags-container .setting-item {
+	border: none !important;
+	padding-top: 0px !important;
+	padding-bottom: 16px !important;
+	flex-direction: row !important;
+	align-items: center !important;
+	margin-inline-end: unset !important;
+	gap: 2px !important;
+}
+
+.exclusion-paths-list .setting-item {
+	flex-direction: row !important;
+	align-items: center !important;
+	margin-inline-end: unset !important;
+	gap: 2px !important;
+}
+
+.extension-tags-container .setting-item .setting-item-control,
+.exclusion-paths-list .setting-item .setting-item-control {
+	width: unset !important;
+}
+
+.extension-tags-container .setting-item .setting-item-info,
+.exclusion-paths-list .setting-item .setting-item-info {
+	margin-inline-end: unset !important;
+}
+
+/* Update Badge Styles */
+.update-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 12px;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: white;
+	border-radius: 20px;
+	font-size: 13px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+	user-select: none;
+	animation: pulse-badge 2s ease-in-out infinite;
+}
+
+.update-badge:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+	background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.update-badge:active {
+	transform: translateY(0);
+}
+
+.update-badge-icon {
+	font-size: 16px;
+	line-height: 1;
+}
+
+.update-badge-text {
+	line-height: 1;
+	white-space: nowrap;
+}
+
+@keyframes pulse-badge {
+	0%, 100% {
+		box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+	}
+
+	50% {
+		box-shadow: 0 2px 16px rgba(102, 126, 234, 0.6);
+	}
+}
+
+
+
+/* 响应式：两套界面共用的收缩规则 */
+@media (max-width: 1200px) {
+	.start-page-container {
+		padding: 5px !important;
+		overflow-x: hidden !important;
+	}
+
+	.start-page-container .recent-notes-limit-label {
+		display: none;
+	}
+
+	.start-page-container .content-grid {
+		gap: 10px;
+	}
+
+	.my-search-modal {
+		top: 10%;
+		left: 10px !important;
+		transform: translateX(10px);
+		bottom: 10% !important;
+		max-height: 90vh !important;
+		border: var(--modal-border-width) solid var(--modal-border-color) !important;
+	}
+
+	.my-search-modal .search-result-item {
+		font-size: 12px;
+	}
+
+	.my-search-modal .search-result-item-folder-icon,
+	.my-search-modal .search-result-item-folder-name {
+		display: none;
+	}
+
+	button:not(.clickable-icon).mobile-tap {
+		box-shadow: none !important;
+	}
+}
+
+@media (max-width: 768px) {
+	.start-page-container .container {
+		padding: 10px;
+	}
+
+	/* 桌面端的并排选择会一直保留到极窄窗口，手机上双列不可用，只有这一档强制堆叠 */
+	.start-page-container .content-grid {
+		grid-template-columns: 1fr;
+	}
+
+	/* 移动端改为外层统一滚动：列表高度随内容，不再各自内部滚动 */
+	.workspace-leaf-content > .view-content.start-page-container {
+		overflow-y: auto !important;
+	}
+
+	.start-page-container .main-content,
+	.start-page-container .content-grid {
+		flex: 0 0 auto;
+	}
+
+	.start-page-container .content-grid {
+		grid-auto-rows: auto;
+	}
+
+	.start-page-container .tab-container {
+		flex: 0 0 auto;
+		overflow: visible;
+	}
+
+	.start-page-container .tab-content-wrapper {
+		flex: 0 0 auto;
+		overflow: visible;
+	}
+
+	.start-page-container .tab-panel {
+		height: auto;
+		overflow: visible;
+	}
+
+	.start-page-container .section,
+	.start-page-container .tab-panel .section {
+		flex: 0 0 auto;
+		overflow: visible !important;
+	}
+
+	.start-page-container .notes-list,
+	.start-page-container .tab-panel .notes-list {
+		flex: 0 0 auto;
+		overflow: visible !important;
+	}
+
+	.start-page-container .actions-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.pinned-note-item .note-actions {
+		justify-content: flex-start;
+	}
+
+	.pinned-note-item .control-button,
+	.pinned-note-item .remove-button {
+		height: 24px;
+		padding: 2px 4px;
+	}
+}
+
+@media (max-width: 480px) {
+	.start-page-container .section {
+		padding: 12px;
+	}
+
+	.start-page-container .action-card {
+		padding: 12px 10px;
+	}
+}

@@ -228,6 +228,8 @@ export class StartPageView extends ItemView {
 
 	private captureScrollState(container: HTMLElement): { key: string; top: number }[] {
 		const state: { key: string; top: number }[] = [];
+		// 移动端由外层容器统一滚动，桌面端则为 0，记录无副作用
+		if (container.scrollTop > 0) state.push({ key: "container", top: container.scrollTop });
 		container.querySelectorAll<HTMLElement>(".notes-list").forEach((el) => {
 			if (el.scrollTop > 0) state.push({ key: scrollerKey(el), top: el.scrollTop });
 		});
@@ -258,8 +260,7 @@ export class StartPageView extends ItemView {
 	private handleScrollEvent(e: Event) {
 		const target = e.target;
 		if (!(target instanceof HTMLElement)) return;
-		// 外层容器永不滚动，只关心内部滚动区域
-		if (target === this.containerEl.children[1]) return;
+		// 移动端外层容器也参与滚动；桌面端外层不滚，只有内层列表产生事件
 		// 仅记录内存，onClose 时统一持久化
 		this.lastScroll = { key: scrollerKey(target), top: target.scrollTop };
 	}

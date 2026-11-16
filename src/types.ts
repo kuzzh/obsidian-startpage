@@ -56,8 +56,10 @@ export const DEFAULT_SECTION_STYLE: SectionStyleSettings = {
 
 export type ContentLayout = "columns" | "columns-reversed" | "stacked";
 export type ListDensity = "comfortable" | "compact";
+export type UiStyle = "compact" | "classic";
 
 export interface StartPageSettings {
+	uiStyle: UiStyle;
 	contentLayout: ContentLayout;
 	listDensity: ListDensity;
 	includeAllFilesInRecent: boolean;
@@ -97,6 +99,7 @@ export interface StartPageSettings {
 	}
 
 export const DEFAULT_SETTINGS: StartPageSettings = {
+	uiStyle: "compact",
 	contentLayout: "columns",
 	listDensity: "comfortable",
 	includeAllFilesInRecent: true,

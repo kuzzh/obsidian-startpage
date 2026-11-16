@@ -1,40 +1,33 @@
+import { App, Keymap, TFile, WorkspaceLeaf } from "obsidian";
 import { ID_STAT_TOTAL_NOTES, ID_STAT_TODAY_EDITED, ID_STAT_TOTAL_SIZE } from "@/types";
-import { App, TFile, Menu, Keymap, WorkspaceLeaf, moment } from "obsidian";
 import StartPagePlugin from "@/main";
 import { t } from "@/i18n";
-import { VIEW_TYPE_START_PAGE } from "@/views/startpageview";
-import FooterTextUtil from "@/utils/footertextutil";
-import SvgUtil from "@/utils/svgutil";
 import { MyUtil } from "@/utils/myutil";
 import { NewNoteUtil } from "@/utils/newnoteutil";
-import { VersionChecker } from "@/utils/versionchecker";
 import SearchModal from "@/views/searchmodal";
 import CaptureModal from "@/views/capturemodal";
 import PinnedNotesModal from "@/views/pinnednotesmodal";
 import TodayEditedModal from "@/views/todayeditedmodal";
-import { DailyNoteUtil } from "@/utils/dailynoteutil";
-
-declare module "obsidian" {
-	interface App {
-		setting: {
-			open(): void;
-			openTabById(id: string): void;
-		};
-		commands: {
-			executeCommandById(id: string): void;
-		};
-	}
-}
+import CompactSkin from "./skins/compactskin";
+import ClassicSkin from "./skins/classicskin";
+import { bindNoteItem } from "./skins/shared";
+import {
+	NoteBindingOptions,
+	StartPageActions,
+	StartPageContext,
+	StartPageSkin,
+	StatItem,
+	TabFolderItem,
+} from "./skins/types";
 
 export default class StartPageCreator {
 	private app: App;
 	private plugin: StartPagePlugin;
 	private container: Element;
-	private searchBox: HTMLInputElement;
 	private keyHandler: (e: KeyboardEvent) => void;
 	private arrowHandler: ((e: KeyboardEvent) => void) | null = null;
 	private initialQuery: string = "";
-	private stats = [
+	private stats: StatItem[] = [
 		{
 			id: ID_STAT_TOTAL_NOTES,
 			data: {
@@ -63,43 +56,39 @@ export default class StartPageCreator {
 			},
 		},
 	];
-		private pinnedNotes: TFile[] | null = null;
-		private recentNotes: TFile[] | null = null;
-		private tabFolderItems: { folderPath: string; folderName: string; files: TFile[] }[] | null = null;
+	private pinnedNotes: TFile[] | null = null;
+	private recentNotes: TFile[] | null = null;
+	private tabFolderItems: TabFolderItem[] | null = null;
 	private resizeObserver: ResizeObserver | null = null;
-	private draggingPinnedPath: string | null = null;
 	private resizeHandler: (() => void) | null = null;
 	private activeTabIndex = 0;
-	private pendingPreviewItems: { el: HTMLElement; file: TFile }[] = [];
+	private draggingPinnedPath: string | null = null;
+	private skin: StartPageSkin | null = null;
 
-		constructor(app: App, plugin: StartPagePlugin, container: Element) {
+	constructor(app: App, plugin: StartPagePlugin, container: Element) {
 		this.app = app;
 		this.plugin = plugin;
 		this.container = container;
 	}
 
-		public async createStartPage(
-			pinnedNotes: TFile[] | null, 
-			recentNotes: TFile[] | null,
-			tabFolderItems?: { folderPath: string; folderName: string; files: TFile[] }[] | null
-		): Promise<void> {
-			this.initData(pinnedNotes, recentNotes, tabFolderItems || null);
+	public async createStartPage(
+		pinnedNotes: TFile[] | null,
+		recentNotes: TFile[] | null,
+		tabFolderItems?: TabFolderItem[] | null,
+	): Promise<void> {
+		this.initData(pinnedNotes, recentNotes, tabFolderItems || null);
 
 		this.container.empty();
 		this.container.addClass("start-page-container");
+		// 容器跨重渲染复用，切换风格时必须清掉旧变体类，否则两套规则同时生效
+		this.container.removeClass("sp-style-compact");
+		this.container.removeClass("sp-style-classic");
+		this.container.addClass(`sp-style-${this.plugin.settings.uiStyle}`);
 
-		const header = this.createHeader();
-		const mainContent = this.createMainContent();
-		// 列表密度作用于整个内容区，紧凑档隐藏摘要与元信息行
-		mainContent.addClass("density-" + this.plugin.settings.listDensity);
-		const footer = await this.createFooter();
-
-		this.container.appendChild(header);
-		this.container.appendChild(mainContent);
-		this.container.appendChild(footer);
+		this.skin = this.plugin.settings.uiStyle === "classic" ? new ClassicSkin() : new CompactSkin();
+		await this.skin.render(this.createContext());
 
 		this.setupKeyListener();
-		this.flushNotePreviews();
 
 		(this.container as HTMLElement).tabIndex = -1;
 	}
@@ -115,14 +104,24 @@ export default class StartPageCreator {
 		this.resizeHandler = null;
 	}
 
-		private initData(
-			pinnedNotes: TFile[] | null, 
-			recentNotes: TFile[] | null,
-			tabFolderItems: { folderPath: string; folderName: string; files: TFile[] }[] | null = null
-		): void {
-			this.pinnedNotes = pinnedNotes;
-			this.recentNotes = recentNotes;
-			this.tabFolderItems = tabFolderItems;
+	public async updateNoteModifiedTimes(notes: TFile[]) {
+		for (const note of notes) {
+			const noteElement = this.container.querySelector(`[data-note-path="${note.path}"] .note-date`);
+			if (noteElement) {
+				const formattedDate = MyUtil.formatDate(note.stat.mtime);
+				noteElement.textContent = formattedDate;
+			}
+		}
+	}
+
+	private initData(
+		pinnedNotes: TFile[] | null,
+		recentNotes: TFile[] | null,
+		tabFolderItems: TabFolderItem[] | null = null,
+	): void {
+		this.pinnedNotes = pinnedNotes;
+		this.recentNotes = recentNotes;
+		this.tabFolderItems = tabFolderItems;
 
 		this.stats.forEach((stat) => {
 			if (stat.id === ID_STAT_TOTAL_NOTES) {
@@ -135,547 +134,74 @@ export default class StartPageCreator {
 		});
 	}
 
-	public async updateNoteModifiedTimes(notes: TFile[]) {
-		for (const note of notes) {
-			const noteElement = this.container.querySelector(`[data-note-path="${note.path}"] .note-date`);
-			if (noteElement) {
-				const formattedDate = MyUtil.formatDate(note.stat.mtime);
-				noteElement.textContent = formattedDate;
-			}
-		}
-	}
-
-	private createHeader(): HTMLElement {
-		// 命令条头部（变体 C）：问候与命令条同行，chips 行随下，垂直空间全部让给列表
-		const header = this.createElement("header", "command-header" + (this.plugin.settings.showGreeting ? "" : " no-greeting"));
-
-		const greetingRow = this.createElement("div", "command-greeting-row");
-		if (this.plugin.settings.showGreeting) {
-			greetingRow.appendChild(this.createElement("div", "command-greeting", this.getGreetingText()));
-		}
-
-		const bar = this.createElement("div", "command-bar");
-		bar.appendChild(this.createElement("span", "command-prompt", "›"));
-
-		this.searchBox = this.createElement("input", "search-box") as HTMLInputElement;
-		this.searchBox.type = "text";
-		this.searchBox.placeholder = t("search_placeholder");
-		this.searchBox.addEventListener("click", () => {
-			this.showSearchModal();
-		});
-
-		this.searchBox.addEventListener("focus", (e) => {
-			(e.target as HTMLInputElement).blur();
-		});
-		// 假搜索框必须移出 Tab 序：其 focus 即自 blur 的监听会把 Tab 焦点弹飞，表现为"按 Tab 没反应"
-		this.searchBox.setAttribute("tabindex", "-1");
-		bar.appendChild(this.searchBox);
-
-		bar.appendChild(this.createElement("span", "command-kbd", t("kbd_any_key")));
-		bar.appendChild(this.createElement("span", "command-kbd", t("kbd_ctrl_enter")));
-
-		const manageBtn = this.createElement("button", "manage-btn");
-		manageBtn.setAttribute("title", t("manage"));
-		manageBtn.appendChild(SvgUtil.createSettingsIcon());
-		manageBtn.addEventListener("click", () => {
-			const setting = this.app.setting;
-			setting.open();
-
-			window.setTimeout(() => {
-				setting.openTabById(this.plugin.manifest.id);
-			}, 100);
-		});
-		bar.appendChild(manageBtn);
-
-		greetingRow.appendChild(bar);
-		header.appendChild(greetingRow);
-
-		// 快捷 chips 行：原浮动按钮的动作全部收编于此，行尾接统计文字与热力图
-		const chips = this.createElement("div", "chip-row");
-		const newChip = this.createElement("button", "chip chip-primary", t("new_note"));
-		newChip.addEventListener("click", () => {
-			void this.createNewNote();
-		});
-		chips.appendChild(newChip);
-
-		if (this.plugin.settings.showDailyCapture && DailyNoteUtil.getTarget(this.app)) {
-			const captureChip = this.createElement("button", "chip", t("capture_title"));
-			captureChip.addEventListener("click", () => {
-				new CaptureModal(this.app, this.plugin).open();
-			});
-			chips.appendChild(captureChip);
-		}
-		if (DailyNoteUtil.getTarget(this.app)) {
-			// 复用核心命令：创建/打开/模板/定位行为全部随核心插件
-			const dailyChip = this.createElement("button", "chip", t("open_daily_note"));
-			dailyChip.addEventListener("click", () => {
-				this.app.commands.executeCommandById("daily-notes");
-			});
-			chips.appendChild(dailyChip);
-		}
-
-		if (this.hasUpdate()) {
-			chips.appendChild(this.createUpdateBadge());
-		}
-
-		// 移动端：单个 ＋ 按钮弹出菜单（触屏无 hover 且横向空间有限），桌面由 CSS 隐藏；
-		// 无 Daily notes 时 ＋ 直接新建，省一次菜单点击
-		const dailyTarget = DailyNoteUtil.getTarget(this.app);
-		const fab = this.createElement("button", "chip-fab");
-		fab.setAttribute("aria-label", t("new_note"));
-		fab.textContent = "+";
-		fab.addEventListener("click", (event) => {
-			if (!dailyTarget) {
+	private createContext(): StartPageContext {
+		const actions: StartPageActions = {
+			openNote: (note, options) => this.openNote(note, options),
+			togglePin: (note, pin) => {
+				void this.togglePinnedNote(note, pin);
+			},
+			reorderPin: (srcPath, targetPath) => this.reorderPinnedNote(srcPath, targetPath),
+			movePinToEnd: (srcPath) => this.movePinnedNoteToEnd(srcPath),
+			showSearch: () => this.showSearchModal(),
+			openSettings: () => this.openPluginSettings(),
+			openCommunityPlugins: () => this.openCommunityPlugins(),
+			openTodayEdited: () => new TodayEditedModal(this.app, this.plugin).open(),
+			openPinnedManager: () => new PinnedNotesModal(this.app, this.plugin, () => MyUtil.refreshStartPage(this.app)).open(),
+			setRecentLimit: (limit) => {
+				this.plugin.settings.recentNotesLimit = limit;
+				void this.plugin.saveSettings();
+				MyUtil.refreshStartPage(this.app);
+			},
+			createNewNote: () => {
 				void this.createNewNote();
-				return;
-			}
-			const menu = new Menu();
-			menu.addItem((item) => {
-				item.setTitle(t("new_note"))
-					.setIcon("plus")
-					.onClick(() => {
-						void this.createNewNote();
-					});
-			});
-			if (this.plugin.settings.showDailyCapture) {
-				menu.addItem((item) => {
-					item.setTitle(t("capture_title"))
-						.setIcon("pencil")
-						.onClick(() => {
-							new CaptureModal(this.app, this.plugin).open();
-						});
-				});
-			}
-			menu.addItem((item) => {
-				item.setTitle(t("open_daily_note"))
-					.setIcon("calendar")
-					.onClick(() => {
-						this.app.commands.executeCommandById("daily-notes");
-					});
-			});
-			menu.showAtMouseEvent(event);
-		});
-		chips.appendChild(fab);
+			},
+			openCapture: () => new CaptureModal(this.app, this.plugin).open(),
+			openDailyNote: () => this.app.commands.executeCommandById("daily-notes"),
+			revealInExplorer: (note) => this.revealInExplorer(note),
+		};
 
-		chips.appendChild(this.createElement("div", "chip-spacer"));
+		const ctx: StartPageContext = {
+			app: this.app,
+			plugin: this.plugin,
+			settings: this.plugin.settings,
+			container: this.container as HTMLElement,
+			stats: this.stats,
+			pinnedNotes: this.pinnedNotes,
+			recentNotes: this.recentNotes,
+			tabFolderItems: this.tabFolderItems,
+			activeTabIndex: this.activeTabIndex,
+			actions,
+			bindNoteItem: (el: HTMLElement, note: TFile, options: NoteBindingOptions) => {
+				bindNoteItem(ctx, el, note, options);
+			},
+			setActiveTab: (index) => {
+				this.activeTabIndex = index;
+			},
+			observeTabList: (tabList, update) => this.observeTabList(tabList, update),
+			setDraggingPinnedPath: (path) => {
+				this.draggingPinnedPath = path;
+			},
+			getDraggingPinnedPath: () => this.draggingPinnedPath,
+		};
 
-		if (this.plugin.settings.showStatBar) {
-			chips.appendChild(this.createStatsText());
-		}
-		if (this.plugin.settings.showActivityHeatmap) {
-			chips.appendChild(this.createActivityGrid());
-		}
-
-		header.appendChild(chips);
-
-		return header;
+		return ctx;
 	}
 
-	private createStatsText(): HTMLElement {
-		const statsText = this.createElement("div", "stats-text");
+	private openNote(note: TFile, options: { newTab?: boolean; event?: MouseEvent } = {}): void {
+		const modEvent = options.event ? Keymap.isModEvent(options.event) : false;
+		const newLeaf = options.newTab ? "tab" : modEvent || (this.plugin.settings.openNotesInNewTab ? "tab" : false);
 
-		this.stats.forEach((stat, index) => {
-			if (index > 0) {
-				statsText.appendChild(this.createElement("span", "stat-text-separator", "·"));
-			}
-			// 与卡片时期相同的语义路由：总笔记开搜索、今日编辑下钻、总大小纯信息不可点
-			const item = this.createElement("span", `stat-text${stat.id === ID_STAT_TOTAL_SIZE ? " static" : ""}`);
-			const number = this.createElement("span", "stat-text-number", stat.data.number.toString());
-			item.appendChild(number);
-			item.appendText(` ${stat.data.label()}`);
-
-			if (stat.id === ID_STAT_TODAY_EDITED) {
-				item.addEventListener("click", () => {
-					new TodayEditedModal(this.app, this.plugin).open();
-				});
-			} else if (stat.id === ID_STAT_TOTAL_NOTES) {
-				item.addEventListener("click", () => {
-					this.showSearchModal();
-				});
-			}
-			statsText.appendChild(item);
-		});
-
-		return statsText;
-	}
-
-	private createNoteItem(note: TFile | null, isPinned: boolean = false): HTMLElement | null {
-		if (!note) {
-			return null;
+		if (newLeaf) {
+			this.app.workspace.openLinkText(note.path, "", newLeaf);
+			return;
 		}
 
-		const styleSettings = isPinned ? this.plugin.settings.pinnedNotesStyle : this.plugin.settings.recentNotesStyle;
-
-		const noteItem = this.createElement("div", `note-item${isPinned ? " pinned" : ""}`);
-		noteItem.setAttribute("data-note-path", note.path);
-
-		// 列表键盘可达：条目可 Tab 聚焦，Enter/空格与点击同语义；
-		// 空格是单字符键，会冒泡进主页"任意字符开搜索"监听，必须阻断
-		noteItem.setAttribute("role", "button");
-		noteItem.setAttribute("tabindex", "0");
-		noteItem.addEventListener("keydown", (event: KeyboardEvent) => {
-			if (event.key !== "Enter" && event.key !== " ") {
-				return;
-			}
-			event.preventDefault();
-			event.stopPropagation();
-			noteItem.click();
-		});
-
-		if (styleSettings.itemPadding) noteItem.style.padding = styleSettings.itemPadding;
-		if (styleSettings.itemMargin) noteItem.style.margin = styleSettings.itemMargin;
-
-		noteItem.addEventListener("click", async (event: MouseEvent) => {
-				const modResult = Keymap.isModEvent(event);
-
-				const newLeaf = modResult || (this.plugin.settings.openNotesInNewTab ? "tab" : false);
-
-				if (newLeaf) {
-					this.app.workspace.openLinkText(note.path, "", newLeaf);
-				} else {
-					const existingLeaf = this.findOpenLeaf(note.path);
-
-					if (existingLeaf) {
-						await this.app.workspace.revealLeaf(existingLeaf);
-					} else {
-						this.app.workspace.openLinkText(note.path, "", false);
-					}
-				}
-			});
-
-			noteItem.addEventListener("mousedown", (event: MouseEvent) => {
-				if (event.button === 1) {
-					event.preventDefault();
-					event.stopPropagation();
-				}
-			});
-
-			noteItem.addEventListener("mouseup", (event: MouseEvent) => {
-				if (event.button === 1) {
-					event.preventDefault();
-					event.stopPropagation();
-					this.app.workspace.openLinkText(note.path, "", "tab");
-				}
-			});
-
-		noteItem.addEventListener("mouseenter", (event) => {
-			this.app.workspace.trigger("hover-link", {
-				event: event,
-				source: VIEW_TYPE_START_PAGE,
-				hoverParent: noteItem,
-				targetEl: noteItem,
-				linktext: note.path,
-				sourcePath: "",
-			});
-		});
-
-		if (isPinned) {
-			// HTML5 拖拽排序：拖放目标即插入位置，drop 后写回数组顺序
-			noteItem.draggable = true;
-			noteItem.addEventListener("dragstart", () => {
-				this.draggingPinnedPath = note.path;
-				noteItem.addClass("dragging");
-			});
-			noteItem.addEventListener("dragend", () => {
-				this.draggingPinnedPath = null;
-				noteItem.removeClass("dragging");
-			});
-			noteItem.addEventListener("dragover", (e) => e.preventDefault());
-			noteItem.addEventListener("drop", (e) => {
-				e.preventDefault();
-				// 阻断冒泡，避免落点在条目上时又触发列表末尾追加
-				e.stopPropagation();
-				if (this.draggingPinnedPath && this.draggingPinnedPath !== note.path) {
-					this.reorderPinnedNote(this.draggingPinnedPath, note.path);
-				}
-				this.draggingPinnedPath = null;
-			});
-
-			noteItem.addEventListener("contextmenu", (event) => {
-				event.preventDefault();
-				event.stopPropagation();
-
-				const menu = new Menu();
-				menu.addItem((item) => {
-					item.setTitle(t("remove_from_pinned_notes"))
-						.setIcon("pin-off")
-						.onClick(() => {
-							void this.togglePinnedNote(note, false);
-						});
-				});
-
-				menu.showAtMouseEvent(event);
-			});
+		const existingLeaf = this.findOpenLeaf(note.path);
+		if (existingLeaf) {
+			void this.app.workspace.revealLeaf(existingLeaf);
 		} else {
-			// 最近/文件夹列表右键快捷置顶，提升添加置顶的可发现性
-			noteItem.addEventListener("contextmenu", (event) => {
-				event.preventDefault();
-				event.stopPropagation();
-
-				const menu = new Menu();
-				menu.addItem((item) => {
-					item.setTitle(t("add_to_pinned_notes"))
-						.setIcon("pin")
-						.onClick(() => {
-							void this.togglePinnedNote(note, true);
-						});
-				});
-
-				menu.showAtMouseEvent(event);
-			});
+			this.app.workspace.openLinkText(note.path, "", false);
 		}
-
-		// 紧凑三行式（参考 Notebook Navigator）：加粗标题 / 摘要 / 时间·路径；行间分隔线交给 CSS
-		const noteTitleRow = this.createElement("div", "note-title-row");
-		const noteTitle = this.createElement("div", "note-title", note.basename);
-		noteTitle.setAttribute("title", note.basename);
-
-		if (styleSettings.noteTitleFontSize) noteTitle.style.fontSize = styleSettings.noteTitleFontSize;
-		if (styleSettings.noteTitleMargin) noteTitle.style.margin = styleSettings.noteTitleMargin;
-		if (styleSettings.noteTitlePadding) noteTitle.style.padding = styleSettings.noteTitlePadding;
-
-		noteTitleRow.appendChild(noteTitle);
-
-		// 悬停动作区：置顶非高频操作，与低频动作统一收进 ⋯ 菜单，条目保持简洁
-		const noteActions = this.createElement("div", "note-actions");
-
-		const moreBtn = this.createElement("button", "btn-icon");
-		moreBtn.setAttribute("title", t("more_actions"));
-		moreBtn.setAttribute("aria-label", t("more_actions"));
-		moreBtn.appendChild(SvgUtil.createMoreIcon());
-		moreBtn.addEventListener("click", (event) => {
-			// 阻断冒泡，避免按钮点击触发整条目的打开
-			event.stopPropagation();
-
-			const menu = new Menu();
-			menu.addItem((item) => {
-				item.setTitle(isPinned ? t("remove_from_pinned_notes") : t("add_to_pinned_notes"))
-					.setIcon(isPinned ? "pin-off" : "pin")
-					.onClick(() => {
-						void this.togglePinnedNote(note, !isPinned);
-					});
-			});
-			menu.addSeparator();
-			menu.addItem((item) => {
-				item.setTitle(t("open_in_new_tab"))
-					.setIcon("external-link")
-					.onClick(() => {
-						this.app.workspace.openLinkText(note.path, "", "tab");
-					});
-			});
-			menu.addItem((item) => {
-				item.setTitle(t("reveal_in_file_explorer"))
-					.setIcon("folder-open")
-					.onClick(() => {
-						// revealInFolder 是 file-explorer 视图的内部方法，移动端无此 leaf 时静默跳过
-						const explorer = this.app.workspace.getLeavesOfType("file-explorer")[0]?.view as unknown as { revealInFolder?: (file: TFile) => void };
-						explorer?.revealInFolder?.(note);
-					});
-			});
-
-			menu.showAtMouseEvent(event);
-		});
-		noteActions.appendChild(moreBtn);
-		noteTitleRow.appendChild(noteActions);
-
-		let folderPath = note.parent ? note.parent.path : "/";
-		if (!folderPath.startsWith("/")) {
-			folderPath = "/" + folderPath;
-		}
-
-		const notePreview = this.createElement("div", "note-preview");
-
-		const noteDateEl = this.createElement("span", "note-date", MyUtil.formatDate(note.stat.mtime));
-		if (styleSettings.noteDateFontSize) noteDateEl.style.fontSize = styleSettings.noteDateFontSize;
-
-		const noteFolderEl = this.createElement("span", "note-folder", MyUtil.truncateMiddle(folderPath));
-		noteFolderEl.setAttribute("title", folderPath);
-		if (styleSettings.noteFolderFontSize) noteFolderEl.style.fontSize = styleSettings.noteFolderFontSize;
-
-		const noteMetaRow = this.createElement("div", "note-meta-row");
-		noteMetaRow.appendChild(noteDateEl);
-		noteMetaRow.appendChild(this.createElement("span", "note-meta-separator", "·"));
-		noteMetaRow.appendChild(noteFolderEl);
-		noteMetaRow.appendChild(this.createElement("span", "note-meta-separator", "·"));
-		noteMetaRow.appendChild(this.createElement("span", "note-type", note.extension.toUpperCase()));
-
-		const noteMain = this.createElement("div", "note-main");
-		noteMain.appendChild(noteTitleRow);
-		noteMain.appendChild(notePreview);
-		noteMain.appendChild(noteMetaRow);
-		noteItem.appendChild(noteMain);
-
-		this.pendingPreviewItems.push({ el: noteItem, file: note });
-
-		// 缩略图：首个能解析的内嵌图片，浏览器原生 lazy 加载；无图不占位
-		const imageFile = this.getFirstImageFile(note);
-		if (imageFile) {
-			const thumb = this.createElement("div", "note-thumb");
-			const img = document.createElement("img");
-			img.loading = "lazy";
-			img.alt = "";
-			img.src = this.app.vault.getResourcePath(imageFile);
-			thumb.appendChild(img);
-			noteItem.appendChild(thumb);
-		}
-
-		return noteItem;
-	}
-
-	// 首个能解析到库内文件的内嵌图片，用于条目缩略图
-	private getFirstImageFile(file: TFile): TFile | null {
-		const imageExtensions = new Set(["png", "jpg", "jpeg", "gif", "webp", "svg", "bmp", "avif"]);
-		const cache = this.app.metadataCache.getFileCache(file);
-		for (const embed of cache?.embeds ?? []) {
-			const dest = this.app.metadataCache.getFirstLinkpathDest(embed.link, file.path);
-			if (dest && imageExtensions.has(dest.extension.toLowerCase())) {
-				return dest;
-			}
-		}
-		return null;
-	}
-
-	// 渲染后异步填充摘要：cachedRead 走 Obsidian 内容缓存，不阻塞整页渲染；二进制文件无摘要
-	private flushNotePreviews(): void {
-		const textExtensions = new Set(["md", "markdown", "mdtxt", "txt"]);
-		const items = this.pendingPreviewItems;
-		this.pendingPreviewItems = [];
-		for (const { el, file } of items) {
-			if (!textExtensions.has(file.extension.toLowerCase())) {
-				continue;
-			}
-			void this.app.vault.cachedRead(file).then((content) => {
-				if (!el.isConnected) {
-					return;
-				}
-				const preview = el.querySelector(".note-preview");
-				if (preview) {
-					preview.textContent = this.extractPreview(content);
-				}
-			});
-		}
-	}
-
-	private extractPreview(content: string): string {
-		let text = content;
-		// 去 frontmatter（循环剥离：测试环境存在被破坏的多重块）
-		while (text.startsWith("---\n")) {
-			const end = text.indexOf("\n---", 4);
-			if (end === -1) {
-				break;
-			}
-			text = text.slice(text.indexOf("\n", end + 1) + 1);
-		}
-		// 多行正文按空格合并成一段（换行符替换为空格），展示时由 CSS 两行截断
-		const parts: string[] = [];
-		let inFence = false;
-		for (const rawLine of text.split("\n")) {
-			const line = rawLine.trim();
-			if (line.startsWith("```")) {
-				inFence = !inFence;
-				continue;
-			}
-			if (inFence || !line || line === "---" || (line.startsWith("#") && !line.startsWith("#tag"))) {
-				continue;
-			}
-			// 残留的裸 YAML 键（如 "tags:"）不作为正文
-			if (/^[A-Za-z][\w-]*:\s*$/.test(line)) {
-				continue;
-			}
-			const plain = line
-				.replace(/!\[\[[^\]]*\]\]/g, "")
-				.replace(/\[\[([^\]|]*\|)?([^\]]*)\]\]/g, "$2")
-				.replace(/!\[[^\]]*\]\([^)]*\)/g, "")
-				.replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
-				.replace(/(\*\*|\*|__|_|==|~~|`)/g, "")
-				.replace(/^\s*(?:[-*+]|\d+\.)\s+/, "")
-				.replace(/^\s*>\s?/, "")
-				.replace(/(^|\s)#[^\s#]+/g, "$1")
-				.trim();
-			if (plain) {
-				parts.push(plain);
-			}
-		}
-		const joined = parts.join(" ");
-		// 上限放宽到 160 字符：两行可容纳约此数量，超出部分由 CSS line-clamp 截断
-		return joined.length > 160 ? joined.slice(0, 160) + "…" : joined;
-	}
-
-	// 通用列表构建：条目渲染 / 空状态 / 置顶拖拽落点 / 最近列表时间分组
-	private createNotesList(
-		notes: TFile[] | null,
-		isPinned: boolean,
-		grouped: boolean,
-		emptyState: HTMLElement,
-		firstRowExtra?: HTMLElement,
-	): HTMLElement {
-		const styleSettings = isPinned ? this.plugin.settings.pinnedNotesStyle : this.plugin.settings.recentNotesStyle;
-
-		const notesList = this.createElement("div", "notes-list");
-		if (styleSettings.listGap) notesList.style.gap = styleSettings.listGap;
-
-		if (isPinned && notes && notes.length > 0) {
-			// 列表空白区域也是合法落点：支持拖到末尾；条目自身的 drop 会阻断冒泡
-			notesList.addEventListener("dragover", (e) => e.preventDefault());
-			notesList.addEventListener("drop", (e) => {
-				e.preventDefault();
-				if (this.draggingPinnedPath) {
-					this.movePinnedNoteToEnd(this.draggingPinnedPath);
-					this.draggingPinnedPath = null;
-				}
-			});
-		}
-
-		if (notes && notes.length > 0) {
-			if (grouped) {
-				this.appendGroupedRecentNotes(notesList, notes, firstRowExtra);
-			} else {
-				for (const note of notes) {
-					const noteItem = this.createNoteItem(note, isPinned);
-					if (noteItem) {
-						notesList.appendChild(noteItem);
-					}
-				}
-			}
-		} else {
-			notesList.appendChild(emptyState);
-		}
-
-		return notesList;
-	}
-
-	// 最近笔记：无独立 header；「最近 · 今天」首行右侧挂数量下拉（参照图布局）
-	private createRecentSection(): HTMLElement {
-		const styleSettings = this.plugin.settings.recentNotesStyle;
-
-		const section = this.createElement("section", "section");
-		if (styleSettings.sectionMargin) section.style.margin = styleSettings.sectionMargin;
-		if (styleSettings.sectionPadding) section.style.padding = styleSettings.sectionPadding;
-
-		const dropdown = this.createRecentNotesLimitDropdown();
-		const notes = this.recentNotes;
-		if (notes && notes.length > 0) {
-			section.appendChild(
-				this.createNotesList(notes, false, true, this.createEmptyState(t("recent_empty_hint")), dropdown),
-			);
-		} else {
-			// 空列表也保留首行，数量下拉仍有入口
-			const list = this.createElement("div", "notes-list");
-			list.appendChild(this.createGroupTitleRow(`${t("recent_short")} · ${t("recent_group_today")}`, dropdown));
-			list.appendChild(this.createEmptyState(t("recent_empty_hint")));
-			section.appendChild(list);
-		}
-
-		return section;
-	}
-
-	private createGroupTitleRow(label: string, extra?: HTMLElement): HTMLElement {
-		const row = this.createElement("div", "notes-group-title");
-		row.appendChild(this.createElement("span", "notes-group-label", label));
-		if (extra) {
-			row.appendChild(extra);
-		}
-		return row;
 	}
 
 	private async togglePinnedNote(note: TFile, pin: boolean): Promise<void> {
@@ -718,335 +244,38 @@ export default class StartPageCreator {
 		MyUtil.refreshStartPage(this.app);
 	}
 
-	private appendGroupedRecentNotes(notesList: HTMLElement, notes: TFile[], firstRowExtra?: HTMLElement): void {
-		// 分段边界与相对时间的 24h/7d 规则对齐；标题插入同一列表容器，保持单一滚动区
-		const todayStart = new Date();
-		todayStart.setHours(0, 0, 0, 0);
-		const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-
-		const groups: { title: string; notes: TFile[] }[] = [
-			{ title: t("recent_group_today"), notes: [] },
-			{ title: t("recent_group_this_week"), notes: [] },
-			{ title: t("recent_group_earlier"), notes: [] },
-		];
-		for (const note of notes) {
-			if (note.stat.mtime >= todayStart.getTime()) {
-				groups[0].notes.push(note);
-			} else if (note.stat.mtime >= weekAgo) {
-				groups[1].notes.push(note);
-			} else {
-				groups[2].notes.push(note);
-			}
+	private observeTabList(tabList: HTMLElement, update: () => void): void {
+		// 单例 observer，每次渲染仅重挂回调并重定向观察目标，避免重建泄漏
+		if (!this.resizeObserver) {
+			this.resizeObserver = new ResizeObserver(() => this.resizeHandler?.());
 		}
-
-		// 首个分组行带「最近 ·」前缀并挂上数量下拉，后续分组只显示段名
-		let first = true;
-		for (const group of groups) {
-			if (group.notes.length === 0) {
-				continue;
-			}
-			notesList.appendChild(
-				this.createGroupTitleRow(first ? `${t("recent_short")} · ${group.title}` : group.title, first ? firstRowExtra : undefined),
-			);
-			first = false;
-			for (const note of group.notes) {
-				const noteItem = this.createNoteItem(note, false);
-				if (noteItem) {
-					notesList.appendChild(noteItem);
-				}
-			}
-		}
+		this.resizeObserver.disconnect();
+		this.resizeHandler = update;
+		this.resizeObserver.observe(tabList);
 	}
 
-	private createPinnedEmptyState(): HTMLElement {
-		// 空状态附带动线入口：文案里的右键添加路径不可发现，按钮直达置顶管理弹窗
-		const empty = this.createEmptyState(t("pinned_empty_hint"));
-		const addBtn = this.createElement("button", "notes-list-empty-action", t("pinned_empty_add"));
-		addBtn.addEventListener("click", () => {
-			new PinnedNotesModal(this.app, this.plugin, () => MyUtil.refreshStartPage(this.app)).open();
-		});
-		empty.appendChild(addBtn);
-		return empty;
+	private openPluginSettings(): void {
+		const setting = this.app.setting;
+		setting.open();
+
+		window.setTimeout(() => {
+			setting.openTabById(this.plugin.manifest.id);
+		}, 100);
 	}
 
-	private createEmptyState(text: string): HTMLElement {
-		return this.createElement("div", "notes-list-empty", text);
+	private openCommunityPlugins(): void {
+		const setting = this.app.setting;
+		setting.open();
+
+		window.setTimeout(() => {
+			setting.openTabById("community-plugins");
+		}, 100);
 	}
 
-		private createContentGrid(): HTMLElement {
-			const contentGrid = this.createElement("div", "content-grid");
-			// 三种布局用修饰类切换，窄屏媒体查询仍强制单列
-			contentGrid.addClass(`layout-${this.plugin.settings.contentLayout}`);
-
-			// 板块显隐开关：置顶与文件夹标签共用标签容器
-			const showTabs = this.plugin.settings.showTabs;
-			const showRecent = this.plugin.settings.showRecentSection;
-			if (showTabs) {
-				const tabContainer = this.createTabContainer();
-				tabContainer.classList.add("pinned-notes");
-				contentGrid.appendChild(tabContainer);
-			}
-
-			if (showRecent) {
-				const recentSection = this.createRecentSection();
-				recentSection.classList.add("recent-notes");
-				contentGrid.appendChild(recentSection);
-			}
-
-			// 只剩一个板块时占满整行，避免栅格留下半栏空白
-			if (showTabs !== showRecent) {
-				contentGrid.addClass("single-section");
-			}
-
-			return contentGrid;
-		}
-
-		private createTabContainer(): HTMLElement {
-			const tabs = this.buildTabItems();
-			// 文件夹 tab 可能在重渲染间被移除，序号收敛到现存范围
-			const activeIndex = Math.min(this.activeTabIndex, tabs.length - 1);
-			this.activeTabIndex = activeIndex;
-			const container = this.createElement("div", "tab-container");
-
-			// Tab bar
-			const bar = this.createElement("div", "tab-bar");
-
-			const scrollLeft = this.createElement("button", "tab-scroll-btn");
-			scrollLeft.appendChild(SvgUtil.createChevronLeftIcon());
-			bar.appendChild(scrollLeft);
-
-			const tabList = this.createElement("div", "tab-list");
-			tabs.forEach((tab, i) => {
-				const tabItem = this.createElement("div", `tab-item${i === activeIndex ? " active" : ""}`);
-				tabItem.dataset.tabIndex = i.toString();
-
-				const label = this.createElement("span", "tab-item-label", tab.label);
-				tabItem.appendChild(label);
-
-				// 计数并入 tab 标签，替代原先面板内的标题+徽标
-				if (tab.id === "pinned") {
-					tabItem.appendChild(this.createElement("span", "tab-count", `${tab.notes.length}`));
-				}
-
-				if (tab.closable) {
-					const closeBtn = this.createElement("button", "tab-close-btn");
-					closeBtn.appendChild(SvgUtil.createCloseIcon());
-					closeBtn.addEventListener("click", (e) => {
-						e.stopPropagation();
-						if (tab.folderPath) {
-							this.plugin.settings.tabFolderPaths =
-								this.plugin.settings.tabFolderPaths.filter((p) => p !== tab.folderPath);
-							this.plugin.saveSettings();
-							MyUtil.refreshStartPage(this.app);
-						}
-					});
-					tabItem.appendChild(closeBtn);
-				}
-
-				tabItem.addEventListener("click", () => {
-					this.switchTab(i);
-				});
-
-				tabList.appendChild(tabItem);
-			});
-			bar.appendChild(tabList);
-
-			const scrollRight = this.createElement("button", "tab-scroll-btn");
-			scrollRight.appendChild(SvgUtil.createChevronRightIcon());
-			bar.appendChild(scrollRight);
-
-			container.appendChild(bar);
-
-			// Content panels
-			const contentWrapper = this.createElement("div", "tab-content-wrapper");
-			tabs.forEach((tab, i) => {
-				const panel = this.createElement("div", `tab-panel${i === activeIndex ? " active" : ""}`);
-				panel.dataset.tabIndex = i.toString();
-				if (tab.id === "pinned") {
-					// tab 栏即面板 header，计数在标签内；面板只留列表
-					panel.appendChild(
-						this.createNotesList(this.pinnedNotes, true, false, this.createPinnedEmptyState()),
-					);
-				} else {
-					panel.appendChild(
-						this.createNotesList(tab.notes, false, false, this.createEmptyState(t("folder_tab_empty_hint"))),
-					);
-				}
-				contentWrapper.appendChild(panel);
-			});
-			container.appendChild(contentWrapper);
-
-			// Set up scroll button visibility
-			const updateButtons = () => {
-				this.updateScrollButtons(tabList, scrollLeft, scrollRight);
-			};
-
-			// 单例 observer，每次渲染仅重挂回调并重定向观察目标，避免重建泄漏
-			if (!this.resizeObserver) {
-				this.resizeObserver = new ResizeObserver(() => this.resizeHandler?.());
-			}
-			this.resizeObserver.disconnect();
-			this.resizeHandler = updateButtons;
-			this.resizeObserver.observe(tabList);
-
-			tabList.addEventListener("scroll", updateButtons);
-			scrollLeft.addEventListener("click", () => {
-				tabList.scrollBy({ left: -150, behavior: "smooth" });
-			});
-			scrollRight.addEventListener("click", () => {
-				tabList.scrollBy({ left: 150, behavior: "smooth" });
-			});
-
-			return container;
-		}
-
-		private buildTabItems(): { id: string; label: string; notes: TFile[]; closable: boolean; folderPath?: string }[] {
-			const tabs: { id: string; label: string; notes: TFile[]; closable: boolean; folderPath?: string }[] = [];
-
-			{
-				tabs.push({
-					id: "pinned",
-					label: t("tab_pinned"),
-					notes: this.pinnedNotes || [],
-					closable: false,
-				});
-			}
-
-			if (this.tabFolderItems) {
-				for (const item of this.tabFolderItems) {
-					tabs.push({
-						id: `folder-${item.folderPath}`,
-						label: item.folderName,
-						notes: item.files,
-						closable: true,
-						folderPath: item.folderPath,
-					});
-				}
-			}
-
-			return tabs;
-		}
-
-		private switchTab(index: number) {
-			// 记录激活序号，供 vault 事件触发整页重渲染后恢复
-			this.activeTabIndex = index;
-
-			const tabContainer = this.container.querySelector(".tab-container");
-			if (!tabContainer) return;
-
-			tabContainer.querySelectorAll(".tab-item").forEach((el, i) => {
-				el.classList.toggle("active", i === index);
-			});
-
-			tabContainer.querySelectorAll(".tab-panel").forEach((el, i) => {
-				el.classList.toggle("active", i === index);
-			});
-		}
-
-		private updateScrollButtons(tabList: HTMLElement, scrollLeft: HTMLElement, scrollRight: HTMLElement) {
-			const hasOverflow = tabList.scrollWidth > tabList.clientWidth + 2;
-			scrollLeft.classList.toggle("hidden", !hasOverflow || tabList.scrollLeft <= 1);
-			scrollRight.classList.toggle("hidden", !hasOverflow || tabList.scrollLeft >= tabList.scrollWidth - tabList.clientWidth - 2);
-		}
-
-		private getGreetingText(): string {
-		// 时间段问候 + 本地化长日期，随 moment.locale() 走界面语言
-		// Obsidian 对 moment 的类型声明是命名空间，需与 newnoteutil 相同的转换
-		const createMoment = moment as unknown as () => { format(format?: string): string; hour(): number };
-		const now = createMoment();
-		const hour = now.hour();
-		const key = hour < 5 ? "greeting_night" : hour < 12 ? "greeting_morning" : hour < 18 ? "greeting_afternoon" : "greeting_evening";
-		const dateStr = `${now.format("LL")} ${now.format("dddd")}`;
-		return `${t(key)} · ${dateStr}`;
-	}
-
-		private createMainContent(): HTMLElement {
-		const mainContent = this.createElement("main", "main-content");
-
-		const contentGrid = this.createContentGrid();
-		mainContent.appendChild(contentGrid);
-
-		return mainContent;
-	}
-
-	private createActivityGrid(): HTMLElement {
-		const grid = this.createElement("div", "activity-grid");
-
-		// GitHub 风格：列=周、行=星期；文件集合与统计区同口径
-		const WEEKS = 16;
-		const DAY = 24 * 60 * 60 * 1000;
-		const today = new Date();
-		today.setHours(0, 0, 0, 0);
-		const end = today.getTime();
-		// 末列为本周（周日起），未来几天留空隐藏：起点 = 本周日往前推 (WEEKS-1) 周
-		const start = end - ((WEEKS - 1) * 7 + today.getDay()) * DAY;
-
-		const files = this.plugin.settings.includeAllFilesInRecent ? this.app.vault.getFiles() : this.app.vault.getMarkdownFiles();
-		const counts = new Map<number, number>();
-		for (const file of files) {
-			const day = new Date(file.stat.mtime);
-			day.setHours(0, 0, 0, 0);
-			const ts = day.getTime();
-			if (ts >= start) {
-				counts.set(ts, (counts.get(ts) ?? 0) + 1);
-			}
-		}
-
-		for (let i = 0; i < WEEKS * 7; i++) {
-			const ts = start + i * DAY;
-			const count = counts.get(ts) ?? 0;
-			const level = count === 0 ? 0 : count <= 2 ? 1 : count <= 5 ? 2 : count <= 9 ? 3 : 4;
-			const cell = this.createElement("div", `activity-cell activity-l${level}`);
-			if (ts > end) {
-				cell.addClass("activity-future");
-			} else {
-				const dateStr = new Date(ts).toLocaleDateString(moment.locale(), { month: "short", day: "numeric" });
-				cell.setAttribute("title", t("heatmap_tooltip").replace("{count}", count.toString()).replace("{date}", dateStr));
-			}
-			grid.appendChild(cell);
-		}
-
-		return grid;
-	}
-
-	private async createFooter(): Promise<HTMLElement> {
-		const footer = this.createElement("footer", "footer");
-
-		const love = this.createElement("p", "", t("default_footer_text"));
-		footer.appendChild(love);
-
-		this.updateFooterTextAsync(love);
-
-		// 快捷键原本完全不可发现，页脚提示用于提升可发现性
-		if (this.plugin.settings.showShortcutHints) {
-			footer.appendChild(this.createElement("div", "footer-shortcut-hints", t("footer_shortcut_hints")));
-		}
-
-		return footer;
-	}
-
-	private async updateFooterTextAsync(footerElement: HTMLElement): Promise<void> {
-		try {
-			const footerText = await FooterTextUtil.getFooterText(this.plugin);
-			footerElement.textContent = footerText;
-
-			if (this.plugin.settings.showCustomFooterText && this.plugin.settings.useRandomFooterText) {
-				if (!footerElement.querySelector("#refresh-footer-text")) {
-					const refreshSvg = SvgUtil.createRefreshIcon();
-					refreshSvg.setAttribute("id", "refresh-footer-text");
-					refreshSvg.addEventListener("click", () => {
-						this.plugin.settings.todayRandomEnFooterText = "";
-						this.plugin.settings.todayRandomZhFooterText = "";
-						this.plugin.saveSettings();
-						footerElement.textContent = t("loading_footer_text");
-						this.updateFooterTextAsync(footerElement);
-					});
-					footerElement.appendChild(refreshSvg);
-				}
-			}
-		} catch (error) {
-			console.error("Failed to load footer text:", error);
-		}
+	private revealInExplorer(note: TFile): void {
+		// revealInFolder 是 file-explorer 视图的内部方法，移动端无此 leaf 时静默跳过
+		const explorer = this.app.workspace.getLeavesOfType("file-explorer")[0]?.view as unknown as { revealInFolder?: (file: TFile) => void };
+		explorer?.revealInFolder?.(note);
 	}
 
 	private async createNewNote(): Promise<void> {
@@ -1076,46 +305,6 @@ export default class StartPageCreator {
 		});
 
 		return leaf || null;
-	}
-
-	private createElement(tag: string, className: string = "", textContent: string = ""): HTMLElement {
-		const element = document.createElement(tag);
-		if (className) element.className = className;
-		if (textContent) element.textContent = textContent;
-		return element;
-	}
-
-	private createRecentNotesLimitDropdown(): HTMLDivElement {
-		const dropdown = document.createElement("select");
-
-		for (let i = 5; i <= 50; i += 5) {
-			const option = document.createElement("option");
-			option.value = i.toString();
-			option.textContent = i.toString();
-			dropdown.appendChild(option);
-
-			if (i === this.plugin.settings.recentNotesLimit) {
-				option.selected = true;
-			}
-		}
-
-		dropdown.addEventListener("change", () => {
-			const limit = parseInt(dropdown.value, 10);
-			this.plugin.settings.recentNotesLimit = limit;
-			this.plugin.saveSettings();
-			MyUtil.refreshStartPage(this.app);
-		});
-
-		const label = document.createElement("label");
-		label.className = "recent-notes-limit-label";
-		label.textContent = t("show_count");
-		label.htmlFor = dropdown.id;
-
-		const container = document.createElement("div");
-		container.appendChild(label);
-		container.appendChild(dropdown);
-
-		return container;
 	}
 
 	getTodayModifiedNoteCount(): number {
@@ -1164,7 +353,7 @@ export default class StartPageCreator {
 				return;
 			}
 
-			if (document.querySelector('.modal-container')) {
+			if (document.querySelector(".modal-container")) {
 				return;
 			}
 
@@ -1218,19 +407,19 @@ export default class StartPageCreator {
 		return Array.from(this.container.querySelectorAll<HTMLElement>(".note-item")).filter((el) => el.offsetParent !== null);
 	}
 
-		private showSearchModal(): void {
-			const modal = new SearchModal(
-				this.app,
-				this.plugin,
-				(item: TFile, forceTab: boolean) => {
-					const newLeaf = forceTab || this.plugin.settings.openNotesInNewTab ? "tab" : false;
-					this.app.workspace.openLinkText(item.path, "", newLeaf);
-				},
-				this.initialQuery
-			);
-			modal.open();
-			this.initialQuery = "";
-		}
+	private showSearchModal(): void {
+		const modal = new SearchModal(
+			this.app,
+			this.plugin,
+			(item: TFile, forceTab: boolean) => {
+				const newLeaf = forceTab || this.plugin.settings.openNotesInNewTab ? "tab" : false;
+				this.app.workspace.openLinkText(item.path, "", newLeaf);
+			},
+			this.initialQuery,
+		);
+		modal.open();
+		this.initialQuery = "";
+	}
 
 	private removeKeyListener(): void {
 		if (this.keyHandler) {
@@ -1240,40 +429,5 @@ export default class StartPageCreator {
 			(this.container as HTMLElement).removeEventListener("keydown", this.arrowHandler);
 			this.arrowHandler = null;
 		}
-	}
-
-	private hasUpdate(): boolean {
-		// 关闭检查更新时即使残留了 latestVersion 也不展示徽标
-		if (!this.plugin.settings.checkForUpdates) {
-			return false;
-		}
-		const latestVersion = this.plugin.settings.latestVersion;
-		if (!latestVersion) {
-			return false;
-		}
-		return VersionChecker.hasUpdate(this.plugin.manifest.version, latestVersion);
-	}
-
-	private createUpdateBadge(): HTMLElement {
-		const badge = this.createElement("div", "update-badge");
-		badge.setAttribute("title", t("new_version_available"));
-
-		const badgeIcon = this.createElement("span", "update-badge-icon", "🎉");
-		const badgeText = this.createElement("span", "update-badge-text", 
-			t("update_to_version").replace("{version}", this.plugin.settings.latestVersion));
-
-		badge.appendChild(badgeIcon);
-		badge.appendChild(badgeText);
-
-		badge.addEventListener("click", () => {
-			const setting = this.app.setting;
-			setting.open();
-
-			window.setTimeout(() => {
-				setting.openTabById("community-plugins");
-			}, 100);
-		});
-
-		return badge;
 	}
 }

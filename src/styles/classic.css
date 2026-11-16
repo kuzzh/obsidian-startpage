@@ -1,0 +1,727 @@
+/* 头部样式 */
+.start-page-container.sp-style-classic .header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	background: var(--background-secondary);
+	backdrop-filter: blur(10px);
+	border-radius: 12px;
+	padding: 14px 20px;
+	margin-bottom: 20px;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+	border: 1px solid var(--background-modifier-border);
+}
+
+.start-page-container.sp-style-classic .logo {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex: 1;
+}
+
+.start-page-container.sp-style-classic .logo-icon {
+	width: 28px;
+	height: 28px;
+	color: var(--color-accent);
+}
+
+.start-page-container.sp-style-classic .logo-text {
+	font-size: 20px;
+	font-weight: 700;
+	background: linear-gradient(135deg, var(--color-purple), var(--color-accent));
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+/* 问候语替代标题时保持低调，不喧宾夺主 */
+.start-page-container.sp-style-classic .logo-text.greeting {
+	font-size: 15px;
+	font-weight: 600;
+	background: none;
+	-webkit-background-clip: border-box;
+	background-clip: border-box;
+	-webkit-text-fill-color: var(--text-muted);
+	color: var(--text-muted);
+}
+
+.start-page-container.sp-style-classic .header-actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.start-page-container.sp-style-classic .manage-btn {
+	width: 32px;
+	height: 32px;
+	border: none !important;
+	box-shadow: none !important;
+	outline: none !important;
+	background: transparent;
+	border-radius: 8px;
+	cursor: pointer;
+	color: var(--text-muted);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.2s;
+	padding: 0;
+}
+
+.start-page-container.sp-style-classic .manage-btn:hover {
+	color: var(--text-normal);
+	background: var(--background-modifier-active-hover);
+}
+
+.start-page-container.sp-style-classic .manage-btn svg {
+	width: 18px;
+	height: 18px;
+}
+
+
+/* 悬浮速记按钮：位于新建按钮上方 */
+.sp-style-classic .start-page-capture-btn {
+	position: fixed;
+	bottom: 104px;
+	right: 38px;
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.3s ease;
+	z-index: 10;
+}
+
+.sp-style-classic .start-page-capture-btn:hover {
+	transform: scale(1.1);
+	background: var(--background-modifier-hover);
+}
+
+/* 悬浮新建笔记按钮 */
+.sp-style-classic .start-page-new-note-btn {
+	position: fixed;
+	bottom: 32px;
+	right: 32px;
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	background: var(--color-accent);
+	border: none;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.3s ease;
+	z-index: 100;
+	color: var(--text-on-accent, #fff);
+	padding: 0;
+}
+
+.sp-style-classic .start-page-new-note-btn:hover {
+	transform: scale(1.1);
+	box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+	background: var(--color-accent-hover, var(--color-accent));
+}
+
+.sp-style-classic .start-page-new-note-btn:active {
+	transform: scale(0.95);
+}
+
+.sp-style-classic .start-page-new-note-btn svg {
+	width: 28px;
+	height: 28px;
+}
+
+/* 新建笔记标题模板预览 */
+.new-note-template-preview {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller, 12px);
+	margin: -8px 0 12px;
+	padding-left: 2px;
+	word-break: break-all;
+}
+
+
+/* 统计卡片 */
+.start-page-container.sp-style-classic .stats-section {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 14px;
+	margin-bottom: 20px;
+}
+
+.start-page-container.sp-style-classic .stat-card {
+	background: var(--background-secondary);
+	backdrop-filter: blur(10px);
+	border-radius: 12px;
+	padding: 16px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	border: 1px solid var(--background-modifier-border);
+	transition: all 0.3s ease;
+	cursor: pointer;
+}
+
+.start-page-container.sp-style-classic .stat-card:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.start-page-container.sp-style-classic .stat-icon {
+	width: 40px;
+	height: 40px;
+	background: linear-gradient(135deg, var(--color-purple), var(--color-accent));
+	border-radius: 10px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--color-base-30);
+}
+
+.start-page-container.sp-style-classic .stat-icon svg {
+	width: 20px;
+	height: 20px;
+}
+
+.start-page-container.sp-style-classic .stat-number {
+	font-size: 22px;
+	font-weight: 700;
+	color: var(--text-normal);
+	line-height: 1;
+}
+
+.start-page-container.sp-style-classic .stat-label {
+	font-size: 12px;
+	color: var(--text-faint);
+	margin-top: 2px;
+}
+
+
+/* 区块样式 */
+.start-page-container.sp-style-classic .section {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+	background: var(--background-secondary);
+	backdrop-filter: blur(10px);
+	border-radius: 12px;
+	padding: 20px;
+	border: 1px solid var(--background-modifier-border);
+}
+
+.start-page-container.sp-style-classic .section-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 12px;
+}
+
+.sp-style-classic .section-title {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--text-normal);
+}
+
+.sp-style-classic .section-title .note-count-badge {
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--text-faint);
+	background: var(--background-modifier-hover);
+	padding: 1px 7px;
+	border-radius: 10px;
+	line-height: 1.5;
+}
+
+.start-page-container.sp-style-classic .section-icon {
+	width: 20px;
+	height: 20px;
+	color: var(--icon-color);
+}
+
+
+/* 笔记列表 */
+.start-page-container.sp-style-classic .notes-list {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	overflow-y: auto;
+	overflow-x: hidden;
+	min-height: 0;
+	gap: 8px;
+}
+
+.start-page-container.sp-style-classic .notes-list-empty {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 32px 12px;
+	border: 1px dashed var(--tag-border-color);
+	border-radius: 10px;
+	color: var(--text-faint);
+	font-size: 0.9em;
+}
+
+.start-page-container.sp-style-classic .note-item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 12px;
+	border-radius: 10px;
+	background: var(--tag-background);
+	border: 1px solid var(--tag-border-color);
+	transition: all 0.3s ease;
+	cursor: pointer;
+	min-width: 0;
+	max-width: 100%;
+}
+
+.start-page-container.sp-style-classic .note-item.dragging {
+	opacity: 0.4;
+}
+
+.start-page-container.sp-style-classic .note-item:hover {
+	background: var(--tag-background-hover);
+	transform: translateX(4px);
+	border-color: var(--tag-border-color-hover);
+	box-shadow: 0 4px 15px var(--background-modifier-border);
+}
+
+.start-page-container.sp-style-classic .note-icon {
+	width: 32px;
+	height: 32px;
+	background: var(--tag-border-color);
+	border-radius: 6px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--icon-color);
+	flex-shrink: 0;
+}
+
+.start-page-container.sp-style-classic .note-icon svg {
+	width: 16px;
+	height: 16px;
+}
+
+.start-page-container.sp-style-classic .note-content {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+}
+
+.start-page-container.sp-style-classic .note-title {
+	font-weight: 500;
+	color: var(--text-normal);
+	margin-bottom: 2px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 100%;
+}
+
+.start-page-container.sp-style-classic .note-meta {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 12px;
+	color: var(--text-faint);
+}
+
+.start-page-container.sp-style-classic .note-date {
+	margin-right: 8px;
+	flex-shrink: 0;
+	white-space: nowrap;
+}
+
+.start-page-container.sp-style-classic .note-ext {
+	margin-right: 8px;
+	flex-shrink: 0;
+	white-space: nowrap;
+	background-color: var(--background-modifier-hover);
+	color: var(--text-muted);
+	border-radius: 4px;
+	padding: 2px 6px;
+	font-size: 0.75em;
+	font-weight: 500;
+}
+
+.start-page-container.sp-style-classic .note-folder {
+	flex: 1;
+	min-width: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+
+/* Tab 控件样式 */
+.start-page-container.sp-style-classic .tab-container {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.start-page-container.sp-style-classic .tab-bar {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	margin-bottom: 10px;
+	flex-shrink: 0;
+}
+
+.start-page-container.sp-style-classic .tab-list {
+	display: flex;
+	gap: 2px;
+	overflow-x: auto;
+	flex: 1;
+	scrollbar-width: none;
+}
+
+.start-page-container.sp-style-classic .tab-list::-webkit-scrollbar {
+	display: none;
+}
+
+.start-page-container.sp-style-classic .tab-item {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 6px 12px;
+	cursor: pointer;
+	border-radius: 6px 6px 0 0;
+	font-size: 13px;
+	font-weight: 500;
+	white-space: nowrap;
+	color: var(--text-muted);
+	border-bottom: 2px solid transparent;
+	transition: all 0.2s;
+	user-select: none;
+	flex-shrink: 0;
+}
+
+.start-page-container.sp-style-classic .tab-item:hover {
+	color: var(--text-normal);
+	background: var(--background-modifier-hover);
+}
+
+.start-page-container.sp-style-classic .tab-item.active {
+	color: var(--text-accent);
+	border-bottom-color: var(--text-accent);
+	background: var(--background-modifier-active-hover);
+}
+
+.start-page-container.sp-style-classic .tab-item-label {
+	pointer-events: none;
+}
+
+.start-page-container.sp-style-classic .tab-close-btn {
+	width: 18px;
+	height: 18px;
+	border: none;
+	background: none;
+	cursor: pointer;
+	color: var(--text-faint);
+	padding: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 3px;
+	opacity: 0;
+	transition: opacity 0.15s, color 0.15s, background-color 0.15s;
+	flex-shrink: 0;
+}
+
+.start-page-container.sp-style-classic .tab-item:hover .tab-close-btn {
+	opacity: 1;
+}
+
+.start-page-container.sp-style-classic .tab-close-btn:hover {
+	color: var(--text-error);
+	background: var(--background-modifier-hover);
+}
+
+.start-page-container.sp-style-classic .tab-close-btn svg {
+	width: 14px;
+	height: 14px;
+}
+
+.start-page-container.sp-style-classic .tab-scroll-btn {
+	width: 24px;
+	height: 24px;
+	border: none;
+	background: none;
+	cursor: pointer;
+	color: var(--text-muted);
+	padding: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 4px;
+	flex-shrink: 0;
+	transition: color 0.15s, background-color 0.15s;
+}
+
+.start-page-container.sp-style-classic .tab-scroll-btn:hover {
+	color: var(--text-normal);
+	background: var(--background-modifier-hover);
+}
+
+.start-page-container.sp-style-classic .tab-scroll-btn.hidden {
+	visibility: hidden;
+	pointer-events: none;
+}
+
+.start-page-container.sp-style-classic .tab-scroll-btn svg {
+	width: 16px;
+	height: 16px;
+}
+
+.start-page-container.sp-style-classic .tab-content-wrapper {
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+	position: relative;
+}
+
+.start-page-container.sp-style-classic .tab-panel {
+	display: none;
+	flex-direction: column;
+	height: 100%;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.start-page-container.sp-style-classic .tab-panel.active {
+	display: flex;
+}
+
+.start-page-container.sp-style-classic .tab-panel .section {
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.start-page-container.sp-style-classic .tab-panel .notes-list {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+/* 响应式：小屏幕 tab 样式调整 */
+@media (max-width: 1200px) {
+	.start-page-container.sp-style-classic .tab-item {
+		font-size: 12px;
+		padding: 4px 8px;
+	}
+
+	.start-page-container.sp-style-classic .tab-close-btn {
+		width: 16px;
+		height: 16px;
+	}
+
+	.start-page-container.sp-style-classic .tab-close-btn svg {
+		width: 12px;
+		height: 12px;
+	}
+}
+
+.start-page-container.sp-style-classic .recent-notes-limit-label {
+	margin-right: 0.5rem;
+	color: var(--text-faint);
+}
+
+
+.start-page-container.sp-style-classic .search-box-container {
+	flex: 1;
+	display: flex;
+	justify-content: right;
+	padding-right: 12px;
+}
+
+.start-page-container.sp-style-classic .search-box {
+	min-width: 300px;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+	.start-page-container.sp-style-classic {
+		padding: 5px !important;
+		overflow-x: hidden !important;
+	}
+
+		.start-page-container.sp-style-classic .header {
+			margin-bottom: 10px;
+		}
+
+		.start-page-container.sp-style-classic .logo-text {
+			display: none;
+		}
+
+		.start-page-container.sp-style-classic .search-box {
+			flex: 1;
+			min-width: 0px;
+		}
+
+		.start-page-container.sp-style-classic .recent-notes-limit-label {
+			display: none;
+		}
+
+		.start-page-container.sp-style-classic .stat-icon {
+			display: none;
+		}
+
+		.start-page-container.sp-style-classic .stats-section {
+			margin-bottom: 10px;
+			grid-template-columns: repeat(3, 1fr);
+		}
+
+		.start-page-container.sp-style-classic .stat-card {
+			padding: 5px;
+		}
+
+		.start-page-container.sp-style-classic .stat-content {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			width: 100%;
+		}
+
+		.start-page-container.sp-style-classic .stat-number {
+			font-size: 18px;
+		}
+
+		.start-page-container.sp-style-classic .stat-label {
+			font-size: 11px;
+			text-align: center;
+		}
+
+		.start-page-container.sp-style-classic .section-header {
+			margin-bottom: 10px;
+		}
+
+		.start-page-container.sp-style-classic .content-grid {
+			gap: 10px;
+		}
+
+		.start-page-container.sp-style-classic .note-icon {
+		display: none;
+	}
+
+	.my-search-modal {
+		top: 10%;
+		left: 10px !important;
+		transform: translateX(10px);
+		bottom: 10% !important;
+		max-height: 90vh !important;
+		border: var(--modal-border-width) solid var(--modal-border-color) !important;
+	}
+
+	.my-search-modal .search-result-item {
+		font-size: 12px;
+	}
+
+	.my-search-modal .search-result-item-folder-icon,
+	.my-search-modal .search-result-item-folder-name {
+		display: none;
+	}
+
+	button:not(.clickable-icon).mobile-tap {
+		box-shadow: none !important;
+	}
+}
+
+@media (max-width: 768px) {
+	.start-page-container.sp-style-classic .container {
+		padding: 10px;
+	}
+
+	/* 内容区列数只由 contentLayout 决定，窗口/侧栏宽度不参与（#75） */
+	.start-page-container.sp-style-classic .content-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.start-page-container.sp-style-classic .header {
+		gap: 0px;
+		text-align: center;
+		padding: 10px;
+		margin: 0px 0px 10px 0px;
+	}
+
+	/* 移动端纵向空间有限，统计卡片让位给笔记列表 */
+	.start-page-container.sp-style-classic .stats-section {
+		display: none;
+	}
+
+	.start-page-container.sp-style-classic .actions-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.pinned-note-item .note-actions {
+			justify-content: flex-start;
+		}
+
+		.pinned-note-item .control-button,
+		.pinned-note-item .remove-button {
+			height: 24px;
+			padding: 2px 4px;
+		}
+
+		/* 两个悬浮按钮上下错开，并抬高避开 Obsidian 移动端底栏 */
+		.sp-style-classic .start-page-new-note-btn {
+			bottom: 88px;
+		}
+
+		.sp-style-classic .start-page-capture-btn {
+			bottom: 156px;
+		}
+}
+
+@media (max-width: 480px) {
+	.start-page-container.sp-style-classic .section {
+		padding: 12px;
+	}
+
+	.start-page-container.sp-style-classic .note-item {
+		padding: 10px;
+	}
+
+	.start-page-container.sp-style-classic .action-card {
+		padding: 12px 10px;
+	}
+
+	.start-page-container.sp-style-classic .search-box-container {
+		flex: 1;
+	}
+}
+
+/* 总大小卡片是纯信息，不呈现可点击反馈 */
+.start-page-container.sp-style-classic .stat-card.static {
+	cursor: default;
+}
+
+.start-page-container.sp-style-classic .stat-card.static:hover {
+	transform: none;
+	box-shadow: none;
+}
+
+/* 经典条目没有摘要行，紧凑档只收窄行内边距 */
+.start-page-container.sp-style-classic .density-compact .note-item {
+	padding: 8px 10px;
+}

@@ -165,6 +165,20 @@ export class StartPageSettingTab extends PluginSettingTab {
         new Setting(containerEl)
             .setName(t("appearance_settings_heading"))
             .setHeading();
+		new Setting(containerEl)
+			.setName(t("ui_style"))
+			.setDesc(t("ui_style_desc"))
+			.addDropdown((dropdown) => {
+				dropdown
+					.addOption("compact", t("ui_style_compact"))
+					.addOption("classic", t("ui_style_classic"))
+					.setValue(this.plugin.settings.uiStyle)
+					.onChange(async (value) => {
+						this.plugin.settings.uiStyle = value as StartPageSettings["uiStyle"];
+						await this.plugin.saveSettings();
+						MyUtil.refreshStartPage(this.app);
+					});
+			});
         new Setting(containerEl)
 			.setName(t("show_title_navigation_bar"))
 			.setDesc(t("show_title_navigation_bar_desc"))

@@ -108,6 +108,7 @@ export default class StartPagePlugin extends Plugin {
 		const saved = savedData && typeof savedData === "object" ? (savedData as Record<string, unknown>) : {};
 		this.settings = mergeSettings(DEFAULT_SETTINGS, saved, {
 			// 枚举型字段需限定取值范围
+			uiStyle: (v) => ["compact", "classic"].includes(v as string),
 			showTitleNavigationBar: (v) => ["default", "show", "hide"].includes(v as string),
 			newNoteConflict: (v) => ["duplicate", "open"].includes(v as string),
 		});

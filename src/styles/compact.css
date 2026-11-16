@@ -1,0 +1,658 @@
+/* 头部样式：问候行 + 概要行（统计文字 + 热力图）纵向合并，压缩垂直占用 */
+/* 命令条头部：问候语与命令条同行，chips 行随下 */
+.start-page-container.sp-style-compact .command-header {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-bottom: 14px;
+}
+
+.start-page-container.sp-style-compact .command-greeting-row {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	min-width: 0;
+}
+
+.start-page-container.sp-style-compact .command-greeting {
+	flex: 1;
+	min-width: 0;
+	font-size: 13px;
+	color: var(--text-muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.start-page-container.sp-style-compact .command-bar {
+	flex: 0 1 420px;
+	margin-left: auto;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	background: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 10px;
+	padding: 5px 10px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* 关闭问候语时命令条独占整行 */
+.start-page-container.sp-style-compact .command-header.no-greeting .command-bar {
+	flex: 1;
+	margin-left: 0;
+}
+
+.start-page-container.sp-style-compact .command-prompt {
+	color: var(--interactive-accent);
+	font-weight: 700;
+	flex-shrink: 0;
+}
+
+.start-page-container.sp-style-compact .command-bar .search-box {
+	flex: 1;
+	min-width: 0;
+	background: transparent;
+	border: none;
+	box-shadow: none;
+	padding: 0;
+	font-size: 13px;
+	color: var(--text-normal);
+}
+
+.start-page-container.sp-style-compact .command-bar .search-box::placeholder {
+	color: var(--text-faint);
+}
+
+.start-page-container.sp-style-compact .command-kbd {
+	flex-shrink: 0;
+	font-size: 10.5px;
+	color: var(--text-faint);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	padding: 1px 6px;
+	background: var(--background-secondary);
+	white-space: nowrap;
+}
+
+/* 紧凑密度：隐藏摘要与元信息行，条目收窄（⋯ 菜单保持可达） */
+.start-page-container.sp-style-compact .density-compact .note-preview,
+.start-page-container.sp-style-compact .density-compact .note-meta-row {
+	display: none;
+}
+
+.start-page-container.sp-style-compact .density-compact .note-item {
+	padding: 4px 12px;
+}
+
+.start-page-container.sp-style-compact .manage-btn {
+	width: 26px;
+	height: 26px;
+	border: none;
+	box-shadow: none;
+	outline: none;
+	background: transparent;
+	border-radius: 6px;
+	cursor: pointer;
+	color: var(--text-muted);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.2s;
+	padding: 0;
+	flex-shrink: 0;
+}
+
+.start-page-container.sp-style-compact .manage-btn:hover {
+	color: var(--text-normal);
+	background: var(--background-modifier-active-hover);
+}
+
+.start-page-container.sp-style-compact .manage-btn svg {
+	width: 16px;
+	height: 16px;
+}
+
+/* 快捷 chips 行：动作与概要信息同排 */
+.start-page-container.sp-style-compact .chip-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.start-page-container.sp-style-compact .chip-spacer {
+	flex: 1;
+}
+
+.start-page-container.sp-style-compact .chip {
+	font-family: inherit;
+	font-size: 12px;
+	color: var(--text-muted);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 999px;
+	padding: 3px 12px;
+	background: var(--background-primary);
+	cursor: pointer;
+	transition: all 0.15s ease;
+	white-space: nowrap;
+}
+
+.start-page-container.sp-style-compact .chip:hover {
+	color: var(--text-normal);
+	background: var(--background-modifier-hover);
+}
+
+.start-page-container.sp-style-compact .chip-primary {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-color: transparent;
+	font-weight: 600;
+}
+
+.start-page-container.sp-style-compact .chip-primary:hover {
+	background: var(--interactive-accent-hover);
+	color: var(--text-on-accent);
+}
+
+/* 移动端专属 ＋ 钮：桌面隐藏，移动端替代三个文字 chips */
+.start-page-container.sp-style-compact .chip-fab {
+	display: none;
+	width: 34px;
+	height: 34px;
+	border-radius: 50%;
+	border: none;
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	font-size: 20px;
+	font-weight: 600;
+	line-height: 1;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	padding: 0;
+	flex-shrink: 0;
+}
+
+
+/* 概要行：统计降格为可点文字，热力图压缩并入 */
+.start-page-container.sp-style-compact .header-meta {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 16px;
+	margin-top: 12px;
+	flex-wrap: wrap;
+}
+
+.start-page-container.sp-style-compact .stats-text {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--text-muted);
+	font-size: 13px;
+	flex-wrap: wrap;
+}
+
+.start-page-container.sp-style-compact .stat-text {
+	white-space: nowrap;
+}
+
+.start-page-container.sp-style-compact .stat-text:not(.static) {
+	cursor: pointer;
+}
+
+.start-page-container.sp-style-compact .stat-text:not(.static):hover .stat-text-number {
+	text-decoration: underline;
+}
+
+.start-page-container.sp-style-compact .stat-text-number {
+	color: var(--text-accent);
+	font-weight: 600;
+}
+
+.start-page-container.sp-style-compact .stat-text-separator {
+	color: var(--text-faint);
+}
+
+
+/* 扁平列表条目：行间分隔线 + hover 高亮；三行式（加粗标题/摘要/时间·路径）+ 可选缩略图 */
+.start-page-container.sp-style-compact .note-item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 12px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	/* outline 必须排除在过渡外：键盘聚焦的轮廓反馈需要即时呈现 */
+	transition: background 0.15s ease;
+	cursor: pointer;
+	min-width: 0;
+	max-width: 100%;
+}
+
+.start-page-container.sp-style-compact .note-item:last-child {
+	border-bottom: none;
+}
+
+.start-page-container.sp-style-compact .note-item.dragging {
+	opacity: 0.4;
+}
+
+.start-page-container.sp-style-compact .note-item:hover {
+	background: var(--background-modifier-hover);
+}
+
+.start-page-container.sp-style-compact .note-main {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+
+.start-page-container.sp-style-compact .note-title-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+}
+
+.start-page-container.sp-style-compact .note-title {
+	font-size: 14px;
+	line-height: 1.35;
+	font-weight: 700;
+	color: var(--text-normal);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	min-width: 0;
+	flex: 0 1 auto;
+}
+
+.start-page-container.sp-style-compact .note-preview {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	overflow: hidden;
+	word-break: break-word;
+	font-size: 12px;
+	line-height: 1.4;
+	color: var(--text-faint);
+}
+
+.start-page-container.sp-style-compact .note-meta-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 0;
+	font-size: 11px;
+	color: var(--text-faint);
+}
+
+.start-page-container.sp-style-compact .note-meta-separator {
+	flex-shrink: 0;
+	opacity: 0.7;
+}
+
+.start-page-container.sp-style-compact .note-date {
+	flex-shrink: 0;
+	white-space: nowrap;
+}
+
+.start-page-container.sp-style-compact .note-folder {
+	flex: 0 1 auto;
+	min-width: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.start-page-container.sp-style-compact .note-type {
+	flex-shrink: 0;
+	white-space: nowrap;
+}
+
+.start-page-container.sp-style-compact .note-thumb {
+	width: 40px;
+	height: 40px;
+	border-radius: 6px;
+	overflow: hidden;
+	flex-shrink: 0;
+	background: var(--background-modifier-border);
+}
+
+.start-page-container.sp-style-compact .note-thumb img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+
+/* Tab 控件样式 */
+/* tab 容器承担卡片外观：tab 栏就是面板 header，省掉独立标题块 */
+.start-page-container.sp-style-compact .tab-container {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 12px;
+	padding: 8px 12px 10px;
+}
+
+.start-page-container.sp-style-compact .tab-bar {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	margin-bottom: 4px;
+	flex-shrink: 0;
+}
+
+.start-page-container.sp-style-compact .tab-list {
+	display: flex;
+	gap: 0;
+	overflow-x: auto;
+	flex: 1;
+	scrollbar-width: none;
+}
+
+.start-page-container.sp-style-compact .tab-list::-webkit-scrollbar {
+	display: none;
+}
+
+.start-page-container.sp-style-compact .tab-item {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 9px;
+	cursor: pointer;
+	border-radius: 6px 6px 0 0;
+	font-size: 13px;
+	font-weight: 500;
+	white-space: nowrap;
+	color: var(--text-muted);
+	border-bottom: 2px solid transparent;
+	transition: all 0.2s;
+	user-select: none;
+	flex-shrink: 0;
+}
+
+.start-page-container.sp-style-compact .tab-count {
+	font-size: 10.5px;
+	font-weight: 500;
+	color: var(--text-faint);
+}
+
+.start-page-container.sp-style-compact .tab-item:hover {
+	color: var(--text-normal);
+	background: var(--background-modifier-hover);
+}
+
+.start-page-container.sp-style-compact .tab-item.active {
+	color: var(--text-accent);
+	border-bottom-color: var(--text-accent);
+	background: var(--background-modifier-active-hover);
+}
+
+.start-page-container.sp-style-compact .tab-item-label {
+	pointer-events: none;
+}
+
+.start-page-container.sp-style-compact .tab-close-btn {
+	width: 18px;
+	height: 18px;
+	border: none;
+	background: none;
+	cursor: pointer;
+	color: var(--text-faint);
+	padding: 0;
+	/* 不显示时完全移出布局：opacity 隐藏会留下 18px+gap 的空白，显得间隔极宽 */
+	display: none;
+	align-items: center;
+	justify-content: center;
+	border-radius: 3px;
+	transition: color 0.15s, background-color 0.15s;
+	flex-shrink: 0;
+}
+
+.start-page-container.sp-style-compact .tab-item:hover .tab-close-btn {
+	display: flex;
+}
+
+.start-page-container.sp-style-compact .tab-close-btn:hover {
+	color: var(--text-error);
+	background: var(--background-modifier-hover);
+}
+
+.start-page-container.sp-style-compact .tab-close-btn svg {
+	width: 14px;
+	height: 14px;
+}
+
+.start-page-container.sp-style-compact .tab-scroll-btn {
+	width: 24px;
+	height: 24px;
+	border: none;
+	background: none;
+	cursor: pointer;
+	color: var(--text-muted);
+	padding: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 4px;
+	flex-shrink: 0;
+	transition: color 0.15s, background-color 0.15s;
+}
+
+.start-page-container.sp-style-compact .tab-scroll-btn:hover {
+	color: var(--text-normal);
+	background: var(--background-modifier-hover);
+}
+
+.start-page-container.sp-style-compact .tab-scroll-btn.hidden {
+	/* 隐藏时必须移除占位，否则首个 tab 前会留出整块空白 */
+	display: none;
+}
+
+.start-page-container.sp-style-compact .tab-scroll-btn svg {
+	width: 16px;
+	height: 16px;
+}
+
+.start-page-container.sp-style-compact .tab-content-wrapper {
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+	position: relative;
+}
+
+.start-page-container.sp-style-compact .tab-panel {
+	display: none;
+	flex-direction: column;
+	height: 100%;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.start-page-container.sp-style-compact .tab-panel.active {
+	display: flex;
+}
+
+.start-page-container.sp-style-compact .tab-panel .notes-list {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+/* 响应式：小屏幕 tab 样式调整 */
+@media (max-width: 1200px) {
+	.start-page-container.sp-style-compact .tab-item {
+		font-size: 12px;
+		padding: 4px 8px;
+	}
+
+	.start-page-container.sp-style-compact .tab-close-btn {
+		width: 16px;
+		height: 16px;
+	}
+
+	.start-page-container.sp-style-compact .tab-close-btn svg {
+		width: 12px;
+		height: 12px;
+	}
+}
+
+.start-page-container.sp-style-compact .recent-notes-limit-label {
+	margin-right: 0.5rem;
+	color: var(--text-faint);
+}
+
+/* 分段标题行内的数量下拉保持紧凑、弱化 */
+.start-page-container.sp-style-compact .notes-group-title .recent-notes-limit-label {
+	font-size: 11px;
+	font-weight: 500;
+	letter-spacing: 0;
+	text-transform: none;
+}
+
+.start-page-container.sp-style-compact .notes-group-title select {
+	font-size: 11px;
+	padding: 0 4px;
+	height: 22px;
+}
+
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+	.start-page-container.sp-style-compact {
+		padding: 5px !important;
+		overflow-x: hidden !important;
+	}
+
+		.start-page-container.sp-style-compact .command-header {
+			margin-bottom: 10px;
+		}
+
+		.start-page-container.sp-style-compact .command-bar .search-box {
+			flex: 1;
+			min-width: 0px;
+		}
+
+		.start-page-container.sp-style-compact .recent-notes-limit-label {
+			display: none;
+		}
+
+		.start-page-container.sp-style-compact .chip-row .activity-grid {
+			display: none;
+		}
+
+		.start-page-container.sp-style-compact .stats-text {
+			font-size: 12px;
+		}
+
+		.start-page-container.sp-style-compact .content-grid {
+			gap: 10px;
+		}
+
+	.my-search-modal {
+		top: 10%;
+		left: 10px !important;
+		transform: translateX(10px);
+		bottom: 10% !important;
+		max-height: 90vh !important;
+		border: var(--modal-border-width) solid var(--modal-border-color) !important;
+	}
+
+	.my-search-modal .search-result-item {
+		font-size: 12px;
+	}
+
+	.my-search-modal .search-result-item-folder-icon,
+	.my-search-modal .search-result-item-folder-name {
+		display: none;
+	}
+
+	button:not(.clickable-icon).mobile-tap {
+		box-shadow: none !important;
+	}
+}
+
+@media (max-width: 768px) {
+	.start-page-container.sp-style-compact .container {
+		padding: 10px;
+	}
+
+	/* 桌面端的并排选择会一直保留到极窄窗口，手机上双列不可用，只有这一档强制堆叠 */
+	.start-page-container.sp-style-compact .content-grid {
+		grid-template-columns: 1fr;
+	}
+
+	/* 移动端隐藏问候语与热力图，节约纵向空间（主人拍板）；命令条独占整行 */
+	.start-page-container.sp-style-compact .command-greeting {
+		display: none;
+	}
+
+	.start-page-container.sp-style-compact .command-bar {
+		flex: 1;
+		margin-left: 0;
+	}
+
+	.start-page-container.sp-style-compact .command-bar .command-kbd {
+		display: none;
+	}
+
+	/* 三个文字 chips 收进单个 ＋ 按钮的菜单，并浮动到右下角 */
+	.start-page-container.sp-style-compact .chip-row .chip {
+		display: none;
+	}
+
+	.start-page-container.sp-style-compact .chip-fab {
+		display: flex;
+		position: fixed;
+		right: 22px;
+		/* 抬高避开 Obsidian 移动端底栏 */
+		bottom: 88px;
+		width: 48px;
+		height: 48px;
+		font-size: 24px;
+		z-index: 100;
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+	}
+
+	.start-page-container.sp-style-compact .actions-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.pinned-note-item .note-actions {
+			justify-content: flex-start;
+		}
+
+		.pinned-note-item .control-button,
+		.pinned-note-item .remove-button {
+			height: 24px;
+			padding: 2px 4px;
+		}
+}
+
+@media (max-width: 480px) {
+	.start-page-container.sp-style-compact .section {
+		padding: 12px;
+	}
+
+	.start-page-container.sp-style-compact .note-item {
+		padding: 6px 8px;
+	}
+
+	.start-page-container.sp-style-compact .action-card {
+		padding: 12px 10px;
+	}
+
+
+}

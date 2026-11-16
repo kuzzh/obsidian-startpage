@@ -1,4 +1,4 @@
-import { SVGTag } from "../types";
+import { SVGTag, ID_STAT_TOTAL_NOTES, ID_STAT_TODAY_EDITED, ID_STAT_TOTAL_SIZE } from "../types";
 
 export default class SvgUtil {
     static createFolderIcon(): SVGElement {
@@ -70,6 +70,10 @@ export default class SvgUtil {
         return svg;
     }
 
+    static createFileIcon(fileType: string): SVGSVGElement {
+        return SvgUtil.createSVG((this.iconSVGs as Record<string, SVGTag[]>)[fileType] || this.iconSVGs["md"]);
+    }
+
     static createRefreshIcon(): SVGSVGElement {
         return this.createSVG([
             { tagName: "path", attributes: { d: "M3 2v6h6" } },
@@ -123,12 +127,106 @@ export default class SvgUtil {
         ]);
     }
 
-    static createMoreIcon(): SVGSVGElement {
+    static createCaptureIcon(): SVGSVGElement {
+        return this.createSVG(
+            [
+                { tagName: "path", attributes: { d: "M12 20h9" } },
+                { tagName: "path", attributes: { d: "M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" } },
+            ],
+            "capture-icon"
+        );
+    }
+
+    static createPinnedNoteIcon(): SVGSVGElement {
         return this.createSVG([
-            { tagName: "circle", attributes: { cx: "5", cy: "12", r: "1", fill: "currentColor" } },
-            { tagName: "circle", attributes: { cx: "12", cy: "12", r: "1", fill: "currentColor" } },
-            { tagName: "circle", attributes: { cx: "19", cy: "12", r: "1", fill: "currentColor" } },
-        ]);
+            {
+                tagName: "path",
+                attributes: {
+                    d: "M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z",
+                    fill: "currentColor",
+                },
+            },
+        ], "section-icon");
+    }
+
+    static createRecentNoteIcon(): SVGSVGElement {
+        return this.createSVG([
+            {
+                tagName: "path",
+                attributes: {
+                    d: "M12 8V12L15 15",
+                },
+            },
+            {
+                tagName: "circle",
+                attributes: {
+                    cx: 12,
+                    cy: 12,
+                    r: 10,
+                    stroke: "currentColor",
+                    "stroke-width": 2,
+                },
+            },
+        ], "section-icon");
+    }
+
+    static createStatIcon(id: string): SVGSVGElement | null {
+        if (id === ID_STAT_TOTAL_NOTES) {
+            return this.createSVG([
+                { tagName: "path", attributes: { d: "M14 2H6A2 2 0 0 0 4 4V20A2 2 0 0 0 6 22H18A2 2 0 0 0 20 20V8L14 2Z" } },
+                { tagName: "path", attributes: { d: "M14 2V8H20" } },
+            ]);
+        } else if (id === ID_STAT_TODAY_EDITED) {
+            return this.createSVG([
+                { tagName: "path", attributes: { d: "M12 8V12L15 15" } },
+                { tagName: "circle", attributes: { cx: 12, cy: 12, r: 10, stroke: "currentColor", "stroke-width": 2 } },
+            ]);
+        } else if (id === ID_STAT_TOTAL_SIZE) {
+            return this.createSVG([
+                {
+                    tagName: "rect",
+                    attributes: {
+                        x: "3",
+                        y: "6",
+                        width: "18",
+                        height: "12",
+                        rx: "2",
+                        ry: "2",
+                        stroke: "currentColor",
+                        "stroke-width": "2",
+                        fill: "none",
+                    },
+                },
+                {
+                    tagName: "circle",
+                    attributes: {
+                        cx: "7",
+                        cy: "12",
+                        r: "1",
+                        fill: "currentColor",
+                    },
+                },
+                {
+                    tagName: "path",
+                    attributes: {
+                        d: "M11 10H17",
+                        stroke: "currentColor",
+                        "stroke-width": "2",
+                        "stroke-linecap": "round",
+                    },
+                },
+                {
+                    tagName: "path",
+                    attributes: {
+                        d: "M11 14H15",
+                        stroke: "currentColor",
+                        "stroke-width": "2",
+                        "stroke-linecap": "round",
+                    },
+                },
+            ]);
+        }
+        return null;
     }
 
     static createSVG(tags: SVGTag[], className: string | null = null): SVGSVGElement {
@@ -160,4 +258,26 @@ export default class SvgUtil {
 
         return svg;
     }
+
+    static iconSVGs = {
+        "md": [
+            { tagName: "path", attributes: { d: "M14 2H6A2 2 0 0 0 4 4V20A2 2 0 0 0 6 22H18A2 2 0 0 0 20 20V8L14 2Z" } },
+            { tagName: "path", attributes: { d: "M14 2V8H20" } },
+        ],
+        "base": [
+            { tagName: "rect", attributes: { x: "4", y: "3", width: "16", height: "20", rx: "2", stroke: "currentColor", "stroke-width": "2", fill: "none" } },
+            { tagName: "path", attributes: { d: "M6 10H18", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } },
+            { tagName: "path", attributes: { d: "M6 16H18", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } },
+            { tagName: "path", attributes: { d: "M10 4V24", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } }
+        ],
+        "canvas": [
+            { tagName: "rect", attributes: { x: "4", y: "3", width: "16", height: "20", rx: "2", stroke: "currentColor", "stroke-width": "2", fill: "none" } },
+            { tagName: "circle", attributes: { cx: "8", cy: "9", r: "2", fill: "currentColor" } },
+            { tagName: "circle", attributes: { cx: "16", cy: "9", r: "2", fill: "currentColor" } },
+            { tagName: "circle", attributes: { cx: "12", cy: "17", r: "2", fill: "currentColor" } },
+            { tagName: "path", attributes: { d: "M10 9L14 9", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } },
+            { tagName: "path", attributes: { d: "M9.4 10.6L12 15", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } },
+            { tagName: "path", attributes: { d: "M14.6 10.6L12 15", stroke: "currentColor", "stroke-width": "1.5", "stroke-linecap": "round" } }
+        ],
+    };
 }
