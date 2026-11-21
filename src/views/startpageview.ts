@@ -2,6 +2,7 @@ import { App, ItemView, TFile, TFolder, Menu, Platform, debounce } from "obsidia
 import StartPagePlugin from "@/main";
 import { t } from "@/i18n";
 import StartPageCreator from "@/core/startpagecreator";
+import { PinnedItem } from "@/core/skins/types";
 import { MyUtil } from "@/utils/myutil";
 
 export const VIEW_TYPE_START_PAGE = "start-page-view";
@@ -145,10 +146,11 @@ export class StartPageView extends ItemView {
 		}
 	}
 
-	private startRefreshTimerIfNeeded(pinnedNotes: TFile[], recentNotes: TFile[]) {
+	private startRefreshTimerIfNeeded(pinnedItems: PinnedItem[], recentNotes: TFile[]) {
 		this.clearRefreshTimer();
 
-		const needsRefresh = pinnedNotes.concat(recentNotes).some((file) => {
+		const pinnedFiles = pinnedItems.filter((item): item is TFile => item instanceof TFile);
+		const needsRefresh = pinnedFiles.concat(recentNotes).some((file) => {
 			const diff = Date.now() - file.stat.mtime;
 			return diff < 24 * 60 * 60 * 1000;
 		});
@@ -168,13 +170,16 @@ export class StartPageView extends ItemView {
 			return;
 		}
 
-		const pinnedNotes = this.getTFiles(this.plugin.settings.pinnedNotes);
+		const pinnedItems = this.getPinnedItems(this.plugin.settings.pinnedNotes);
 		const recentNotes = this.getRecentNotes(this.plugin.settings.recentNotesLimit);
 
-		const notesToUpdate = pinnedNotes.concat(recentNotes).filter((file) => {
-			const diff = Date.now() - file.stat.mtime;
-			return diff < 24 * 60 * 60 * 1000;
-		});
+		const notesToUpdate = pinnedItems
+			.filter((item): item is TFile => item instanceof TFile)
+			.concat(recentNotes)
+			.filter((file) => {
+				const diff = Date.now() - file.stat.mtime;
+				return diff < 24 * 60 * 60 * 1000;
+			});
 
 		if (notesToUpdate.length > 0) {
 			await this.startPageCreator.updateNoteModifiedTimes(notesToUpdate);
@@ -217,13 +222,13 @@ export class StartPageView extends ItemView {
 		}
 		// 重建 DOM 会把内部列表滚回顶部，重建前记录、重建后恢复
 		const scrollState = this.captureScrollState(container);
-		const pinnedNotes = this.getTFiles(this.plugin.settings.pinnedNotes);
+		const pinnedItems = this.getPinnedItems(this.plugin.settings.pinnedNotes);
 		const recentNotes = this.getRecentNotes(this.plugin.settings.recentNotesLimit);
 		const tabFolderItems = this.getTabFolderItems();
-		await this.startPageCreator.createStartPage(pinnedNotes, recentNotes, tabFolderItems);
+		await this.startPageCreator.createStartPage(pinnedItems, recentNotes, tabFolderItems);
 		this.applyScrollState(container, scrollState);
 
-		this.startRefreshTimerIfNeeded(pinnedNotes, recentNotes);
+		this.startRefreshTimerIfNeeded(pinnedItems, recentNotes);
 	}
 
 	private captureScrollState(container: HTMLElement): { key: string; top: number }[] {
@@ -275,22 +280,22 @@ export class StartPageView extends ItemView {
 		}
 	}
 
-	getTFiles(notePaths: string[] | null): TFile[] {
-		if (!notePaths) {
+	getPinnedItems(itemPaths: string[] | null): PinnedItem[] {
+		if (!itemPaths) {
 			return [];
 		}
 
-		const tFiles = notePaths
-			.map((notePath) => {
-				const file = this.app.vault.getAbstractFileByPath(notePath);
-				if (file instanceof TFile) {
-					return file;
+		const items = itemPaths
+			.map((path) => {
+				const item = this.app.vault.getAbstractFileByPath(path);
+				if (item instanceof TFile || item instanceof TFolder) {
+					return item;
 				}
 				return null;
 			})
-			.filter((file): file is TFile => file !== null);
+			.filter((item): item is PinnedItem => item !== null);
 
-		return tFiles;
+		return items;
 	}
 
 	getRecentNotes(limit: number): TFile[] {

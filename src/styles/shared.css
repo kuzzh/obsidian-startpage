@@ -272,6 +272,19 @@
 .pinned-note-item .note-line1 {
 	display: flex;
 	align-items: center;
+	gap: 6px;
+}
+
+.pinned-note-item .pinned-kind-icon {
+	color: var(--text-faint);
+	display: inline-flex;
+	align-items: center;
+	flex-shrink: 0;
+}
+
+.pinned-note-item .pinned-kind-icon svg {
+	width: 14px;
+	height: 14px;
 }
 
 .pinned-note-item .note-title {

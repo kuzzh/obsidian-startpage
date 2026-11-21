@@ -358,6 +358,18 @@
 	font-weight: 500;
 }
 
+/* 文件夹条目替代日期/扩展名的子文件数 */
+.start-page-container.sp-style-classic .note-count {
+	margin-right: 12px;
+	flex-shrink: 0;
+	white-space: nowrap;
+	color: var(--text-muted);
+}
+
+.start-page-container.sp-style-classic .note-item.is-folder .note-meta {
+	gap: 8px;
+}
+
 .start-page-container.sp-style-classic .note-folder {
 	flex: 1;
 	min-width: 0;

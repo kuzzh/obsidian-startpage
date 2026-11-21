@@ -1,10 +1,11 @@
-import { Menu, Platform, TFile, moment } from "obsidian";
+import { Menu, Platform, TFile, TFolder, moment } from "obsidian";
 import { t } from "@/i18n";
 import SvgUtil from "@/utils/svgutil";
 import FooterTextUtil from "@/utils/footertextutil";
 import { MyUtil } from "@/utils/myutil";
 import { VersionChecker } from "@/utils/versionchecker";
 import {
+	PinnedItem,
 	StartPageContext,
 	TabSpec,
 	NoteBindingOptions,
@@ -15,7 +16,7 @@ export interface NotesListOptions {
 	grouped?: boolean;
 	emptyState: HTMLElement;
 	firstRowExtra?: HTMLElement;
-	renderNote: (note: TFile) => HTMLElement | null;
+	renderNote: (item: PinnedItem) => HTMLElement | null;
 }
 
 export interface TabRenderOptions {
@@ -142,7 +143,7 @@ export function groupRecentNotes(notes: TFile[]): { title: string; notes: TFile[
 
 export function createNotesList(
 	ctx: StartPageContext,
-	notes: TFile[] | null,
+	notes: PinnedItem[] | null,
 	options: NotesListOptions,
 ): HTMLElement {
 	const styleSettings = options.isPinned ? ctx.settings.pinnedNotesStyle : ctx.settings.recentNotesStyle;
@@ -165,8 +166,10 @@ export function createNotesList(
 
 	if (notes && notes.length > 0) {
 		if (options.grouped) {
+			// 分组只用于最近笔记；类型放宽后此处仍需 TFile 才能读取 mtime
+			const recentFiles = notes.filter((note): note is TFile => note instanceof TFile);
 			let first = true;
-			for (const group of groupRecentNotes(notes)) {
+			for (const group of groupRecentNotes(recentFiles)) {
 				if (group.notes.length === 0) {
 					continue;
 				}
@@ -443,7 +446,7 @@ export function createContentGrid(
 export function bindNoteItem(
 	ctx: StartPageContext,
 	noteItem: HTMLElement,
-	note: TFile,
+	item: PinnedItem,
 	options: NoteBindingOptions,
 ): void {
 	let suppressClick = false;
@@ -460,29 +463,38 @@ export function bindNoteItem(
 	};
 
 	const openActionsMenu = (position: { x: number; y: number }) => {
+		const isFolder = item instanceof TFolder;
+		const pinTitle = isFolder
+			? t("remove_folder_from_pinned")
+			: options.isPinned
+				? t("remove_from_pinned_notes")
+				: t("add_to_pinned_notes");
+		const pinIcon = isFolder || options.isPinned ? "pin-off" : "pin";
 		const menu = new Menu();
-		menu.addItem((item) => {
-			item.setTitle(options.isPinned ? t("remove_from_pinned_notes") : t("add_to_pinned_notes"))
-				.setIcon(options.isPinned ? "pin-off" : "pin")
+		menu.addItem((menuItem) => {
+			menuItem.setTitle(pinTitle)
+				.setIcon(pinIcon)
 				.onClick(() => {
-					ctx.actions.togglePin(note, !options.isPinned);
+					ctx.actions.togglePin(item, isFolder ? false : !options.isPinned);
 				});
 		});
 		menu.addSeparator();
-		menu.addItem((item) => {
-			item.setTitle(t("open_in_new_tab"))
-				.setIcon("external-link")
-				.onClick(() => {
-					ctx.actions.openNote(note, { newTab: true });
-				});
-		});
+		if (item instanceof TFile) {
+			menu.addItem((menuItem) => {
+				menuItem.setTitle(t("open_in_new_tab"))
+					.setIcon("external-link")
+					.onClick(() => {
+						ctx.actions.openNote(item, { newTab: true });
+					});
+			});
+		}
 		if (!Platform.isMobile) {
 			// 移动端没有文件浏览器 leaf，隐藏无效动作
-			menu.addItem((item) => {
-				item.setTitle(t("reveal_in_file_explorer"))
+			menu.addItem((menuItem) => {
+				menuItem.setTitle(t("reveal_in_file_explorer"))
 					.setIcon("folder-open")
 					.onClick(() => {
-						ctx.actions.revealInExplorer(note);
+						ctx.actions.revealInExplorer(item);
 					});
 			});
 		}
@@ -510,14 +522,18 @@ export function bindNoteItem(
 	});
 
 	noteItem.addEventListener("click", (event: MouseEvent) => {
-		// 长按已经弹出菜单，松开手指后的合成 click 不应再打开笔记
+		// 长按已经弹出菜单，松开手指后的合成 click 不应再触发条目动作
 		if (suppressClick) {
 			suppressClick = false;
 			event.preventDefault();
 			event.stopPropagation();
 			return;
 		}
-		ctx.actions.openNote(note, { event });
+		if (item instanceof TFolder) {
+			ctx.actions.revealInExplorer(item);
+			return;
+		}
+		ctx.actions.openNote(item, { event });
 	});
 
 	noteItem.addEventListener("contextmenu", (event) => {
@@ -575,17 +591,25 @@ export function bindNoteItem(
 		if (event.button === 1) {
 			event.preventDefault();
 			event.stopPropagation();
-			ctx.actions.openNote(note, { newTab: true });
+			if (item instanceof TFolder) {
+				ctx.actions.revealInExplorer(item);
+			} else {
+				ctx.actions.openNote(item, { newTab: true });
+			}
 		}
 	});
 
 	noteItem.addEventListener("mouseenter", (event) => {
+		// 文件夹没有可预览的笔记内容
+		if (item instanceof TFolder) {
+			return;
+		}
 		ctx.app.workspace.trigger("hover-link", {
 			event: event,
 			source: "start-page-view",
 			hoverParent: noteItem,
 			targetEl: noteItem,
-			linktext: note.path,
+			linktext: item.path,
 			sourcePath: "",
 		});
 	});
@@ -594,7 +618,7 @@ export function bindNoteItem(
 		// HTML5 拖拽排序：拖放目标即插入位置，drop 后写回数组顺序
 		noteItem.draggable = true;
 		noteItem.addEventListener("dragstart", () => {
-			ctx.setDraggingPinnedPath(note.path);
+			ctx.setDraggingPinnedPath(item.path);
 			noteItem.addClass("dragging");
 		});
 		noteItem.addEventListener("dragend", () => {
@@ -607,8 +631,8 @@ export function bindNoteItem(
 			// 阻断冒泡，避免落点在条目上时又触发列表末尾追加
 			e.stopPropagation();
 			const srcPath = ctx.getDraggingPinnedPath();
-			if (srcPath && srcPath !== note.path) {
-				ctx.actions.reorderPin(srcPath, note.path);
+			if (srcPath && srcPath !== item.path) {
+				ctx.actions.reorderPin(srcPath, item.path);
 			}
 			ctx.setDraggingPinnedPath(null);
 		});

@@ -258,6 +258,38 @@
 	min-width: 0;
 }
 
+/* 置顶列表的类型图标：与标题同轴、不参与压缩，保证文件夹与文件可一眼区分 */
+.start-page-container.sp-style-compact .note-kind-icon {
+	display: inline-flex;
+	align-items: center;
+	flex-shrink: 0;
+	color: var(--text-muted);
+}
+
+.start-page-container.sp-style-compact .note-kind-icon svg {
+	width: 14px;
+	height: 14px;
+}
+
+/* 文件夹只有标题与「文件数 · 路径」两行，适度放宽行距避免显得局促 */
+.start-page-container.sp-style-compact .density-comfortable .note-item.is-folder {
+	padding-top: 12px;
+	padding-bottom: 12px;
+}
+
+.start-page-container.sp-style-compact .note-item.is-folder .note-main {
+	gap: 6px;
+}
+
+.start-page-container.sp-style-compact .note-item.is-folder .note-meta-row {
+	gap: 8px;
+}
+
+.start-page-container.sp-style-compact .note-count {
+	flex-shrink: 0;
+	white-space: nowrap;
+}
+
 .start-page-container.sp-style-compact .note-title {
 	font-size: 14px;
 	line-height: 1.35;

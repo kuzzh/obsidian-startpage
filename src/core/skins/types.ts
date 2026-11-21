@@ -1,6 +1,9 @@
-import type { App, TFile } from "obsidian";
+import type { App, TFile, TFolder } from "obsidian";
 import type StartPagePlugin from "@/main";
 import type { StartPageSettings, UiStyle } from "@/types";
+
+// 置顶列表同时承载文件与文件夹，保持单列表才能继续共用排序/拖拽逻辑
+export type PinnedItem = TFile | TFolder;
 
 declare module "obsidian" {
 	interface App {
@@ -31,7 +34,7 @@ export interface TabFolderItem {
 export interface TabSpec {
 	id: string;
 	label: string;
-	notes: TFile[];
+	notes: PinnedItem[];
 	closable: boolean;
 	folderPath?: string;
 }
@@ -43,7 +46,7 @@ export interface NoteBindingOptions {
 // 皮肤只消费控制器暴露的动作，保证两套界面的行为只有一份实现
 export interface StartPageActions {
 	openNote(note: TFile, options?: { newTab?: boolean; event?: MouseEvent }): void;
-	togglePin(note: TFile, pin: boolean): void;
+	togglePin(item: PinnedItem, pin: boolean): void;
 	reorderPin(srcPath: string, targetPath: string): void;
 	movePinToEnd(srcPath: string): void;
 	showSearch(): void;
@@ -55,7 +58,7 @@ export interface StartPageActions {
 	createNewNote(): void;
 	openCapture(): void;
 	openDailyNote(): void;
-	revealInExplorer(note: TFile): void;
+	revealInExplorer(item: PinnedItem): void;
 }
 
 export interface StartPageContext {
@@ -64,12 +67,12 @@ export interface StartPageContext {
 	settings: StartPageSettings;
 	container: HTMLElement;
 	stats: StatItem[];
-	pinnedNotes: TFile[] | null;
+	pinnedNotes: PinnedItem[] | null;
 	recentNotes: TFile[] | null;
 	tabFolderItems: TabFolderItem[] | null;
 	activeTabIndex: number;
 	actions: StartPageActions;
-	bindNoteItem(el: HTMLElement, note: TFile, options: NoteBindingOptions): void;
+	bindNoteItem(el: HTMLElement, item: PinnedItem, options: NoteBindingOptions): void;
 	setActiveTab(index: number): void;
 	observeTabList(tabList: HTMLElement, update: () => void): void;
 	setDraggingPinnedPath(path: string | null): void;

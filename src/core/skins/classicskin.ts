@@ -1,4 +1,4 @@
-import { Menu, Platform, TFile } from "obsidian";
+import { Menu, Platform, TFile, TFolder } from "obsidian";
 import { t } from "@/i18n";
 import SvgUtil from "@/utils/svgutil";
 import { MyUtil } from "@/utils/myutil";
@@ -19,7 +19,7 @@ import {
 	getGreetingText,
 	hasUpdate,
 } from "./shared";
-import { StartPageContext, StartPageSkin, TabSpec } from "./types";
+import { PinnedItem, StartPageContext, StartPageSkin, TabSpec } from "./types";
 
 type SectionVariant = "pinned" | "folder" | "recent";
 
@@ -106,25 +106,26 @@ export default class ClassicSkin implements StartPageSkin {
 		return statsSection;
 	}
 
-	private createNoteItem(ctx: StartPageContext, note: TFile | null, isPinned: boolean = false): HTMLElement | null {
-		if (!note) {
+	private createNoteItem(ctx: StartPageContext, item: PinnedItem | null, isPinned: boolean = false): HTMLElement | null {
+		if (!item) {
 			return null;
 		}
 
+		const isFolder = item instanceof TFolder;
 		const styleSettings = isPinned ? ctx.settings.pinnedNotesStyle : ctx.settings.recentNotesStyle;
 
-		const noteItem = createElement("div", `note-item${isPinned ? " pinned" : ""}`);
-		noteItem.setAttribute("data-note-path", note.path);
+		const noteItem = createElement("div", `note-item${isPinned ? " pinned" : ""}${isFolder ? " is-folder" : ""}`);
+		noteItem.setAttribute("data-note-path", item.path);
 
 		if (styleSettings.itemPadding) noteItem.style.padding = styleSettings.itemPadding;
 		if (styleSettings.itemMargin) noteItem.style.margin = styleSettings.itemMargin;
 
 		const noteIcon = createElement("div", "note-icon");
-		noteIcon.appendChild(SvgUtil.createFileIcon(note.extension));
+		noteIcon.appendChild(isFolder ? SvgUtil.createFolderIcon() : SvgUtil.createFileIcon(item.extension));
 
 		const noteContent = createElement("div", "note-content");
-		const noteTitle = createElement("div", "note-title", note.basename);
-		noteTitle.setAttribute("title", note.basename);
+		const noteTitle = createElement("div", "note-title", isFolder ? item.name : item.basename);
+		noteTitle.setAttribute("title", isFolder ? item.name : item.basename);
 
 		if (styleSettings.noteTitleFontSize) noteTitle.style.fontSize = styleSettings.noteTitleFontSize;
 		if (styleSettings.noteTitleMargin) noteTitle.style.margin = styleSettings.noteTitleMargin;
@@ -132,18 +133,23 @@ export default class ClassicSkin implements StartPageSkin {
 
 		const noteMeta = createElement("div", "note-meta");
 
-		let folderPath = note.parent ? note.parent.path : "/";
+		let folderPath = item.parent ? item.parent.path : "/";
 		if (!folderPath.startsWith("/")) {
 			folderPath = "/" + folderPath;
 		}
 
-		const noteDateEl = createElement("div", "note-date", MyUtil.formatDate(note.stat.mtime));
-		if (styleSettings.noteDateFontSize) noteDateEl.style.fontSize = styleSettings.noteDateFontSize;
+		if (isFolder) {
+			const childFileCount = item.children.filter((child) => child instanceof TFile).length;
+			noteMeta.appendChild(createElement("div", "note-count", t("folder_file_count", childFileCount.toString())));
+		} else {
+			const noteDateEl = createElement("div", "note-date", MyUtil.formatDate(item.stat.mtime));
+			if (styleSettings.noteDateFontSize) noteDateEl.style.fontSize = styleSettings.noteDateFontSize;
 
-		const noteExtEl = createElement("div", "note-ext", "." + note.extension);
-		noteMeta.appendChild(noteDateEl);
-		noteMeta.appendChild(noteExtEl);
-		noteMeta.appendChild(SvgUtil.createFolderIcon());
+			const noteExtEl = createElement("div", "note-ext", "." + item.extension);
+			noteMeta.appendChild(noteDateEl);
+			noteMeta.appendChild(noteExtEl);
+			noteMeta.appendChild(SvgUtil.createFolderIcon());
+		}
 
 		const noteFolderEl = createElement("div", "note-folder", MyUtil.truncateMiddle(folderPath));
 		noteFolderEl.setAttribute("title", folderPath);
@@ -156,7 +162,7 @@ export default class ClassicSkin implements StartPageSkin {
 		noteItem.appendChild(noteIcon);
 		noteItem.appendChild(noteContent);
 
-		ctx.bindNoteItem(noteItem, note, { isPinned });
+		ctx.bindNoteItem(noteItem, item, { isPinned });
 
 		return noteItem;
 	}
@@ -164,7 +170,7 @@ export default class ClassicSkin implements StartPageSkin {
 	private createNotesSection(
 		ctx: StartPageContext,
 		title: string,
-		notes: TFile[] | null,
+		notes: PinnedItem[] | null,
 		variant: SectionVariant,
 		icon: SVGElement,
 	): HTMLElement {

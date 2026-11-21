@@ -1,5 +1,6 @@
-import { Menu, TFile } from "obsidian";
+import { Menu, TFile, TFolder } from "obsidian";
 import { t } from "@/i18n";
+import SvgUtil from "@/utils/svgutil";
 import { MyUtil } from "@/utils/myutil";
 import { DailyNoteUtil } from "@/utils/dailynoteutil";
 import { ID_STAT_TODAY_EDITED, ID_STAT_TOTAL_NOTES, ID_STAT_TOTAL_SIZE } from "@/types";
@@ -20,7 +21,7 @@ import {
 	getGreetingText,
 	hasUpdate,
 } from "./shared";
-import { StartPageContext, StartPageSkin, TabSpec } from "./types";
+import { PinnedItem, StartPageContext, StartPageSkin, TabSpec } from "./types";
 
 export default class CompactSkin implements StartPageSkin {
 	readonly style = "compact" as const;
@@ -170,23 +171,31 @@ export default class CompactSkin implements StartPageSkin {
 		return statsText;
 	}
 
-	private createNoteItem(ctx: StartPageContext, note: TFile | null, isPinned: boolean = false): HTMLElement | null {
-		if (!note) {
+	private createNoteItem(ctx: StartPageContext, item: PinnedItem | null, isPinned: boolean = false): HTMLElement | null {
+		if (!item) {
 			return null;
 		}
 
+		const isFolder = item instanceof TFolder;
 		const styleSettings = isPinned ? ctx.settings.pinnedNotesStyle : ctx.settings.recentNotesStyle;
 
-		const noteItem = createElement("div", `note-item${isPinned ? " pinned" : ""}`);
-		noteItem.setAttribute("data-note-path", note.path);
+		const noteItem = createElement("div", `note-item${isPinned ? " pinned" : ""}${isFolder ? " is-folder" : ""}`);
+		noteItem.setAttribute("data-note-path", item.path);
 
 		if (styleSettings.itemPadding) noteItem.style.padding = styleSettings.itemPadding;
 		if (styleSettings.itemMargin) noteItem.style.margin = styleSettings.itemMargin;
 
 		// 紧凑三行式（参考 Notebook Navigator）：加粗标题 / 摘要 / 时间·路径；行间分隔线交给 CSS
 		const noteTitleRow = createElement("div", "note-title-row");
-		const noteTitle = createElement("div", "note-title", note.basename);
-		noteTitle.setAttribute("title", note.basename);
+		// 仅置顶列表需要区分文件与文件夹，最近列表保持无图标的原有观感
+		if (isPinned) {
+			const kindIcon = createElement("span", "note-kind-icon");
+			kindIcon.appendChild(isFolder ? SvgUtil.createFolderIcon() : SvgUtil.createFileIcon(item.extension));
+			noteTitleRow.appendChild(kindIcon);
+		}
+
+		const noteTitle = createElement("div", "note-title", isFolder ? item.name : item.basename);
+		noteTitle.setAttribute("title", isFolder ? item.name : item.basename);
 
 		if (styleSettings.noteTitleFontSize) noteTitle.style.fontSize = styleSettings.noteTitleFontSize;
 		if (styleSettings.noteTitleMargin) noteTitle.style.margin = styleSettings.noteTitleMargin;
@@ -194,48 +203,68 @@ export default class CompactSkin implements StartPageSkin {
 
 		noteTitleRow.appendChild(noteTitle);
 
-		let folderPath = note.parent ? note.parent.path : "/";
+		let folderPath = item.parent ? item.parent.path : "/";
 		if (!folderPath.startsWith("/")) {
 			folderPath = "/" + folderPath;
 		}
 
 		const notePreview = createElement("div", "note-preview");
-
-		const noteDateEl = createElement("span", "note-date", MyUtil.formatDate(note.stat.mtime));
-		if (styleSettings.noteDateFontSize) noteDateEl.style.fontSize = styleSettings.noteDateFontSize;
-
-		const noteFolderEl = createElement("span", "note-folder", MyUtil.truncateMiddle(folderPath));
-		noteFolderEl.setAttribute("title", folderPath);
-		if (styleSettings.noteFolderFontSize) noteFolderEl.style.fontSize = styleSettings.noteFolderFontSize;
-
 		const noteMetaRow = createElement("div", "note-meta-row");
-		noteMetaRow.appendChild(noteDateEl);
-		noteMetaRow.appendChild(createElement("span", "note-meta-separator", "·"));
-		noteMetaRow.appendChild(noteFolderEl);
-		noteMetaRow.appendChild(createElement("span", "note-meta-separator", "·"));
-		noteMetaRow.appendChild(createElement("span", "note-type", note.extension.toUpperCase()));
+
+		if (isFolder) {
+			// 文件夹没有修改时间与正文，文件数与父路径合并一行，避免多余的空摘要行
+			const childFileCount = item.children.filter((child) => child instanceof TFile).length;
+			const countEl = createElement("span", "note-count", t("folder_file_count", childFileCount.toString()));
+			if (styleSettings.noteDateFontSize) countEl.style.fontSize = styleSettings.noteDateFontSize;
+
+			const noteFolderEl = createElement("span", "note-folder", MyUtil.truncateMiddle(folderPath));
+			noteFolderEl.setAttribute("title", folderPath);
+			if (styleSettings.noteFolderFontSize) noteFolderEl.style.fontSize = styleSettings.noteFolderFontSize;
+
+			noteMetaRow.appendChild(countEl);
+			noteMetaRow.appendChild(createElement("span", "note-meta-separator", "·"));
+			noteMetaRow.appendChild(noteFolderEl);
+		} else {
+			const noteDateEl = createElement("span", "note-date", MyUtil.formatDate(item.stat.mtime));
+			if (styleSettings.noteDateFontSize) noteDateEl.style.fontSize = styleSettings.noteDateFontSize;
+
+			const noteFolderEl = createElement("span", "note-folder", MyUtil.truncateMiddle(folderPath));
+			noteFolderEl.setAttribute("title", folderPath);
+			if (styleSettings.noteFolderFontSize) noteFolderEl.style.fontSize = styleSettings.noteFolderFontSize;
+
+			noteMetaRow.appendChild(noteDateEl);
+			noteMetaRow.appendChild(createElement("span", "note-meta-separator", "·"));
+			noteMetaRow.appendChild(noteFolderEl);
+			noteMetaRow.appendChild(createElement("span", "note-meta-separator", "·"));
+			noteMetaRow.appendChild(createElement("span", "note-type", item.extension.toUpperCase()));
+		}
 
 		const noteMain = createElement("div", "note-main");
 		noteMain.appendChild(noteTitleRow);
-		noteMain.appendChild(notePreview);
+		// 文件夹只有两行，去掉空摘要保持紧凑但不留无意义占位
+		if (!isFolder) {
+			noteMain.appendChild(notePreview);
+		}
 		noteMain.appendChild(noteMetaRow);
 		noteItem.appendChild(noteMain);
 
-		this.pendingPreviewItems.push({ el: noteItem, file: note });
+		if (item instanceof TFile) {
+			this.pendingPreviewItems.push({ el: noteItem, file: item });
 
-		// 缩略图：首个能解析的内嵌图片，浏览器原生 lazy 加载；无图不占位
-		const imageFile = this.getFirstImageFile(ctx, note);
-		if (imageFile) {
-			const thumb = createElement("div", "note-thumb");
-			const img = document.createElement("img");
-			img.loading = "lazy";
-			img.alt = "";
-			img.src = ctx.app.vault.getResourcePath(imageFile);
-			thumb.appendChild(img);
-			noteItem.appendChild(thumb);
+			// 缩略图：首个能解析的内嵌图片，浏览器原生 lazy 加载；无图不占位
+			const imageFile = this.getFirstImageFile(ctx, item);
+			if (imageFile) {
+				const thumb = createElement("div", "note-thumb");
+				const img = document.createElement("img");
+				img.loading = "lazy";
+				img.alt = "";
+				img.src = ctx.app.vault.getResourcePath(imageFile);
+				thumb.appendChild(img);
+				noteItem.appendChild(thumb);
+			}
 		}
 
-		ctx.bindNoteItem(noteItem, note, { isPinned });
+		ctx.bindNoteItem(noteItem, item, { isPinned });
 
 		return noteItem;
 	}

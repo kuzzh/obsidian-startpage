@@ -1,4 +1,4 @@
-import { App, Keymap, TFile, WorkspaceLeaf } from "obsidian";
+import { App, Keymap, Platform, TFile, TFolder, WorkspaceLeaf } from "obsidian";
 import { ID_STAT_TOTAL_NOTES, ID_STAT_TODAY_EDITED, ID_STAT_TOTAL_SIZE } from "@/types";
 import StartPagePlugin from "@/main";
 import { t } from "@/i18n";
@@ -13,6 +13,7 @@ import ClassicSkin from "./skins/classicskin";
 import { bindNoteItem } from "./skins/shared";
 import {
 	NoteBindingOptions,
+	PinnedItem,
 	StartPageActions,
 	StartPageContext,
 	StartPageSkin,
@@ -56,7 +57,7 @@ export default class StartPageCreator {
 			},
 		},
 	];
-	private pinnedNotes: TFile[] | null = null;
+	private pinnedNotes: PinnedItem[] | null = null;
 	private recentNotes: TFile[] | null = null;
 	private tabFolderItems: TabFolderItem[] | null = null;
 	private resizeObserver: ResizeObserver | null = null;
@@ -72,7 +73,7 @@ export default class StartPageCreator {
 	}
 
 	public async createStartPage(
-		pinnedNotes: TFile[] | null,
+		pinnedNotes: PinnedItem[] | null,
 		recentNotes: TFile[] | null,
 		tabFolderItems?: TabFolderItem[] | null,
 	): Promise<void> {
@@ -115,7 +116,7 @@ export default class StartPageCreator {
 	}
 
 	private initData(
-		pinnedNotes: TFile[] | null,
+		pinnedNotes: PinnedItem[] | null,
 		recentNotes: TFile[] | null,
 		tabFolderItems: TabFolderItem[] | null = null,
 	): void {
@@ -171,8 +172,8 @@ export default class StartPageCreator {
 			tabFolderItems: this.tabFolderItems,
 			activeTabIndex: this.activeTabIndex,
 			actions,
-			bindNoteItem: (el: HTMLElement, note: TFile, options: NoteBindingOptions) => {
-				bindNoteItem(ctx, el, note, options);
+			bindNoteItem: (el: HTMLElement, item: PinnedItem, options: NoteBindingOptions) => {
+				bindNoteItem(ctx, el, item, options);
 			},
 			setActiveTab: (index) => {
 				this.activeTabIndex = index;
@@ -204,15 +205,15 @@ export default class StartPageCreator {
 		}
 	}
 
-	private async togglePinnedNote(note: TFile, pin: boolean): Promise<void> {
+	private async togglePinnedNote(item: PinnedItem, pin: boolean): Promise<void> {
 		const list = this.plugin.settings.pinnedNotes;
 		if (pin) {
-			if (list.includes(note.path)) {
+			if (list.includes(item.path)) {
 				return;
 			}
-			list.push(note.path);
+			list.push(item.path);
 		} else {
-			this.plugin.settings.pinnedNotes = list.filter((path) => path !== note.path);
+			this.plugin.settings.pinnedNotes = list.filter((path) => path !== item.path);
 		}
 		await this.plugin.saveSettings();
 		MyUtil.refreshStartPage(this.app);
@@ -272,10 +273,17 @@ export default class StartPageCreator {
 		}, 100);
 	}
 
-	private revealInExplorer(note: TFile): void {
+	private revealInExplorer(item: PinnedItem): void {
 		// revealInFolder 是 file-explorer 视图的内部方法，移动端无此 leaf 时静默跳过
-		const explorer = this.app.workspace.getLeavesOfType("file-explorer")[0]?.view as unknown as { revealInFolder?: (file: TFile) => void };
-		explorer?.revealInFolder?.(note);
+		const explorer = this.app.workspace.getLeavesOfType("file-explorer")[0]?.view as unknown as { revealInFolder?: (file: TFile | TFolder) => void };
+		if (!explorer?.revealInFolder) {
+			return;
+		}
+		// 文件夹定位只在桌面端需要自动展开侧栏，避免收起状态下点击后看不到结果
+		if (Platform.isDesktop && item instanceof TFolder) {
+			this.app.workspace.leftSplit?.expand?.();
+		}
+		explorer.revealInFolder(item);
 	}
 
 	private async createNewNote(): Promise<void> {

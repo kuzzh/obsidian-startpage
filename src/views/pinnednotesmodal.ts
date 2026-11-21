@@ -1,9 +1,10 @@
-import { App, Modal, Setting, Notice } from "obsidian";
+import { App, Modal, Setting, Notice, TFile, TFolder } from "obsidian";
 import StartPagePlugin from "@/main";
 import { t } from "@/i18n";
 import SvgUtil from "@/utils/svgutil";
 import { MyUtil } from "@/utils/myutil";
 import NoteSuggestModal from "@/views/notesuggestmodal";
+import FolderSuggestModal from "@/views/foldersuggestmodal";
 
 export default class PinnedNotesModal extends Modal {
 	private plugin: StartPagePlugin;
@@ -48,6 +49,22 @@ export default class PinnedNotesModal extends Modal {
 					await this.showImportConfirmDialog();
 				});
 			});
+
+		new Setting(containerEl)
+			.setName(t("pinned_notes_select_folder"))
+			.setDesc(t("pinned_notes_select_folder_desc"))
+			.addButton((button) => {
+				button.setButtonText(t("pinned_notes_select_folder_button")).onClick(() => {
+					new FolderSuggestModal(this.app, async (folder: TFolder) => {
+						if (!this.plugin.settings.pinnedNotes.includes(folder.path)) {
+							this.plugin.settings.pinnedNotes.push(folder.path);
+							await this.plugin.saveSettings();
+							this.onSettingsChange();
+							this.refreshDisplay();
+						}
+					}).open();
+				});
+			});
 	}
 
 	private async showImportConfirmDialog() {
@@ -89,25 +106,25 @@ export default class PinnedNotesModal extends Modal {
 
 			const bookmarks = bookmarksPlugin.instance?.items || [];
 
-			const bookmarkedFilePaths: string[] = [];
-			const extractFilePaths = (items: any[]) => {
+			const bookmarkedPaths: string[] = [];
+			const extractBookmarkedPaths = (items: any[]) => {
 				for (const item of items) {
-					if (item.type === "file" && item.path) {
-						bookmarkedFilePaths.push(item.path);
+					if ((item.type === "file" || item.type === "folder") && item.path) {
+						bookmarkedPaths.push(item.path);
 					} else if (item.type === "group" && item.items) {
-						extractFilePaths(item.items);
+						extractBookmarkedPaths(item.items);
 					}
 				}
 			};
 
-			extractFilePaths(bookmarks);
+			extractBookmarkedPaths(bookmarks);
 
-			if (bookmarkedFilePaths.length === 0) {
+			if (bookmarkedPaths.length === 0) {
 				new Notice(t("import_bookmarks_no_bookmarks"));
 				return;
 			}
 
-			const newPinnedNotes = bookmarkedFilePaths.filter((path) => !this.plugin.settings.pinnedNotes.includes(path));
+			const newPinnedNotes = bookmarkedPaths.filter((path) => !this.plugin.settings.pinnedNotes.includes(path));
 
 			if (newPinnedNotes.length === 0) {
 				new Notice(t("import_bookmarks_already_exist"));
@@ -156,6 +173,12 @@ export default class PinnedNotesModal extends Modal {
 		const filename = path.split("/").pop() ?? path;
 
 		const line1 = li.createEl("div", { cls: "note-line1" });
+		const kindIcon = line1.createSpan({ cls: "pinned-kind-icon" });
+		if (file instanceof TFile) {
+			kindIcon.appendChild(SvgUtil.createFileIcon(file.extension));
+		} else if (file instanceof TFolder) {
+			kindIcon.appendChild(SvgUtil.createFolderIcon());
+		}
 		line1.createEl("span", { cls: "note-title", text: filename });
 
 		const line2 = li.createEl("div", { cls: "note-line2" });

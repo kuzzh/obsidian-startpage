@@ -96,6 +96,7 @@ export default class StartPagePlugin extends Plugin {
 			this.app.workspace.on("file-menu", (menu: Menu, file: TAbstractFile) => {
 				if (file instanceof TFolder) {
 					this.addTabFolderMenuItem(menu, file);
+					this.addPinnedFolderMenuItem(menu, file);
 				}
 			}),
 		);
@@ -249,6 +250,25 @@ export default class StartPagePlugin extends Plugin {
 						this.settings.pinnedNotes = this.settings.pinnedNotes.filter((path) => path !== file.path);
 					} else {
 						this.settings.pinnedNotes.push(file.path);
+					}
+					await this.saveSettings();
+
+					MyUtil.refreshStartPage(this.app);
+				});
+		});
+	}
+
+	addPinnedFolderMenuItem(menu: Menu, folder: TFolder) {
+		const isPinned = this.settings.pinnedNotes.includes(folder.path);
+
+		menu.addItem((item) => {
+			item.setTitle(isPinned ? t("remove_folder_from_pinned") : t("add_folder_to_pinned"))
+				.setIcon(isPinned ? "pin-off" : "pin")
+				.onClick(async () => {
+					if (isPinned) {
+						this.settings.pinnedNotes = this.settings.pinnedNotes.filter((path) => path !== folder.path);
+					} else {
+						this.settings.pinnedNotes.push(folder.path);
 					}
 					await this.saveSettings();
 
