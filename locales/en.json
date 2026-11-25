@@ -38,6 +38,7 @@
     "import_bookmarks_no_bookmarks": "No bookmarks found",
     "import_bookmarks_already_exist": "All bookmarks are already pinned",
     "pinned_notes_remove": "Remove",
+    "pinned_note_missing": "Not found",
     "pinned_notes_settings": "Pinned notes settings",
     "current_pinned_notes": "Current pinned items",
     "current_pinned_notes_desc": "Currently pinned: {0} items",

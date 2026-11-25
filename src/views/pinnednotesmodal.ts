@@ -163,23 +163,20 @@ export default class PinnedNotesModal extends Modal {
 	}
 
 	private createPinnedNoteListItem(pinnedList: HTMLElement, path: string, index: number) {
-		const li = pinnedList.createEl("li", { cls: "pinned-note-item" });
 		const file = this.app.vault.getAbstractFileByPath(path);
-
-		if (!file) {
-			return;
-		}
-
+		const li = pinnedList.createEl("li", { cls: file ? "pinned-note-item" : "pinned-note-item is-missing" });
 		const filename = path.split("/").pop() ?? path;
 
 		const line1 = li.createEl("div", { cls: "note-line1" });
-		const kindIcon = line1.createSpan({ cls: "pinned-kind-icon" });
-		if (file instanceof TFile) {
-			kindIcon.appendChild(SvgUtil.createFileIcon(file.extension));
-		} else if (file instanceof TFolder) {
-			kindIcon.appendChild(SvgUtil.createFolderIcon());
+		if (file instanceof TFile || file instanceof TFolder) {
+			const kindIcon = line1.createSpan({ cls: "pinned-kind-icon" });
+			kindIcon.appendChild(file instanceof TFile ? SvgUtil.createFileIcon(file.extension) : SvgUtil.createFolderIcon());
 		}
 		line1.createEl("span", { cls: "note-title", text: filename });
+		// 外部删除的文件不会触发插件清理，仍留在置顶配置里；标成失效项并保留移除按钮，否则只剩一行无法操作的空白
+		if (!file) {
+			line1.createEl("span", { cls: "note-status", text: t("pinned_note_missing") });
+		}
 
 		const line2 = li.createEl("div", { cls: "note-line2" });
 		const pathContainer = line2.createEl("div", { cls: "note-path" });

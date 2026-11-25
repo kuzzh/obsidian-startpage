@@ -294,6 +294,16 @@
 	text-overflow: ellipsis;
 }
 
+.pinned-note-item.is-missing .note-title {
+	color: var(--text-muted);
+}
+
+.pinned-note-item .note-status {
+	color: var(--text-error);
+	font-size: 12px;
+	flex-shrink: 0;
+}
+
 .pinned-note-item .note-line2 {
 	display: grid;
 	grid-template-columns: 1fr auto;

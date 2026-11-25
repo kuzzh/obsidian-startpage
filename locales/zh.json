@@ -38,6 +38,7 @@
     "import_bookmarks_no_bookmarks": "未找到书签",
     "import_bookmarks_already_exist": "所有书签已经被置顶",
     "pinned_notes_remove": "移除",
+    "pinned_note_missing": "不存在",
     "pinned_notes_settings": "置顶笔记设置",
     "current_pinned_notes": "当前置顶条目",
     "current_pinned_notes_desc": "当前已置顶: {0} 个条目",
